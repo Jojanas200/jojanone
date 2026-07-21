@@ -58,13 +58,13 @@ const CONTRACTOR_RANGES: Option[] = [
 ];
 
 const REVENUE_BANDS: Option[] = [
-  { value: "pre_revenue", label: "Pre-revenue" },
-  { value: "under_85k", label: "Under £85k" },
-  { value: "85k_250k", label: "£85k–£250k" },
-  { value: "250k_1m", label: "£250k–£1m" },
-  { value: "1m_5m", label: "£1m–£5m" },
-  { value: "5m_10m", label: "£5m–£10m" },
-  { value: "over_10m", label: "Over £10m" },
+  { value: "under_50k", label: "Under £50k" },
+  { value: "50k_90k", label: "£50k–£89,999" },
+  { value: "90k_250k", label: "£90k–£249,999" },
+  { value: "250k_500k", label: "£250k–£499,999" },
+  { value: "500k_1m", label: "£500k–£999,999" },
+  { value: "1m_5m", label: "£1m–£4.99m" },
+  { value: "5m_plus", label: "£5m+" },
 ];
 
 const SECTORS: Option[] = [

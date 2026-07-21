@@ -5,6 +5,7 @@ import { listRisks } from "@/server/services/risk";
 import { NewRisk } from "./NewRisk";
 import { RowActions } from "./RowActions";
 import { WriteGate } from "../WriteGate";
+import { ModuleSetup } from "../../onboarding/ModuleSetup";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -66,6 +67,10 @@ export default async function RiskPage() {
           <NewRisk />
         </WriteGate>
       </div>
+
+      <WriteGate>
+        <ModuleSetup moduleKey="risk" title="Risk" />
+      </WriteGate>
 
       <Card className="overflow-hidden p-0">
         {rows.length === 0 ? (

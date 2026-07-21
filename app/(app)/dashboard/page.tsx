@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getClaims } from "@/server/auth/session";
 import { requireModuleAccess } from "@/server/auth/guard";
 import { getSnapshot } from "@/server/services/dashboard";
+import { getOnboardingStatus } from "@/server/services/onboarding";
+import { FinishSetupBanner } from "../FinishSetupBanner";
 import {
   Card,
   CardDescription,
@@ -51,7 +53,10 @@ export default async function DashboardPage() {
   const claims = await getClaims();
   if (!claims) redirect("/login");
   await requireModuleAccess(claims, "dashboard");
-  const s = await getSnapshot(claims);
+  const [s, setup] = await Promise.all([
+    getSnapshot(claims),
+    getOnboardingStatus(claims),
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
@@ -61,6 +66,10 @@ export default async function DashboardPage() {
       <p className="mb-6 mt-1 text-sm text-muted-foreground">
         Your business, at a glance.
       </p>
+
+      {setup.started && !setup.completed && (
+        <FinishSetupBanner missing={setup.missing} />
+      )}
 
       {/* Business Confidence Score */}
       <Card className="mb-6 p-6">

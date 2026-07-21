@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getClaims } from "@/server/auth/session";
 import {
@@ -10,6 +11,7 @@ import {
   listMembers,
 } from "@/server/services/settings";
 import { getBillingOverview } from "@/server/services/billing";
+import { getOnboarding, isStarted } from "@/server/services/onboarding";
 import { listPendingInvitations } from "@/server/services/invitations";
 import { getUserEmails } from "@/server/services/members";
 import { InviteTeammate } from "./InviteTeammate";
@@ -28,7 +30,7 @@ export default async function SettingsPage() {
   const ws = await getActiveWorkspaceId(claims);
   if (!ws) redirect("/onboarding");
 
-  const [profile, workspace, members, role, overview, invites] =
+  const [profile, workspace, members, role, overview, invites, onboarding] =
     await Promise.all([
       getBusinessProfile(claims, ws),
       getWorkspace(claims, ws),
@@ -36,7 +38,10 @@ export default async function SettingsPage() {
       getWorkspaceRole(claims, ws),
       getBillingOverview(claims, ws),
       listPendingInvitations(claims, ws),
+      getOnboarding(claims, ws),
     ]);
+  const showResumeSetup =
+    isStarted(onboarding) && onboarding.completedAt === null;
 
   if (!profile || !workspace) redirect("/onboarding");
   const isOwner = role === "owner_admin";
@@ -53,6 +58,21 @@ export default async function SettingsPage() {
           Your business, your data, your control.
         </p>
       </div>
+
+      {showResumeSetup && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
+          <p className="text-sm text-foreground">
+            Your workspace setup isn&apos;t finished yet — your saved answers
+            are waiting.
+          </p>
+          <Link
+            href="/onboarding"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Resume setup →
+          </Link>
+        </div>
+      )}
 
       <Tabs defaultValue="profile">
         <TabsList>

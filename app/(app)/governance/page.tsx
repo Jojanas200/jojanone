@@ -5,6 +5,7 @@ import { listGovernanceRecords } from "@/server/services/governance";
 import { NewRecord } from "./NewRecord";
 import { RowActions } from "./RowActions";
 import { WriteGate } from "../WriteGate";
+import { ModuleSetup } from "../../onboarding/ModuleSetup";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -55,6 +56,10 @@ export default async function GovernancePage() {
           <NewRecord />
         </WriteGate>
       </div>
+
+      <WriteGate>
+        <ModuleSetup moduleKey="governance" title="Governance" />
+      </WriteGate>
 
       <Card className="overflow-hidden p-0">
         {rows.length === 0 ? (

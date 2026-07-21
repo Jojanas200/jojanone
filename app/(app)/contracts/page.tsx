@@ -4,6 +4,7 @@ import { requireModuleAccess } from "@/server/auth/guard";
 import { listContracts } from "@/server/services/contracts";
 import { NewContract } from "./NewContract";
 import { WriteGate } from "../WriteGate";
+import { ModuleSetup } from "../../onboarding/ModuleSetup";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -49,6 +50,10 @@ export default async function ContractsPage() {
           <NewContract />
         </WriteGate>
       </div>
+
+      <WriteGate>
+        <ModuleSetup moduleKey="contracts" title="Contracts" />
+      </WriteGate>
 
       <Card className="overflow-hidden p-0">
         {rows.length === 0 ? (

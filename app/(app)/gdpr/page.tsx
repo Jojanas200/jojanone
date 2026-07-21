@@ -5,6 +5,7 @@ import { listProcessingActivities } from "@/server/services/gdpr";
 import { NewProcessingActivity } from "./NewProcessingActivity";
 import { RowActions } from "./RowActions";
 import { WriteGate } from "../WriteGate";
+import { ModuleSetup } from "../../onboarding/ModuleSetup";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -38,6 +39,10 @@ export default async function GdprPage() {
           <NewProcessingActivity />
         </WriteGate>
       </div>
+
+      <WriteGate>
+        <ModuleSetup moduleKey="gdpr" title="GDPR" />
+      </WriteGate>
 
       <Card className="overflow-hidden p-0">
         {rows.length === 0 ? (

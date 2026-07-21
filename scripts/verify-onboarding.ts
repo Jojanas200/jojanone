@@ -156,17 +156,27 @@ async function main() {
 
     // --- conditional (requiredIf) gate -------------------------------------
     // Everything except company_number, with a limited_company structure.
-    await saveOnboarding(A, wsA, INITIAL);
+    const partial = await saveOnboarding(A, wsA, INITIAL);
+    check(
+      "save reports complete=false while a required field is missing",
+      partial.complete === false,
+    );
     let res = await completeOnboarding(A, wsA);
     check(
       "limited company: company_number blocks completion (requiredIf)",
       res.ok === false && res.missing.includes("company.company_number"),
     );
 
-    // Switching to sole trader removes that requirement.
-    await saveOnboarding(A, wsA, {
+    // Switching to sole trader removes that requirement — the save now reports
+    // complete=true, exactly the signal a module-card uses to offer "Finish
+    // setup" once the last required field is filled.
+    const nowComplete = await saveOnboarding(A, wsA, {
       "company.business_structure": "sole_trader",
     });
+    check(
+      "save flips complete=true once the last required field is filled",
+      nowComplete.complete === true,
+    );
     res = await completeOnboarding(A, wsA);
     check(
       "sole trader: company_number not required → completes",

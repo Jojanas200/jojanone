@@ -6,6 +6,7 @@ import { NewObligation } from "./NewObligation";
 import { RowActions } from "./RowActions";
 import { ConfirmEvidence } from "./ConfirmEvidence";
 import { WriteGate } from "../WriteGate";
+import { ModuleSetup } from "../../onboarding/ModuleSetup";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -63,6 +64,10 @@ export default async function CompliancePage() {
           <NewObligation />
         </WriteGate>
       </div>
+
+      <WriteGate>
+        <ModuleSetup moduleKey="compliance" title="Compliance" />
+      </WriteGate>
 
       <Card className="overflow-hidden p-0">
         {rows.length === 0 ? (

@@ -8,6 +8,7 @@ import {
   validateAnswers,
 } from "../../shared/onboarding/logic";
 import { seedModulesFromOnboarding } from "./onboarding-fanout";
+import { getActiveWorkspaceId } from "./workspaces";
 import type { OnboardingAnswers } from "../../shared/onboarding/types";
 
 /**
@@ -20,6 +21,45 @@ export interface OnboardingState {
   answers: OnboardingAnswers;
   completedAt: Date | null;
   complete: boolean;
+}
+
+export interface OnboardingStatus {
+  hasWorkspace: boolean;
+  /** True once the wizard has saved at least once (or been completed). */
+  started: boolean;
+  completed: boolean;
+  missing: number;
+}
+
+/** Whether onboarding has meaningfully begun (a saved row / completion). */
+export function isStarted(state: OnboardingState): boolean {
+  return state.completedAt !== null || Object.keys(state.answers).length > 0;
+}
+
+/**
+ * Lightweight status for the "Finish setup" prompts: whether onboarding was
+ * started, whether it's done, and how many initially-required items remain.
+ * Resolves the active workspace itself so callers can use it without a ws id.
+ * Legacy workspaces that predate the wizard have started=false (never nagged).
+ */
+export async function getOnboardingStatus(
+  claims: UserClaims,
+): Promise<OnboardingStatus> {
+  const ws = await getActiveWorkspaceId(claims);
+  if (!ws)
+    return {
+      hasWorkspace: false,
+      started: false,
+      completed: false,
+      missing: 0,
+    };
+  const state = await getOnboarding(claims, ws);
+  return {
+    hasWorkspace: true,
+    started: isStarted(state),
+    completed: state.completedAt !== null,
+    missing: missingInitialFields(state.answers).length,
+  };
 }
 
 export function getOnboarding(
