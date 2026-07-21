@@ -1,0 +1,584 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+@import "@fontsource-variable/inter";
+
+@custom-variant dark (&:is(.dark *, [data-theme="dark"] *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+  /* Jojan One - light surfaces, navy text, corporate blue accent */
+  --background: oklch(0.975 0.004 260); /* warm neutral page bg (#F7F8FA) */
+  --foreground: oklch(0.26 0.05 265); /* navy #1B2A4A */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.26 0.05 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.26 0.05 265);
+  --primary: oklch(0.55 0.22 264); /* corporate blue #2563EB */
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.972 0.005 255); /* recessed panel #F8FAFC */
+  --secondary-foreground: oklch(0.26 0.05 265);
+  --muted: oklch(0.972 0.005 255);
+  --muted-foreground: oklch(0.55 0.02 260); /* #6B7280 */
+  --accent: oklch(0.955 0.03 264); /* light blue tint for active nav */
+  --accent-foreground: oklch(0.55 0.22 264);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(0.92 0.005 260); /* #E5E7EB */
+  --input: oklch(0.92 0.005 260);
+  --ring: oklch(0.55 0.22 264);
+  /* Surface layers */
+  --surface-sidebar: oklch(0.988 0.003 255); /* ~#FBFCFD */
+  --surface-topbar: oklch(1 0 0 / 0.94);
+  --surface-recessed: oklch(0.972 0.005 255); /* ~#F8FAFC */
+  /* Status colors */
+  --status-live: oklch(0.62 0.18 148); /* #16A34A */
+  --status-dev: oklch(0.55 0.22 264); /* #2563EB */
+  --status-soon: oklch(0.68 0.015 260); /* #9CA3AF */
+  --body-text: oklch(0.38 0.02 265); /* #374151 */
+  /* Semantic status tokens (WCAG AA text/background) */
+  --success: oklch(0.62 0.18 148);
+  --warning: oklch(0.72 0.15 75);
+  --danger: oklch(0.6 0.22 25);
+  --info: oklch(0.55 0.22 264);
+  /* Module category accents - subtle, used for headers/borders only */
+  --accent-core: oklch(0.55 0.22 264); /* Core Intelligence */
+  --accent-business: oklch(0.55 0.11 200); /* Business - teal */
+  --accent-compliance: oklch(0.5 0.17 285); /* Compliance - indigo */
+  --accent-growth: oklch(0.55 0.2 300); /* Growth - violet */
+  --accent-learning: oklch(0.58 0.14 245); /* Academy - warm blue */
+  --accent-system: oklch(0.5 0.02 260); /* Settings - slate */
+  /* Elevation */
+  --shadow-xs: 0 1px 2px oklch(0.26 0.05 265 / 0.04);
+  --shadow-sm:
+    0 1px 3px oklch(0.26 0.05 265 / 0.06), 0 1px 2px oklch(0.26 0.05 265 / 0.04);
+  --shadow-md:
+    0 4px 12px -2px oklch(0.26 0.05 265 / 0.08),
+    0 2px 4px -2px oklch(0.26 0.05 265 / 0.04);
+  --shadow-lg:
+    0 12px 32px -8px oklch(0.26 0.05 265 / 0.14),
+    0 4px 12px -4px oklch(0.26 0.05 265 / 0.06);
+  --font-sans: "Inter Variable", "Inter", system-ui, -apple-system, sans-serif;
+  /* Editorial serif - used only for large hero display headings */
+  --font-serif: "DM Serif Display", "Cormorant Garamond", Georgia, serif;
+  /* Jova cyan glow - independent from the user-selected primary brand colour */
+  --jova-glow: oklch(0.78 0.13 220);
+  --jova-glow-strong: oklch(0.7 0.16 220);
+  /* Editorial hero wash - very pale cyan-blue used behind hero areas */
+  --hero-wash: oklch(0.985 0.012 230);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.984 0.003 247.858);
+  --sidebar-foreground: oklch(0.129 0.042 264.695);
+  --sidebar-primary: oklch(0.208 0.042 265.755);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.968 0.007 247.896);
+  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
+  --sidebar-border: oklch(0.929 0.013 255.508);
+  --sidebar-ring: oklch(0.704 0.04 256.788);
+}
+
+.dark,
+:root[data-theme="dark"] {
+  --background: oklch(0.129 0.042 264.695);
+  --foreground: oklch(0.984 0.003 247.858);
+  --card: oklch(0.208 0.042 265.755);
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+  --primary: oklch(0.929 0.013 255.508);
+  --primary-foreground: oklch(0.208 0.042 265.755);
+  --secondary: oklch(0.279 0.041 260.031);
+  --secondary-foreground: oklch(0.984 0.003 247.858);
+  --muted: oklch(0.279 0.041 260.031);
+  --muted-foreground: oklch(0.704 0.04 256.788);
+  --accent: oklch(0.279 0.041 260.031);
+  --accent-foreground: oklch(0.984 0.003 247.858);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.551 0.027 264.364);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.208 0.042 265.755);
+  --sidebar-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-accent: oklch(0.279 0.041 260.031);
+  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.551 0.027 264.364);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+
+  /* Very faint brand atmosphere in the upper-right of the app canvas.
+     Uses the currently selected primary brand colour at 4-6% opacity and
+     fades fully into the neutral background. Non-interactive, decorative. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(
+        60rem 40rem at 100% -10%,
+        color-mix(in oklab, var(--primary) 6%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        48rem 32rem at 0% 110%,
+        color-mix(in oklab, var(--primary) 3%, transparent),
+        transparent 65%
+      );
+  }
+
+  /* Ensure app content sits above the atmosphere layer. */
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Editorial hero surface - warm off-white with a soft cyan wash on the
+     upper-right that never competes with the user-selected brand colour. */
+  .hero-editorial {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: calc(var(--radius) + 8px);
+    background:
+      radial-gradient(
+        48rem 26rem at 92% -20%,
+        color-mix(in oklab, var(--jova-glow) 22%, transparent),
+        transparent 65%
+      ),
+      radial-gradient(
+        36rem 22rem at -10% 120%,
+        color-mix(in oklab, var(--jova-glow) 10%, transparent),
+        transparent 60%
+      ),
+      linear-gradient(180deg, var(--hero-wash) 0%, var(--card) 100%);
+    border: 1px solid color-mix(in oklab, var(--jova-glow) 18%, var(--border));
+    box-shadow: var(--shadow-sm);
+  }
+
+  .font-display {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  /* Marketing landing typography (Swiss/editorial). Loaded via Fontshare on the
+     landing page; falls back to Inter everywhere the fonts are absent. */
+  .font-clash {
+    font-family: "Clash Display", "Inter Variable", system-ui, sans-serif;
+  }
+  .font-satoshi {
+    font-family: "Satoshi", "Inter Variable", system-ui, sans-serif;
+  }
+  /* Deep offset text layering ("echo"). Foreground stays #111; ghost layers sit
+     behind, shifted up-left, fading to light gray. Decorative + non-interactive. */
+  .echo-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Jova presence indicator - soft cyan orb with a restrained pulse */
+  .jova-orb {
+    position: relative;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 9999px;
+    background: var(--jova-glow-strong);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--jova-glow) 25%, transparent);
+  }
+  .jova-orb::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--jova-glow) 35%, transparent);
+    opacity: 0.6;
+    animation: jova-pulse 2.8s ease-in-out infinite;
+  }
+  @keyframes jova-pulse {
+    0%,
+    100% {
+      transform: scale(0.9);
+      opacity: 0.35;
+    }
+    50% {
+      transform: scale(1.25);
+      opacity: 0.05;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .jova-orb::after {
+      animation: none;
+    }
+  }
+
+  /* Consistent, visible focus ring across the app */
+  :where(
+    a,
+    button,
+    [role="button"],
+    input,
+    select,
+    textarea,
+    [tabindex]
+  ):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: calc(var(--radius) - 4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  /* Print exclusion - reports, certificates and generated documents must
+     remain white with no decorative brand atmosphere or shadows. */
+  @media print {
+    body {
+      background: #ffffff !important;
+    }
+    body::before {
+      display: none !important;
+    }
+    * {
+      box-shadow: none !important;
+    }
+    .hero-editorial {
+      background: #ffffff !important;
+      border-color: #e5e7eb !important;
+    }
+    .jova-orb::after {
+      animation: none !important;
+    }
+  }
+}
+
+/* =========================================================================
+   Selectable THEME: Neumorphism (Soft UI).
+   Toggled via data-theme="neumorph" on <html>. Default theme (no attribute or
+   data-theme="default") keeps the existing design. Applies app-wide AND to the
+   marketing landing, which is theme-driven through the --ld-* variables below.
+   ========================================================================= */
+
+/* Landing palette - default (Swiss editorial). Surfaces are flat + hairline. */
+:root {
+  --ld-bg: #f2f2f2;
+  --ld-panel: #ececec;
+  --ld-surface: #f2f2f2;
+  --ld-ink: #111111;
+  --ld-strong: #1e1e1e;
+  --ld-muted: #838282;
+  --ld-body: #4b4b4b;
+  --ld-line: rgba(30, 30, 30, 0.1);
+  --ld-invert-bg: #1e1e1e;
+  --ld-invert-ink: #f6f6f6;
+  --ld-accent: #111111;
+  --ld-echo1: #bfbfbf;
+  --ld-echo2: #c9c9c9;
+  --ld-echo3: #d1d1d1;
+  --ld-echo4: #d9d9d9;
+  --ld-raise: none;
+  --ld-raise-sm: none;
+  --ld-radius: 0.25rem;
+  --ld-font-body: "Satoshi", "Inter Variable", system-ui, sans-serif;
+}
+
+/* Dark theme: the editorial (Swiss) landing rendered on a deep slate palette. */
+[data-theme="dark"] {
+  --ld-bg: #0d1424;
+  --ld-panel: #121a2c;
+  --ld-surface: #18223a;
+  --ld-ink: #eef2f7;
+  --ld-strong: #eef2f7;
+  --ld-muted: #94a3b8;
+  --ld-body: #c3cede;
+  --ld-line: rgba(255, 255, 255, 0.08);
+  --ld-invert-bg: #eef2f7;
+  --ld-invert-ink: #0d1424;
+  --ld-accent: #7c74ff;
+  --ld-echo1: #202b44;
+  --ld-echo2: #26324c;
+  --ld-echo3: #2c3a56;
+  --ld-echo4: #334160;
+  --ld-raise: none;
+  --ld-raise-sm: none;
+  --ld-radius: 0.25rem;
+  --ld-font-body: "Satoshi", "Inter Variable", system-ui, sans-serif;
+}
+
+[data-theme="neumorph"] {
+  /* App design tokens - cool clay surface + soft violet accent */
+  --background: #e0e5ec;
+  --foreground: #3d4852;
+  --card: #e0e5ec;
+  --card-foreground: #3d4852;
+  --popover: #e0e5ec;
+  --popover-foreground: #3d4852;
+  --primary: #6c63ff;
+  --primary-foreground: #ffffff;
+  --secondary: #e0e5ec;
+  --secondary-foreground: #3d4852;
+  --muted: #e0e5ec;
+  --muted-foreground: #6b7280;
+  --accent: #d6dbe3;
+  --accent-foreground: #3d4852;
+  --border: #cfd6df;
+  --input: #cfd6df;
+  --ring: #6c63ff;
+  --radius: 1rem;
+  --font-sans: "DM Sans", "Inter Variable", system-ui, sans-serif;
+  --sidebar: #e0e5ec;
+  --sidebar-foreground: #3d4852;
+  --sidebar-border: transparent;
+  --sidebar-accent: #d6dbe3;
+  --sidebar-accent-foreground: #3d4852;
+
+  /* Neumorphic dual shadows (rgba for smooth blending) */
+  --neu-raised:
+    9px 9px 16px rgba(163, 177, 198, 0.6),
+    -9px -9px 16px rgba(255, 255, 255, 0.5);
+  --neu-raised-sm:
+    5px 5px 10px rgba(163, 177, 198, 0.6),
+    -5px -5px 10px rgba(255, 255, 255, 0.5);
+  --neu-raised-lg:
+    12px 12px 20px rgba(163, 177, 198, 0.7),
+    -12px -12px 20px rgba(255, 255, 255, 0.6);
+  --neu-inset:
+    inset 6px 6px 10px rgba(163, 177, 198, 0.6),
+    inset -6px -6px 10px rgba(255, 255, 255, 0.5);
+  --neu-inset-deep:
+    inset 10px 10px 20px rgba(163, 177, 198, 0.7),
+    inset -10px -10px 20px rgba(255, 255, 255, 0.6);
+
+  /* Landing overrides - same clay surface, soft-UI depth */
+  --ld-bg: #e0e5ec;
+  --ld-panel: #e0e5ec;
+  --ld-surface: #e0e5ec;
+  --ld-ink: #3d4852;
+  --ld-strong: #3d4852;
+  --ld-muted: #6b7280;
+  --ld-body: #4a5568;
+  --ld-line: transparent;
+  --ld-invert-bg: #3d4852;
+  --ld-invert-ink: #e0e5ec;
+  --ld-accent: #6c63ff;
+  --ld-echo1: #c7ccd4;
+  --ld-echo2: #d0d5dc;
+  --ld-echo3: #d7dbe2;
+  --ld-echo4: #dde1e8;
+  --ld-raise: var(--neu-raised);
+  --ld-raise-sm: var(--neu-raised-sm);
+  --ld-radius: 1.75rem;
+  --ld-font-body: "DM Sans", "Inter Variable", system-ui, sans-serif;
+}
+
+/* Neumorph: no root atmosphere gradient (spec: flat clay background) */
+[data-theme="neumorph"] body::before {
+  display: none !important;
+}
+/* Repurpose Tailwind's shadow utilities into dual neumorphic shadows so every
+   Card / Button / Input inherits the soft-UI depth without per-component edits. */
+[data-theme="neumorph"] .shadow,
+[data-theme="neumorph"] .shadow-md,
+[data-theme="neumorph"] .shadow-lg {
+  box-shadow: var(--neu-raised) !important;
+}
+[data-theme="neumorph"] .shadow-sm,
+[data-theme="neumorph"] .shadow-xs {
+  box-shadow: var(--neu-raised-sm) !important;
+}
+[data-theme="neumorph"] .shadow:active,
+[data-theme="neumorph"] .shadow-sm:active {
+  box-shadow: var(--neu-inset) !important;
+}
+/* Cards are molded from the surface - no visible edge */
+[data-theme="neumorph"] .bg-card,
+[data-theme="neumorph"] .bg-popover {
+  border-color: transparent !important;
+}
+/* Inputs are wells drilled into the surface */
+[data-theme="neumorph"]
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+    [type="submit"]
+  ):not([type="button"]),
+[data-theme="neumorph"] textarea,
+[data-theme="neumorph"] select {
+  box-shadow: var(--neu-inset) !important;
+  background-color: var(--background) !important;
+  border-color: transparent !important;
+}
+[data-theme="neumorph"] input:focus-visible,
+[data-theme="neumorph"] textarea:focus-visible,
+[data-theme="neumorph"] select:focus-visible {
+  box-shadow: var(--neu-inset-deep) !important;
+}
+/* Geometric display font for the soft theme */
+[data-theme="neumorph"] :is(h1, h2, h3, .font-clash) {
+  font-family: "Plus Jakarta Sans", "DM Sans", system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Brand logo blending: the source JPEG has a white background. On light + clay
+   (Soft-UI) surfaces, multiply drops the white into the surface. On the Dark
+   theme, invert + screen turns the dark marks light and drops the (now black)
+   background, so the lockup stays visible. */
+.brand-logo {
+  mix-blend-mode: multiply;
+}
+:is(.dark, [data-theme="dark"]) .brand-logo {
+  mix-blend-mode: screen;
+  filter: invert(1) grayscale(1) brightness(1.4);
+}
+
+/* -------- Landing semantic surfaces (theme-driven) -------- */
+/* Border + depth only; each panel sets its own background utility. */
+.ld-surface {
+  border: 1px solid var(--ld-line);
+  box-shadow: var(--ld-raise);
+}
+.ld-well {
+  border: 1px solid var(--ld-line);
+}
+[data-theme="neumorph"] .ld-well {
+  border: none;
+  box-shadow: var(--neu-inset);
+}
+.ld-btn-primary {
+  background: var(--ld-accent);
+  color: var(--ld-bg);
+  border: 1px solid var(--ld-accent);
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.2s ease;
+}
+.ld-btn-primary:hover {
+  transform: scale(1.03);
+}
+[data-theme="neumorph"] .ld-btn-primary {
+  color: #ffffff;
+  border: none;
+  box-shadow: var(--neu-raised-sm);
+}
+[data-theme="neumorph"] .ld-btn-primary:hover {
+  transform: none;
+  box-shadow: var(--neu-raised);
+}
+[data-theme="neumorph"] .ld-btn-primary:active {
+  box-shadow: var(--neu-inset);
+}
+.ld-btn-outline {
+  background: transparent;
+  color: var(--ld-ink);
+  border: 1px solid var(--ld-strong);
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.3s ease;
+}
+.ld-btn-outline:hover {
+  background: var(--ld-ink);
+  color: var(--ld-bg);
+}
+[data-theme="neumorph"] .ld-btn-outline {
+  border: none;
+  background: var(--ld-surface);
+  box-shadow: var(--neu-raised-sm);
+}
+[data-theme="neumorph"] .ld-btn-outline:hover {
+  background: var(--ld-surface);
+  color: var(--ld-accent);
+  box-shadow: var(--neu-raised);
+}
+[data-theme="neumorph"] .ld-btn-outline:active {
+  box-shadow: var(--neu-inset);
+}

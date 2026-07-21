@@ -1,0 +1,177 @@
+/**
+ * End-to-end verification of the Policies module against the REAL Supabase
+ * project: provision → create → isolation → publish (active stamps approval) →
+ * cross-tenant block → hard delete → cleanup.
+ *
+ * Run: set -a; source .env.local; set +a; ./node_modules/.bin/tsx scripts/verify-policies.ts
+ */
+import { inArray } from "drizzle-orm";
+import { adminDb } from "../src/server/db";
+import { organisations, workspaces } from "../src/server/db/schema";
+import {
+  createPolicy,
+  deletePolicy,
+  listPolicies,
+  setPolicyStatus,
+  updatePolicy,
+} from "../src/server/services/policies";
+import { provisionWorkspace } from "../src/server/services/provisioning";
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+let pass = 0;
+let fail = 0;
+const check = (label: string, cond: boolean) => {
+  console.log(`  ${cond ? "PASS" : "FAIL"}  ${label}`);
+  cond ? pass++ : fail++;
+};
+
+async function adminFetch(path: string, init?: RequestInit) {
+  return fetch(`${SUPABASE_URL}/auth/v1/admin${path}`, {
+    ...init,
+    headers: {
+      apikey: SERVICE_KEY,
+      Authorization: `Bearer ${SERVICE_KEY}`,
+      "Content-Type": "application/json",
+      ...(init?.headers ?? {}),
+    },
+  });
+}
+async function createUser(email: string): Promise<string> {
+  const res = await adminFetch("/users", {
+    method: "POST",
+    body: JSON.stringify({
+      email,
+      password: "Test-Passw0rd!",
+      email_confirm: true,
+    }),
+  });
+  if (!res.ok) throw new Error(`createUser: ${res.status} ${await res.text()}`);
+  const data = (await res.json()) as { id?: string; user?: { id: string } };
+  const id = data.id ?? data.user?.id;
+  if (!id) throw new Error("createUser: no id");
+  return id;
+}
+const deleteUser = (id: string) =>
+  adminFetch(`/users/${id}`, { method: "DELETE" });
+
+async function main() {
+  const stamp = Date.now();
+  let userA = "";
+  let userB = "";
+  let wsA = "";
+  let wsB = "";
+
+  try {
+    userA = await createUser(`vpol-a-${stamp}@example.test`);
+    userB = await createUser(`vpol-b-${stamp}@example.test`);
+    wsA = await provisionWorkspace(
+      { sub: userA },
+      { orgName: "VPol A", workspaceName: "VPol A" },
+    );
+    wsB = await provisionWorkspace(
+      { sub: userB },
+      { orgName: "VPol B", workspaceName: "VPol B" },
+    );
+
+    const pol = await createPolicy({ sub: userA }, wsA, {
+      policyName: "Data Protection Policy",
+      policyCategory: "Data protection",
+      version: "1.0",
+      owner: "Jane Doe",
+      acknowledgementRequired: true,
+    });
+    check(
+      "policy created for A (defaults to draft)",
+      pol?.policyName === "Data Protection Policy" && pol.status === "draft",
+    );
+    check(
+      "created policy has no approval date until published",
+      pol.approvalDate === null,
+    );
+
+    await createPolicy({ sub: userB }, wsB, {
+      policyName: "Health & Safety Policy",
+      policyCategory: "Health & safety",
+    });
+
+    const aSees = await listPolicies({ sub: userA });
+    const bSees = await listPolicies({ sub: userB });
+    check(
+      "A sees exactly 1 policy",
+      aSees.length === 1 && aSees[0].id === pol.id,
+    );
+    check("B sees exactly 1 policy", bSees.length === 1);
+    check(
+      "A does NOT see B's policy",
+      !aSees.some((x) => x.policyName === "Health & Safety Policy"),
+    );
+
+    const published = await setPolicyStatus({ sub: userA }, pol.id, "active");
+    check(
+      "publish sets status active + stamps approval date",
+      published?.status === "active" && published.approvalDate !== null,
+    );
+
+    const edited = await updatePolicy({ sub: userA }, pol.id, {
+      version: "1.1",
+    });
+    check("owner can update own policy version", edited?.version === "1.1");
+
+    let blocked = false;
+    try {
+      await createPolicy({ sub: userA }, wsB, {
+        policyName: "hack",
+        policyCategory: "Other",
+      });
+    } catch {
+      blocked = true;
+    }
+    check("A cannot create in B's workspace (RLS)", blocked);
+
+    const hijack = await updatePolicy({ sub: userB }, pol.id, {
+      policyName: "hijacked",
+    });
+    check("B cannot update A's policy (row hidden)", hijack === null);
+
+    check(
+      "A can hard-delete own policy",
+      (await deletePolicy({ sub: userA }, pol.id)) === true,
+    );
+    check(
+      "deleted policy no longer listed",
+      (await listPolicies({ sub: userA })).length === 0,
+    );
+  } finally {
+    console.log("Cleanup…");
+    try {
+      const ids = [wsA, wsB].filter(Boolean);
+      if (ids.length) {
+        const orgRows = await adminDb
+          .select({ org: workspaces.organisationId })
+          .from(workspaces)
+          .where(inArray(workspaces.id, ids));
+        await adminDb.delete(workspaces).where(inArray(workspaces.id, ids));
+        const orgIds = orgRows.map((x) => x.org).filter(Boolean);
+        if (orgIds.length)
+          await adminDb
+            .delete(organisations)
+            .where(inArray(organisations.id, orgIds));
+      }
+      if (userA) await deleteUser(userA);
+      if (userB) await deleteUser(userB);
+      console.log("  done");
+    } catch (e) {
+      console.log(`  cleanup warning: ${(e as Error).message}`);
+    }
+  }
+
+  console.log(`\nResult: ${pass} passed, ${fail} failed`);
+  process.exit(fail === 0 ? 0 : 1);
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

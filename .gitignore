@@ -1,0 +1,28 @@
+# dependencies
+node_modules
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# builds
+/build
+/dist
+
+# env — NEVER commit real secrets
+.env
+.env*.local
+
+# drizzle-kit introspection artefacts
+src/server/db/meta/
+
+# supabase local
+supabase/.branches
+supabase/.temp
+
+# misc
+.branches
+.temp
+.DS_Store
+*.log

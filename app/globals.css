@@ -1,0 +1,4 @@
+/* Reuse the prototype's Tailwind v4 setup + brand theme tokens, and add the
+   Next.js app directory to Tailwind's content sources. */
+@import "../src/styles.css";
+@source "../app";

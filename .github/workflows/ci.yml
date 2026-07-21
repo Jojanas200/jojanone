@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    name: Format · Typecheck · Guard · Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Format check (migrated code)
+        run: npm run format:check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # RLS guard: request-path code (app/) must use withUser(); adminDb bypasses
+      # RLS and is reserved for webhooks/jobs/scripts only.
+      - name: Guard — no adminDb in request paths
+        run: |
+          if grep -rn "adminDb" app/; then
+            echo "::error::adminDb must not be used under app/ — use withUser() so RLS applies."
+            exit 1
+          fi
+          echo "ok: no adminDb in app/"
+
+      - name: Build
+        env:
+          # Dummy values — the build constructs clients lazily and never connects.
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+          DIRECT_URL: postgresql://ci:ci@localhost:5432/ci
+          NEXT_PUBLIC_SUPABASE_URL: https://ci.example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: npm run build
+
+  tenant-isolation:
+    name: Tenant isolation (real DB)
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      # Runs the RLS isolation verifiers against a Supabase project when the
+      # secrets are configured; skips cleanly otherwise (e.g. on forks).
+      - name: Verify RLS isolation
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "No DB secrets configured — skipping isolation verification."
+            exit 0
+          fi
+          npm run verify:isolation

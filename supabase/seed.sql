@@ -1,0 +1,20 @@
+-- =============================================================================
+-- seed.sql — DEV-ONLY data, applied by `supabase db reset` (NOT by `db push`).
+--
+-- Reference content (plan catalogue) lives in migration 0006 so it exists in
+-- every environment. This file is for local demo data only.
+--
+-- Creating a demo tenant needs a real auth user (memberships.user_id -> auth.users),
+-- and provision_workspace() reads auth.uid() from the request JWT — which is null
+-- in the SQL editor. So seed a demo workspace from the app instead:
+--
+--   1. `supabase start` then open Studio (http://127.0.0.1:54323)
+--   2. Auth → Add user  (e.g. owner@demo.test / a password)
+--   3. From the app (signed in as that user) call the RPC:
+--        select public.provision_workspace('Demo Ltd', 'Demo Ltd');
+--      or via the JS client:  supabase.rpc('provision_workspace', { org_name: 'Demo Ltd', workspace_name: 'Demo Ltd' })
+--
+-- Once a workspace exists you can insert sample rows against its workspace_id.
+-- =============================================================================
+
+-- (intentionally empty — see notes above)
