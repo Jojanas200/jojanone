@@ -1,5 +1,5 @@
 // =============================================================================
-// Conditional onboarding schema — logic helpers.
+// Conditional onboarding schema - logic helpers.
 // Pure functions over the schema + a set of answers. No I/O. Shared by the
 // server (gate + persistence) and the client (wizard rendering).
 // =============================================================================
@@ -211,7 +211,7 @@ export function fieldsByModule(): Record<string, FieldDef[]> {
   return out;
 }
 
-/** Fields answered "unsure" — each becomes a review recommendation, not a block. */
+/** Fields answered "unsure" - each becomes a review recommendation, not a block. */
 export function reviewRecommendations(answers: OnboardingAnswers): FieldDef[] {
   return ALL_FIELDS.filter(
     (f) => isVisible(f, answers) && answers[f.id] === "unsure",

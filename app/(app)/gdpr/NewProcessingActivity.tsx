@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogClose,
@@ -31,21 +32,26 @@ const LAWFUL_BASES = [
   "legitimate_interests",
 ] as const;
 
+const BLANK = {
+  activityName: "",
+  businessPurpose: "",
+  dataSubjects: "",
+  personalDataCategories: "",
+  lawfulBasis: "consent",
+  retentionPeriod: "",
+  recipients: "",
+  processors: "",
+  securityMeasures: "",
+  owner: "",
+  specialCategoryData: false,
+  internationalTransfers: false,
+};
+
 export function NewProcessingActivity() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [f, setF] = useState({
-    activityName: "",
-    businessPurpose: "",
-    dataSubjects: "",
-    personalDataCategories: "",
-    lawfulBasis: "consent",
-    retentionPeriod: "",
-    owner: "",
-    specialCategoryData: false,
-    internationalTransfers: false,
-  });
+  const [f, setF] = useState({ ...BLANK });
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) =>
     setF((p) => ({ ...p, [k]: v }));
 
@@ -59,14 +65,18 @@ export function NewProcessingActivity() {
         specialCategoryData: f.specialCategoryData,
         internationalTransfers: f.internationalTransfers,
       };
-      if (f.businessPurpose.trim())
-        payload.businessPurpose = f.businessPurpose.trim();
-      if (f.dataSubjects.trim()) payload.dataSubjects = f.dataSubjects.trim();
-      if (f.personalDataCategories.trim())
-        payload.personalDataCategories = f.personalDataCategories.trim();
-      if (f.retentionPeriod.trim())
-        payload.retentionPeriod = f.retentionPeriod.trim();
-      if (f.owner.trim()) payload.owner = f.owner.trim();
+      const text = (k: keyof typeof f) => {
+        const v = String(f[k]).trim();
+        if (v) payload[k] = v;
+      };
+      text("businessPurpose");
+      text("dataSubjects");
+      text("personalDataCategories");
+      text("retentionPeriod");
+      text("recipients");
+      text("processors");
+      text("securityMeasures");
+      text("owner");
 
       const res = await fetch("/api/gdpr", {
         method: "POST",
@@ -79,17 +89,7 @@ export function NewProcessingActivity() {
         );
       toast.success("Processing activity added");
       setOpen(false);
-      setF((p) => ({
-        ...p,
-        activityName: "",
-        businessPurpose: "",
-        dataSubjects: "",
-        personalDataCategories: "",
-        retentionPeriod: "",
-        owner: "",
-        specialCategoryData: false,
-        internationalTransfers: false,
-      }));
+      setF({ ...BLANK });
       router.refresh();
     } catch (err) {
       toast.error((err as Error).message);
@@ -103,7 +103,7 @@ export function NewProcessingActivity() {
       <DialogTrigger asChild>
         <Button>New activity</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>New processing activity</DialogTitle>
         </DialogHeader>
@@ -118,6 +118,17 @@ export function NewProcessingActivity() {
               placeholder="Customer enquiry handling"
             />
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="businessPurpose">Business purpose</Label>
+            <Textarea
+              id="businessPurpose"
+              required
+              rows={2}
+              value={f.businessPurpose}
+              onChange={(e) => set("businessPurpose", e.target.value)}
+              placeholder="Why you process this data and what it is used for."
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="dataSubjects">Data subjects</Label>
@@ -128,6 +139,19 @@ export function NewProcessingActivity() {
                 placeholder="Customers, prospects"
               />
             </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="personalDataCategories">
+                Personal data categories
+              </Label>
+              <Input
+                id="personalDataCategories"
+                value={f.personalDataCategories}
+                onChange={(e) => set("personalDataCategories", e.target.value)}
+                placeholder="Name, email, phone"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Lawful basis</Label>
               <Select
@@ -146,25 +170,54 @@ export function NewProcessingActivity() {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="retentionPeriod">Retention</Label>
               <Input
                 id="retentionPeriod"
+                required
                 value={f.retentionPeriod}
                 onChange={(e) => set("retentionPeriod", e.target.value)}
                 placeholder="6 years"
               />
             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="owner">Owner</Label>
+              <Label htmlFor="recipients">Recipients</Label>
               <Input
-                id="owner"
-                value={f.owner}
-                onChange={(e) => set("owner", e.target.value)}
+                id="recipients"
+                value={f.recipients}
+                onChange={(e) => set("recipients", e.target.value)}
+                placeholder="Who the data is shared with"
               />
             </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="processors">Processors</Label>
+              <Input
+                id="processors"
+                value={f.processors}
+                onChange={(e) => set("processors", e.target.value)}
+                placeholder="Third-party processors"
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="securityMeasures">Security measures</Label>
+            <Textarea
+              id="securityMeasures"
+              rows={2}
+              value={f.securityMeasures}
+              onChange={(e) => set("securityMeasures", e.target.value)}
+              placeholder="Access controls, encryption, backups…"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="owner">Owner</Label>
+            <Input
+              id="owner"
+              value={f.owner}
+              onChange={(e) => set("owner", e.target.value)}
+            />
           </div>
           <div className="flex gap-6 pt-1">
             <label className="flex items-center gap-2 text-sm text-foreground">

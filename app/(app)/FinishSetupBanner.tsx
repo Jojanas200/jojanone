@@ -32,7 +32,7 @@ export function FinishSetupBanner({ missing }: { missing: number }) {
             {missing > 0
               ? `${missing} required item${missing === 1 ? "" : "s"} left. `
               : ""}
-            Pick up where you left off — your answers are saved.
+            Pick up where you left off - your answers are saved.
           </p>
         </div>
       </div>

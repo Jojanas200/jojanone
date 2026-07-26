@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -30,6 +31,7 @@ export function ConfirmEvidence({
     title: `Evidence - ${obligationTitle}`,
     notes: "",
     fileName: "",
+    completeObligation: true,
   });
 
   async function submit(e: React.FormEvent) {
@@ -44,15 +46,20 @@ export function ConfirmEvidence({
           category: "compliance",
           notes: f.notes.trim() || undefined,
           fileName: f.fileName.trim() || undefined,
-          completeObligation: true,
+          completeObligation: f.completeObligation,
         }),
       });
       if (!res.ok)
         throw new Error(
           (await res.json().catch(() => ({})))?.error ?? "Failed",
         );
-      toast.success("Evidence recorded - obligation completed");
+      toast.success(
+        f.completeObligation
+          ? "Evidence recorded - obligation completed"
+          : "Evidence recorded",
+      );
       setOpen(false);
+      setF((p) => ({ ...p, notes: "", fileName: "" }));
       router.refresh();
     } catch (err) {
       toast.error((err as Error).message);
@@ -108,6 +115,21 @@ export function ConfirmEvidence({
               placeholder="What was done, when, and where the proof is held."
             />
           </div>
+          <div className="flex items-center justify-between rounded-lg border border-border p-3">
+            <div>
+              <Label htmlFor="ev-complete">Mark obligation complete</Label>
+              <p className="text-xs text-muted-foreground">
+                Turn off to log evidence while the obligation stays in progress.
+              </p>
+            </div>
+            <Switch
+              id="ev-complete"
+              checked={f.completeObligation}
+              onCheckedChange={(v) =>
+                setF((p) => ({ ...p, completeObligation: v === true }))
+              }
+            />
+          </div>
           <DialogFooter>
             <DialogClose asChild>
               <Button type="button" variant="outline">
@@ -115,7 +137,11 @@ export function ConfirmEvidence({
               </Button>
             </DialogClose>
             <Button type="submit" disabled={loading}>
-              {loading ? "Saving…" : "Record & complete"}
+              {loading
+                ? "Saving…"
+                : f.completeObligation
+                  ? "Record & complete"
+                  : "Record evidence"}
             </Button>
           </DialogFooter>
         </form>

@@ -1,5 +1,6 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { withUser, type UserClaims } from "../db";
+import { academyCertificates, academyProgress } from "../db/schema";
 import { academyAssignments } from "../db/schema";
 import { recordActivity } from "./activity";
 import { getCourse } from "../../data/academy-catalog";
@@ -60,6 +61,26 @@ export function listAssignments(
       .orderBy(desc(academyAssignments.createdAt));
     return rows.map(enrich);
   });
+}
+
+/** Certificates earned across the workspace, newest first (RLS-scoped). */
+export function listCertificates(claims: UserClaims) {
+  return withUser(claims, (tx) =>
+    tx
+      .select()
+      .from(academyCertificates)
+      .orderBy(desc(academyCertificates.completedAt)),
+  );
+}
+
+/** In-flight learning progress rows (RLS-scoped). */
+export function listProgress(claims: UserClaims) {
+  return withUser(claims, (tx) =>
+    tx
+      .select()
+      .from(academyProgress)
+      .orderBy(desc(academyProgress.lastActivityAt)),
+  );
 }
 
 export function createAssignment(
@@ -162,5 +183,107 @@ export function hasAssignment(
       )
       .limit(1);
     return rows.length > 0;
+  });
+}
+
+// --- Lesson progress + certificates (the learning experience) ---------------
+
+/** Record a completed lesson; stamps course completion when all are done. */
+export function markLessonComplete(
+  claims: UserClaims,
+  workspaceId: string,
+  courseId: string,
+  lessonId: string,
+  learnerId = "owner",
+) {
+  const course = getCourse(courseId);
+  if (!course) return Promise.resolve(null);
+  const totalLessons = course.lessons.length;
+  return withUser(claims, async (tx) => {
+    const existing = (
+      await tx
+        .select()
+        .from(academyProgress)
+        .where(
+          and(
+            eq(academyProgress.courseId, courseId),
+            eq(academyProgress.learnerId, learnerId),
+          ),
+        )
+        .limit(1)
+    )[0];
+    const done = new Set(existing?.lessonsCompleted ?? []);
+    done.add(lessonId);
+    const lessonsCompleted = [...done];
+    const finished = lessonsCompleted.length >= totalLessons;
+    if (existing) {
+      const rows = await tx
+        .update(academyProgress)
+        .set({
+          lessonsCompleted,
+          lastActivityAt: sql`now()`,
+          completedAt: finished ? sql`now()` : existing.completedAt,
+        })
+        .where(eq(academyProgress.id, existing.id))
+        .returning();
+      return rows[0];
+    }
+    const rows = await tx
+      .insert(academyProgress)
+      .values({ workspaceId, learnerId, courseId, lessonsCompleted })
+      .returning();
+    return rows[0];
+  });
+}
+
+/** Issue a certificate for a passed final quiz (>= 80%). */
+export function issueCertificate(
+  claims: UserClaims,
+  workspaceId: string,
+  input: {
+    courseId: string;
+    quizScore: number;
+    learnerId?: string;
+    learnerName?: string | null;
+  },
+) {
+  const course = getCourse(input.courseId);
+  if (!course) return Promise.resolve(null);
+  const learnerId = input.learnerId ?? "owner";
+  const reference = `JO-${input.courseId
+    .replace(/[^a-z0-9]/gi, "")
+    .slice(0, 8)
+    .toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+  return withUser(claims, async (tx) => {
+    const rows = await tx
+      .insert(academyCertificates)
+      .values({
+        workspaceId,
+        reference,
+        learnerId,
+        learnerName: input.learnerName ?? null,
+        courseId: input.courseId,
+        courseTitle: course.title,
+        quizScore: input.quizScore,
+        durationMinutes: course.duration_minutes,
+      })
+      .returning();
+    // A pass also completes any open assignment for this course/learner.
+    await tx
+      .update(academyAssignments)
+      .set({ status: "completed" })
+      .where(
+        and(
+          eq(academyAssignments.courseId, input.courseId),
+          eq(academyAssignments.learnerId, learnerId),
+        ),
+      );
+    await recordActivity(tx, workspaceId, {
+      module: "academy",
+      action: "completed",
+      title: `Certificate: ${course.title}`,
+      referenceId: rows[0].id,
+    });
+    return rows[0];
   });
 }

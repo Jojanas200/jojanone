@@ -57,5 +57,25 @@ export const setRiskStatusSchema = z.object({
   reason: z.string().trim().max(500).nullish(),
 });
 
+// Mitigation/treatment actions embedded on the risk record.
+export type RiskMitigation = {
+  id: string;
+  label: string;
+  dueDate: string | null;
+  completedAt: string | null;
+};
+
+export const addRiskMitigationSchema = z.object({
+  label: z.string().trim().min(1).max(300),
+  dueDate: z.string().date().nullish(),
+});
+
+export const setRiskMitigationSchema = z.object({
+  mitigationId: z.string().uuid(),
+  done: z.boolean(),
+});
+
+export type AddRiskMitigationInput = z.infer<typeof addRiskMitigationSchema>;
+export type SetRiskMitigationInput = z.infer<typeof setRiskMitigationSchema>;
 export type CreateRiskInput = z.infer<typeof createRiskSchema>;
 export type UpdateRiskInput = z.infer<typeof updateRiskSchema>;

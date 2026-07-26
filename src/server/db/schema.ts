@@ -262,6 +262,19 @@ export const businessProfiles = pgTable("business_profiles", {
   customerCount: integer("customer_count").notNull().default(0),
   supplierCount: integer("supplier_count").notNull().default(0),
   annualRevenueBand: text("annual_revenue_band"),
+  tradingName: text("trading_name"),
+  website: text("website"),
+  phone: text("phone"),
+  contactEmail: text("contact_email"),
+  primaryContactName: text("primary_contact_name"),
+  primaryContactRole: text("primary_contact_role"),
+  vatNumber: text("vat_number"),
+  usesContractors: boolean("uses_contractors").notNull().default(false),
+  operatesPublicService: boolean("operates_public_service")
+    .notNull()
+    .default(false),
+  regulatedActivities: boolean("regulated_activities").notNull().default(false),
+  reliesOnSuppliers: boolean("relies_on_suppliers").notNull().default(false),
   vatRegistered: boolean("vat_registered").notNull().default(false),
   employerRegistered: boolean("employer_registered").notNull().default(false),
   processesPersonalData: boolean("processes_personal_data")
@@ -387,6 +400,14 @@ export const risks = pgTable("risks", {
   closedAt: ts("closed_at"),
   acceptanceReason: text("acceptance_reason"),
   closureReason: text("closure_reason"),
+  mitigations: jsonb("mitigations").notNull().default([]).$type<
+    {
+      id: string;
+      label: string;
+      dueDate: string | null;
+      completedAt: string | null;
+    }[]
+  >(),
   createdBy: uuid("created_by"),
   updatedBy: uuid("updated_by"),
   createdAt: ts("created_at").notNull().defaultNow(),
@@ -459,6 +480,82 @@ export const processingActivities = pgTable("processing_activities", {
   updatedAt: ts("updated_at").notNull().defaultNow(),
 });
 
+// --- GDPR sub-registers (data_requests, data_breaches, dpias) ----------------
+// Canonical tables from migration 0003; tenant-scoped via apply_tenant_rls,
+// updated_at maintained by trigger.
+export const dataRequestType = pgEnum("data_request_type", [
+  "subject_access",
+  "rectification",
+  "erasure",
+  "restriction",
+  "objection",
+  "portability",
+]);
+
+export const dataRequests = pgTable("data_requests", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  requestType: dataRequestType("request_type").notNull(),
+  requesterReference: text("requester_reference"),
+  receivedDate: date("received_date").notNull(),
+  identityVerified: boolean("identity_verified").notNull().default(false),
+  dueDate: date("due_date").notNull(),
+  status: text("status").notNull().default("open"), // open|in_progress|completed|closed
+  assignedOwner: text("assigned_owner"),
+  notes: text("notes"),
+  completedAt: ts("completed_at"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+export const dataBreaches = pgTable("data_breaches", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  title: text("title").notNull(),
+  discoveredAt: ts("discovered_at").notNull().defaultNow(),
+  occurredAt: ts("occurred_at"),
+  description: text("description"),
+  dataInvolved: text("data_involved"),
+  affectedPeopleEstimate: integer("affected_people_estimate")
+    .notNull()
+    .default(0),
+  riskLevel: riskBand("risk_level").notNull().default("low"),
+  containmentActions: text("containment_actions"),
+  icoNotificationAssessment: text("ico_notification_assessment"),
+  individualNotificationAssessment: text("individual_notification_assessment"),
+  status: text("status").notNull().default("open"), // open|contained|closed
+  owner: text("owner"),
+  professionalSupportRequired: boolean("professional_support_required")
+    .notNull()
+    .default(false),
+  closedAt: ts("closed_at"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+export const dpias = pgTable("dpias", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  title: text("title").notNull(),
+  project: text("project"),
+  processingSummary: text("processing_summary"),
+  necessity: text("necessity"),
+  risks: text("risks"),
+  controls: text("controls"),
+  residualRisk: riskBand("residual_risk").notNull().default("low"),
+  status: text("status").notNull().default("draft"), // draft|approved|review_due
+  owner: text("owner"),
+  reviewDate: date("review_date"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
 // --- governance_records ------------------------------------------------------
 export const governanceRecords = pgTable("governance_records", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -505,10 +602,25 @@ export const policies = pgTable("policies", {
     .notNull()
     .default("not_started"), // not_started | partial | complete
   notes: text("notes"),
+  content: text("content"), // full policy body (Jova-drafted or authored)
   createdBy: uuid("created_by"),
   updatedBy: uuid("updated_by"),
   createdAt: ts("created_at").notNull().defaultNow(),
   updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+// --- policy_versions (immutable snapshot on each publish) --------------------
+export const policyVersions = pgTable("policy_versions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  policyId: uuid("policy_id").notNull(),
+  version: text("version").notNull(),
+  status: text("status").notNull(),
+  policyName: text("policy_name").notNull(),
+  content: text("content"),
+  notes: text("notes"),
+  createdBy: uuid("created_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
 });
 
 // --- policy_acknowledgements (per-employee sign-off on a policy) --------------
@@ -573,6 +685,12 @@ export const tenderOpportunities = pgTable("tender_opportunities", {
   summary: text("summary"),
   eligibilityNotes: text("eligibility_notes"),
   owner: text("owner"),
+  checklist: jsonb("checklist")
+    .notNull()
+    .default([])
+    .$type<
+      { id: string; label: string; mandatory: boolean; done: boolean }[]
+    >(),
   createdBy: uuid("created_by"),
   updatedBy: uuid("updated_by"),
   createdAt: ts("created_at").notNull().defaultNow(),
@@ -725,6 +843,37 @@ export const jovaSources = pgTable("jova_sources", {
   note: text("note"),
 });
 
+// --- score_history (daily Business Confidence Score snapshots) ---------------
+export const scoreHistory = pgTable("score_history", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  score: integer("score").notNull(),
+  statusLabel: text("status_label").notNull(),
+  recordedOn: date("recorded_on").notNull(),
+  createdAt: ts("created_at").notNull().defaultNow(),
+});
+
+// --- jova_memories (pgvector semantic memory) --------------------------------
+// The `embedding vector(384)` column is managed via raw SQL (Drizzle has no
+// native vector type); it is intentionally omitted from this binding, which
+// covers metadata reads/writes. See services/jova-memory.ts.
+export const jovaMemories = pgTable("jova_memories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  kind: text("kind").notNull().default("fact"),
+  title: text("title"),
+  content: text("content").notNull(),
+  metadata: jsonb("metadata")
+    .notNull()
+    .default({})
+    .$type<Record<string, unknown>>(),
+  sourceModule: text("source_module"),
+  refId: uuid("ref_id"),
+  createdBy: uuid("created_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
 // --- notifications (in-app reminders/alerts) ---------------------------------
 export const notifications = pgTable("notifications", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -824,6 +973,304 @@ export const academyCertificates = pgTable("academy_certificates", {
   quizScore: integer("quiz_score").notNull().default(0),
   durationMinutes: integer("duration_minutes").notNull().default(0),
   createdAt: ts("created_at").notNull().defaultNow(),
+});
+
+// =============================================================================
+// Wave 4 subsystems - canonical tables from the baseline migrations, bound here
+// so they can be surfaced in the app. All tenant-scoped (apply_tenant_rls),
+// updated_at maintained by trigger.
+// =============================================================================
+
+// --- business_entities (key parties / relationship map) ---------------------
+export const entityType = pgEnum("entity_type", [
+  "customer",
+  "supplier",
+  "employee",
+  "contractor",
+  "adviser",
+  "regulator",
+  "partner",
+  "insurer",
+  "bank",
+]);
+export const entityStatus = pgEnum("entity_status", [
+  "active",
+  "review_due",
+  "at_risk",
+  "archived",
+  "missing_info",
+]);
+export const businessEntities = pgTable("business_entities", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  entityType: entityType("entity_type").notNull(),
+  name: text("name").notNull(),
+  relationship: text("relationship"),
+  status: entityStatus("status").notNull().default("active"),
+  importance: priorityLevel("importance").notNull().default("medium"),
+  riskLevel: riskBand("risk_level").notNull().default("low"),
+  contractId: uuid("contract_id"),
+  contactName: text("contact_name"),
+  email: text("email"),
+  startDate: date("start_date"),
+  reviewDate: date("review_date"),
+  notes: text("notes"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+  deletedAt: ts("deleted_at"),
+});
+
+// --- hr_actions (people tasks bound to the HR register) ---------------------
+export const hrActionType = pgEnum("hr_action_type", [
+  "right_to_work",
+  "probation_review",
+  "contract_issue",
+  "training",
+  "policy_ack",
+  "performance_review",
+  "return_to_work",
+  "welfare",
+  "document_renewal",
+]);
+export const hrActions = pgTable("hr_actions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  employeeId: uuid("employee_id"),
+  actionType: hrActionType("action_type").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  priority: priorityLevel("priority").notNull().default("medium"),
+  status: text("status").notNull().default("open"), // open|in_progress|completed
+  dueDate: date("due_date"),
+  completedAt: ts("completed_at"),
+  notes: text("notes"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+// --- privacy_notices ---------------------------------------------------------
+export const privacyNotices = pgTable("privacy_notices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  version: text("version").notNull().default("1.0"),
+  status: text("status").notNull().default("draft"), // draft|published
+  organisation: text("organisation"),
+  contactDetails: text("contact_details"),
+  dataCollected: text("data_collected"),
+  purposes: text("purposes"),
+  lawfulBases: text("lawful_bases").array().notNull().default([]),
+  sharing: text("sharing"),
+  internationalTransfers: text("international_transfers"),
+  retention: text("retention"),
+  rights: text("rights"),
+  complaints: text("complaints"),
+  reviewDate: date("review_date"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+// --- gdpr_assessments --------------------------------------------------------
+export const gdprAssessments = pgTable("gdpr_assessments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  assessmentType: text("assessment_type").notNull().default("health_check"),
+  answers: jsonb("answers")
+    .notNull()
+    .default({})
+    .$type<Record<string, unknown>>(),
+  score: integer("score").notNull().default(0),
+  status: text("status").notNull().default("draft"), // draft|completed
+  gaps: text("gaps").array().notNull().default([]),
+  recommendations: jsonb("recommendations")
+    .notNull()
+    .default([])
+    .$type<unknown[]>(),
+  completedAt: ts("completed_at"),
+  reviewDate: date("review_date"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+// --- investor_profiles -------------------------------------------------------
+export const investorProfiles = pgTable("investor_profiles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  fundingStage: text("funding_stage").notNull().default("pre_seed"),
+  amountSought: bigint("amount_sought", { mode: "number" })
+    .notNull()
+    .default(0),
+  currency: text("currency").notNull().default("GBP"),
+  fundingPurpose: text("funding_purpose"),
+  targetCloseDate: date("target_close_date"),
+  currentRevenueBand: text("current_revenue_band"),
+  growthSummary: text("growth_summary"),
+  tractionSummary: text("traction_summary"),
+  marketSummary: text("market_summary"),
+  teamSummary: text("team_summary"),
+  investmentType: text("investment_type").notNull().default("undecided"),
+  status: text("status").notNull().default("preparing"),
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+// --- investor_readiness_assessments -----------------------------------------
+export const investorReadinessAssessments = pgTable(
+  "investor_readiness_assessments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspaceId: uuid("workspace_id").notNull(),
+    answers: jsonb("answers")
+      .notNull()
+      .default({})
+      .$type<Record<string, unknown>>(),
+    overallScore: integer("overall_score").notNull().default(0),
+    corporateScore: integer("corporate_score").notNull().default(0),
+    financialScore: integer("financial_score").notNull().default(0),
+    legalScore: integer("legal_score").notNull().default(0),
+    complianceScore: integer("compliance_score").notNull().default(0),
+    commercialScore: integer("commercial_score").notNull().default(0),
+    peopleScore: integer("people_score").notNull().default(0),
+    dataRoomScore: integer("data_room_score").notNull().default(0),
+    gaps: text("gaps").array().notNull().default([]),
+    redFlags: text("red_flags").array().notNull().default([]),
+    recommendedActions: jsonb("recommended_actions")
+      .notNull()
+      .default([])
+      .$type<unknown[]>(),
+    status: text("status").notNull().default("draft"),
+    completedAt: ts("completed_at"),
+    reviewDate: date("review_date"),
+    createdAt: ts("created_at").notNull().defaultNow(),
+    updatedAt: ts("updated_at").notNull().defaultNow(),
+  },
+);
+
+// --- data_room_items ---------------------------------------------------------
+export const dataRoomItems = pgTable("data_room_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  folder: text("folder").notNull(),
+  title: text("title").notNull(),
+  documentType: text("document_type"),
+  version: text("version").notNull().default("1.0"),
+  status: text("status").notNull().default("missing"), // missing|requested|in_progress|ready
+  fileName: text("file_name"),
+  sourceModule: text("source_module"),
+  sourceRecordId: uuid("source_record_id"),
+  confidentiality: text("confidentiality").notNull().default("standard"),
+  reviewDate: date("review_date"),
+  notes: text("notes"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+// --- tender_requirements -----------------------------------------------------
+export const tenderRequirements = pgTable("tender_requirements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  opportunityId: uuid("opportunity_id"),
+  requirementType: text("requirement_type").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  mandatory: boolean("mandatory").notNull().default(false),
+  weighting: integer("weighting").notNull().default(0),
+  status: text("status").notNull().default("not_started"), // not_started|in_progress|met|not_met
+  owner: text("owner"),
+  dueDate: date("due_date"),
+  evidenceReference: text("evidence_reference"),
+  responseId: uuid("response_id"),
+  sourceSection: text("source_section"),
+  notes: text("notes"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+// --- tender_responses --------------------------------------------------------
+export const tenderResponses = pgTable("tender_responses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  opportunityId: uuid("opportunity_id"),
+  requirementId: uuid("requirement_id"),
+  sectionTitle: text("section_title"),
+  question: text("question"),
+  wordLimit: integer("word_limit").notNull().default(0),
+  responseText: text("response_text"),
+  status: text("status").notNull().default("draft"), // draft|in_review|final
+  reviewNotes: text("review_notes"),
+  version: integer("version").notNull().default(1),
+  owner: text("owner"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+// --- bid_assessments ---------------------------------------------------------
+export const bidAssessments = pgTable("bid_assessments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  opportunityId: uuid("opportunity_id"),
+  strategicFitScore: integer("strategic_fit_score").notNull().default(0),
+  eligibilityScore: integer("eligibility_score").notNull().default(0),
+  capacityScore: integer("capacity_score").notNull().default(0),
+  evidenceScore: integer("evidence_score").notNull().default(0),
+  commercialScore: integer("commercial_score").notNull().default(0),
+  deliveryRiskScore: integer("delivery_risk_score").notNull().default(0),
+  overallScore: integer("overall_score").notNull().default(0),
+  answers: jsonb("answers")
+    .notNull()
+    .default({})
+    .$type<Record<string, unknown>>(),
+  strengths: text("strengths").array().notNull().default([]),
+  gaps: text("gaps").array().notNull().default([]),
+  risks: text("risks").array().notNull().default([]),
+  recommendation: text("recommendation").notNull().default("no_bid"), // bid|no_bid|conditional
+  decision: text("decision").notNull().default("pending"), // pending|bid|no_bid
+  decisionReason: text("decision_reason"),
+  completedAt: ts("completed_at"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+});
+
+// --- scenario_runs (business simulator) -------------------------------------
+export const scenarioType = pgEnum("scenario_type", [
+  "hire_employee",
+  "engage_contractor",
+  "new_customer",
+  "new_supplier",
+  "launch_website",
+  "expand_market",
+  "raise_investment",
+  "prepare_tender",
+  "introduce_ai",
+  "new_personal_data",
+]);
+export const scenarioRuns = pgTable("scenario_runs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  scenarioType: scenarioType("scenario_type").notNull(),
+  scenarioName: text("scenario_name").notNull(),
+  answers: jsonb("answers")
+    .notNull()
+    .default({})
+    .$type<Record<string, unknown>>(),
+  result: jsonb("result")
+    .notNull()
+    .default({})
+    .$type<Record<string, unknown>>(),
+  status: text("status").notNull().default("draft"), // draft|complete
+  createdBy: uuid("created_by"),
+  updatedBy: uuid("updated_by"),
+  createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
 });
 
 // Inferred row types for convenience.

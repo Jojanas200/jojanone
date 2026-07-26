@@ -20,9 +20,26 @@ from its current Lovable/TanStack prototype to a production, multi-tenant SaaS.
 | 03       | [03-UI-UX-Design.md](./03-UI-UX-Design.md)                                 | Design system, layout, components, accessibility, brand rules         |
 | 04       | [04-App-Flow.md](./04-App-Flow.md)                                         | End-to-end user journeys and navigation flows                         |
 | 05       | [05-Backend-Schema.md](./05-Backend-Schema.md)                             | Postgres schema, RLS/tenant model, storage buckets                    |
-| 06       | [06-Implementation-Plan.md](./06-Implementation-Plan.md)                   | Phased roadmap, milestones, exit criteria, estimates                  |
+| 06       | [06-Implementation-Plan.md](./06-Implementation-Plan.md)                   | Phased roadmap, milestones, exit criteria, estimates, **live progress** |
+| 07       | [07-Security-Threat-Model.md](./07-Security-Threat-Model.md)               | Threat model, trust boundaries, controls, launch-blocking security items |
+| 08       | [08-Privacy-and-DPIA.md](./08-Privacy-and-DPIA.md)                         | Privacy analysis + DPIA screening (UK GDPR)                           |
+| 09       | [09-Runbooks-and-Go-Live.md](./09-Runbooks-and-Go-Live.md)                 | Operational runbooks and the go-live checklist                        |
+| 10       | [10-Go-Live-Signoff-Register.md](./10-Go-Live-Signoff-Register.md)         | Go-live sign-off register                                             |
 
-## Current state (prototype)
+## Production build status
+
+The production application is **built** — Next.js App Router + Supabase (Postgres + RLS +
+Auth + Storage + pgvector, London) + the Drizzle `withUser()` data layer. It has been taken
+through milestones **M0–M6** plus a **Lovable feature-parity programme (Waves 2–4)**: all
+modules end-to-end with per-record detail/edit boards, a real Jova (Claude/OpenRouter with a
+deterministic fallback) with semantic memory and persistent conversations, the GDPR /
+investor / tender / simulator sub-registers, and policy drafting + version history. See the
+live build log in **[06-Implementation-Plan → Progress (live)](./06-Implementation-Plan.md#progress-live)**;
+tenant isolation is proven by the `verify-*` suite (2-tenant CRUD + RLS against hosted
+Supabase). The sections below describe the original **prototype** — retained as the source of
+product intent, not the current implementation.
+
+## The prototype (source of intent)
 
 - **Framework:** TanStack Start + React 19 + TypeScript + Vite 8 (built in Lovable).
 - **UI:** Tailwind CSS 4 + shadcn/ui (Radix primitives), Recharts, lucide-react.

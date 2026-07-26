@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogClose,
@@ -67,6 +68,10 @@ export function NewRisk() {
   const [f, setF] = useState({
     riskTitle: "",
     riskCategory: "operational",
+    description: "",
+    cause: "",
+    consequence: "",
+    controls: "",
     likelihood: "3",
     impact: "3",
     residualLikelihood: "2",
@@ -74,6 +79,7 @@ export function NewRisk() {
     controlEffectiveness: "adequate",
     response: "reduce",
     riskOwner: "",
+    reviewDate: "",
   });
   const set = (k: keyof typeof f) => (v: string) =>
     setF((p) => ({ ...p, [k]: v }));
@@ -93,6 +99,11 @@ export function NewRisk() {
         response: f.response,
       };
       if (f.riskOwner.trim()) payload.riskOwner = f.riskOwner.trim();
+      if (f.description.trim()) payload.description = f.description.trim();
+      if (f.cause.trim()) payload.cause = f.cause.trim();
+      if (f.consequence.trim()) payload.consequence = f.consequence.trim();
+      if (f.controls.trim()) payload.controls = f.controls.trim();
+      if (f.reviewDate) payload.reviewDate = f.reviewDate;
 
       const res = await fetch("/api/risk", {
         method: "POST",
@@ -105,7 +116,16 @@ export function NewRisk() {
         );
       toast.success("Risk added");
       setOpen(false);
-      setF((p) => ({ ...p, riskTitle: "", riskOwner: "" }));
+      setF((p) => ({
+        ...p,
+        riskTitle: "",
+        description: "",
+        cause: "",
+        consequence: "",
+        controls: "",
+        riskOwner: "",
+        reviewDate: "",
+      }));
       router.refresh();
     } catch (err) {
       toast.error((err as Error).message);
@@ -119,7 +139,7 @@ export function NewRisk() {
       <DialogTrigger asChild>
         <Button>New risk</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>New risk</DialogTitle>
         </DialogHeader>
@@ -169,6 +189,48 @@ export function NewRisk() {
               </Select>
             </div>
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              rows={2}
+              value={f.description}
+              onChange={(e) => set("description")(e.target.value)}
+              placeholder="What is the risk?"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="cause">Cause</Label>
+              <Textarea
+                id="cause"
+                rows={2}
+                value={f.cause}
+                onChange={(e) => set("cause")(e.target.value)}
+                placeholder="What could cause it?"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="consequence">Consequence</Label>
+              <Textarea
+                id="consequence"
+                rows={2}
+                value={f.consequence}
+                onChange={(e) => set("consequence")(e.target.value)}
+                placeholder="What is the impact if it happens?"
+              />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="controls">Controls</Label>
+            <Textarea
+              id="controls"
+              rows={2}
+              value={f.controls}
+              onChange={(e) => set("controls")(e.target.value)}
+              placeholder="What controls are in place to reduce it?"
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label>Inherent likelihood</Label>
@@ -213,13 +275,24 @@ export function NewRisk() {
               </Select>
             </div>
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="riskOwner">Owner</Label>
-            <Input
-              id="riskOwner"
-              value={f.riskOwner}
-              onChange={(e) => set("riskOwner")(e.target.value)}
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="riskOwner">Owner</Label>
+              <Input
+                id="riskOwner"
+                value={f.riskOwner}
+                onChange={(e) => set("riskOwner")(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="reviewDate">Review date</Label>
+              <Input
+                id="reviewDate"
+                type="date"
+                value={f.reviewDate}
+                onChange={(e) => set("reviewDate")(e.target.value)}
+              />
+            </div>
           </div>
           <DialogFooter>
             <DialogClose asChild>

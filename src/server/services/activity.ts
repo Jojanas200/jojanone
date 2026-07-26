@@ -1,4 +1,4 @@
-import { desc, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { withUser, type UserClaims, type Tx } from "../db";
 import { activities } from "../db/schema";
 
@@ -105,5 +105,17 @@ export function listActivities(
       .orderBy(desc(activities.createdAt))
       .limit(limit);
     return rows.map((r) => ({ ...r, action: r.description ?? "" }));
+  });
+}
+
+/** Mark a feed item done (e.g. a priority ticked off from the timeline). */
+export function completeActivity(claims: UserClaims, id: string) {
+  return withUser(claims, async (tx) => {
+    const rows = await tx
+      .update(activities)
+      .set({ status: "completed", completedAt: sql`now()` })
+      .where(eq(activities.id, id))
+      .returning();
+    return rows[0] ?? null;
   });
 }

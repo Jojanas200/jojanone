@@ -1,6 +1,7 @@
-import { isNull } from "drizzle-orm";
+import { desc, isNull } from "drizzle-orm";
 import { withUser, type UserClaims } from "../db";
 import {
+  activities,
   complianceObligations,
   contracts,
   employees,
@@ -9,6 +10,7 @@ import {
   risks,
   tenderOpportunities,
 } from "../db/schema";
+import { getUserEmails } from "./members";
 
 // Timeline - a unified, chronological feed of every dated event already in the
 // database. Read-only: it merges due-dates, renewals, reviews and deadlines
@@ -207,4 +209,74 @@ export function getTimeline(claims: UserClaims): Promise<TimelineEvent[]> {
     out.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
     return out;
   });
+}
+
+// --- Activity feed -----------------------------------------------------------
+// The historical spine of the Timeline: every recorded activity (created,
+// updated, completed, status change) in reverse-chronological order, with the
+// acting user resolved to an email. RLS-scoped, so it only returns the caller's
+// workspace. The acting user is resolved with the service role (same pattern as
+// the platform audit log), over ids that already appear in RLS-visible rows.
+
+export interface ActivityFeedItem {
+  id: string;
+  activityType: string;
+  module: string;
+  title: string;
+  description: string | null;
+  status: string;
+  priority: string;
+  referenceType: string | null;
+  referenceId: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  dueAt: string | null;
+  actorEmail: string | null;
+}
+
+export async function getActivityFeed(
+  claims: UserClaims,
+  limit = 250,
+): Promise<ActivityFeedItem[]> {
+  const rows = await withUser(claims, (tx) =>
+    tx
+      .select({
+        id: activities.id,
+        activityType: activities.activityType,
+        module: activities.module,
+        title: activities.title,
+        description: activities.description,
+        status: activities.status,
+        priority: activities.priority,
+        referenceType: activities.referenceType,
+        referenceId: activities.referenceId,
+        createdAt: activities.createdAt,
+        completedAt: activities.completedAt,
+        dueAt: activities.dueAt,
+        actorUserId: activities.actorUserId,
+      })
+      .from(activities)
+      .orderBy(desc(activities.createdAt))
+      .limit(limit),
+  );
+
+  const emails = await getUserEmails(
+    rows.map((r) => r.actorUserId).filter((x): x is string => !!x),
+  );
+
+  return rows.map((r) => ({
+    id: r.id,
+    activityType: r.activityType,
+    module: r.module,
+    title: r.title,
+    description: r.description,
+    status: r.status,
+    priority: r.priority,
+    referenceType: r.referenceType,
+    referenceId: r.referenceId,
+    createdAt: r.createdAt.toISOString(),
+    completedAt: r.completedAt ? r.completedAt.toISOString() : null,
+    dueAt: r.dueAt ? r.dueAt.toISOString() : null,
+    actorEmail: r.actorUserId ? (emails[r.actorUserId] ?? null) : null,
+  }));
 }

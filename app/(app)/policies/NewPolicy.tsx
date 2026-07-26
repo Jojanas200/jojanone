@@ -6,6 +6,7 @@ import { POLICY_CATEGORIES } from "@/shared/schemas/policies";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
@@ -33,6 +34,7 @@ export function NewPolicy() {
     policyCategory: POLICY_CATEGORIES[0] as string,
     version: "1.0",
     owner: "",
+    purpose: "",
     reviewDate: "",
     acknowledgementRequired: false,
   });
@@ -51,6 +53,10 @@ export function NewPolicy() {
       };
       if (f.owner.trim()) payload.owner = f.owner.trim();
       if (f.reviewDate) payload.reviewDate = f.reviewDate;
+      // Seed the document body with a Purpose section so it is captured up front
+      // and shows on the policy page (editable there, or draftable with Jova).
+      if (f.purpose.trim())
+        payload.content = `Purpose\n\n${f.purpose.trim()}\n`;
 
       const res = await fetch("/api/policies", {
         method: "POST",
@@ -67,6 +73,7 @@ export function NewPolicy() {
         ...p,
         policyName: "",
         owner: "",
+        purpose: "",
         reviewDate: "",
         acknowledgementRequired: false,
       }));
@@ -83,7 +90,7 @@ export function NewPolicy() {
       <DialogTrigger asChild>
         <Button>New policy</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>New policy</DialogTitle>
         </DialogHeader>
@@ -146,6 +153,16 @@ export function NewPolicy() {
                 onChange={(e) => set("reviewDate")(e.target.value)}
               />
             </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="purpose">Purpose</Label>
+            <Textarea
+              id="purpose"
+              rows={3}
+              value={f.purpose}
+              onChange={(e) => set("purpose")(e.target.value)}
+              placeholder="What this policy is for and why it matters. This becomes the opening section of the document."
+            />
           </div>
           <div className="flex items-center justify-between rounded-lg border border-border p-3">
             <div>

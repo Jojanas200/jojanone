@@ -54,8 +54,9 @@ export default async function AppLayout({
   }
 
   const access = await getWorkspaceAccess(claims, active.id);
-  const impersonating =
-    (await cookies()).get("jj_impersonating")?.value ?? null;
+  const cookieStore = await cookies();
+  const impersonating = cookieStore.get("jj_impersonating")?.value ?? null;
+  const sidebarCollapsed = cookieStore.get("jj_sidebar")?.value === "collapsed";
   const [savedTheme, disabledModules, logo] = await Promise.all([
     getUserTheme(claims),
     getDisabledModules(),
@@ -80,6 +81,8 @@ export default async function AppLayout({
         disabledModules={disabledModules}
         isPlatformAdmin={platformAdmin && !impersonating}
         brandLogoSrc={brandLogoSrc}
+        brandColor={active.brandColor}
+        defaultCollapsed={sidebarCollapsed}
       >
         {children}
       </AppShell>

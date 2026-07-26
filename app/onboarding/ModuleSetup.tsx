@@ -112,7 +112,7 @@ export function ModuleSetup({
       setAnswers(state.answers);
       setFinishReady(state.complete);
       toast.success(
-        state.complete ? "Saved — that's everything required!" : "Saved",
+        state.complete ? "Saved - that's everything required!" : "Saved",
       );
     } catch (e) {
       toast.error((e as Error).message);
@@ -136,7 +136,7 @@ export function ModuleSetup({
         toast.error(
           `${body.missing?.length ?? "Some"} item${
             body.missing?.length === 1 ? "" : "s"
-          } still needed — use Resume setup to review.`,
+          } still needed - use Resume setup to review.`,
         );
       }
     } finally {
@@ -160,10 +160,10 @@ export function ModuleSetup({
           </p>
           <p className="text-xs text-muted-foreground">
             {finishReady && unanswered.length === 0
-              ? "That's everything required — you can finish setup now."
+              ? "That's everything required - you can finish setup now."
               : `${unanswered.length} quick question${
                   unanswered.length === 1 ? "" : "s"
-                } to complete — saved to your workspace setup.`}
+                } to complete - saved to your workspace setup.`}
           </p>
         </div>
         <ChevronDown

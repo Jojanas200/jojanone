@@ -36,7 +36,7 @@ export default async function EvidencePage() {
   const rows = await listEvidence(claims);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
+    <div className="mx-auto max-w-7xl px-6 py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           Evidence library

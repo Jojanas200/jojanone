@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Download, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,11 +43,15 @@ const DOC_CATEGORIES = [
 
 export function DocumentUploader({
   variant,
-  ensureSaved,
+  ensureSaved = async () => true,
 }: {
   variant: "documents" | "logo";
-  ensureSaved: () => Promise<boolean>;
+  // Called before upload to guarantee a workspace exists (onboarding provisions
+  // on first save). In Settings the workspace already exists, so it defaults to
+  // a no-op - which lets a server component embed this without a function prop.
+  ensureSaved?: () => Promise<boolean>;
 }) {
+  const router = useRouter();
   const isLogo = variant === "logo";
   const sourceModule = isLogo ? "branding" : "onboarding";
   const accept = (isLogo ? ALLOWED_IMAGE_MIME : ALLOWED_DOCUMENT_MIME).join(
@@ -110,6 +115,7 @@ export function DocumentUploader({
       setMeta((m) => ({ ...m, title: "", issueDate: "", reviewDate: "" }));
       if (inputRef.current) inputRef.current.value = "";
       toast.success(isLogo ? "Logo uploaded" : "Document uploaded");
+      if (isLogo) router.refresh(); // update the sidebar logo immediately
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -131,6 +137,7 @@ export function DocumentUploader({
     if (res.ok) {
       setDocs((d) => d.filter((x) => x.id !== id));
       toast.success("Removed");
+      if (isLogo) router.refresh();
     } else toast.error("Could not remove");
   }
 

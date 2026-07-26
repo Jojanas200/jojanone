@@ -2,121 +2,114 @@ import { redirect } from "next/navigation";
 import { getClaims } from "@/server/auth/session";
 import { requireModuleAccess } from "@/server/auth/guard";
 import { listTenderOpportunities } from "@/server/services/tender";
-import { NewOpportunity } from "./NewOpportunity";
-import { RowActions } from "./RowActions";
-import { WriteGate } from "../WriteGate";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-const money = (minor: number, currency: string) =>
-  minor
-    ? new Intl.NumberFormat("en-GB", {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 0,
-      }).format(minor / 100)
-    : "-";
-
-const fmtDate = (d: string | null) =>
-  d
-    ? new Date(d).toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      })
-    : "-";
-
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  identified: "outline",
-  assessing: "outline",
-  bid: "secondary",
-  drafting: "secondary",
-  submitted: "secondary",
-  won: "secondary",
-  no_bid: "outline",
-  lost: "destructive",
-  archived: "outline",
-};
+  getBidAssessment,
+  getTenderReadiness,
+  listTenderRequirements,
+  listTenderResponses,
+} from "@/server/services/tender-readiness";
+import { NewOpportunity } from "./NewOpportunity";
+import { OpportunitiesBoard } from "./OpportunitiesBoard";
+import { TenderReadinessHeader } from "./TenderReadinessHeader";
+import { TenderRequirementsBoard } from "./TenderRequirementsBoard";
+import { TenderResponsesBoard } from "./TenderResponsesBoard";
+import { BidDecisionPanel } from "./BidDecisionPanel";
+import { WriteGate } from "../WriteGate";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function TenderReadyPage() {
   const claims = await getClaims();
   if (!claims) redirect("/login");
-  await requireModuleAccess(claims, "tender-ready");
-  const rows = await listTenderOpportunities(claims);
+  const { access } = await requireModuleAccess(claims, "tender-ready");
+  const [rows, requirements, responses, bid, readiness] = await Promise.all([
+    listTenderOpportunities(claims),
+    listTenderRequirements(claims),
+    listTenderResponses(claims),
+    getBidAssessment(claims),
+    getTenderReadiness(claims),
+  ]);
+  const canWrite = access.canWrite;
+  const oppOptions = rows.map((o) => ({ id: o.id, title: o.title }));
+
+  const bidForClient = bid
+    ? {
+        answers: bid.answers,
+        overallScore: bid.overallScore,
+        recommendation: bid.recommendation,
+        decision: bid.decision,
+        decisionReason: bid.decisionReason,
+      }
+    : null;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Tender Ready
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Win more of the contracts you bid for.
-          </p>
-        </div>
-        <WriteGate>
-          <NewOpportunity />
-        </WriteGate>
+    <div className="mx-auto max-w-7xl px-6 py-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+          Tender Ready
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Win more of the contracts you bid for.
+        </p>
       </div>
 
-      <Card className="overflow-hidden p-0">
-        {rows.length === 0 ? (
-          <div className="p-10 text-center text-sm text-muted-foreground">
-            No opportunities yet. Track tenders, deadlines and bid decisions in
-            one place.
+      <TenderReadinessHeader readiness={readiness} canWrite={canWrite} />
+
+      <Tabs defaultValue="opportunities">
+        <TabsList>
+          <TabsTrigger value="opportunities">
+            Opportunities{rows.length ? ` (${rows.length})` : ""}
+          </TabsTrigger>
+          <TabsTrigger value="requirements">
+            Requirements{requirements.length ? ` (${requirements.length})` : ""}
+          </TabsTrigger>
+          <TabsTrigger value="responses">
+            Responses{responses.length ? ` (${responses.length})` : ""}
+          </TabsTrigger>
+          <TabsTrigger value="bid">Bid decision</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="opportunities" className="mt-6">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Track tenders, deadlines and bid decisions in one place.
+            </p>
+            <WriteGate>
+              <NewOpportunity />
+            </WriteGate>
           </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Opportunity</TableHead>
-                <TableHead>Authority</TableHead>
-                <TableHead>Value</TableHead>
-                <TableHead>Deadline</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-10" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((o) => (
-                <TableRow key={o.id}>
-                  <TableCell className="font-medium text-foreground">
-                    {o.title}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {o.authority || "-"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {money(o.contractValue, o.currency)}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {fmtDate(o.submissionDeadline)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={statusVariant[o.status] ?? "outline"}>
-                      {o.status.replace(/_/g, " ")}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <WriteGate>
-                      <RowActions id={o.id} status={o.status} />
-                    </WriteGate>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </Card>
+          <OpportunitiesBoard
+            opportunities={rows}
+            canWrite={canWrite}
+            requirements={requirements.map((r) => ({
+              opportunityId: r.opportunityId,
+              title: r.title,
+              requirementType: r.requirementType,
+              mandatory: r.mandatory,
+              status: r.status,
+            }))}
+          />
+        </TabsContent>
+
+        <TabsContent value="requirements" className="mt-6">
+          <TenderRequirementsBoard
+            requirements={requirements}
+            canWrite={canWrite}
+            opportunities={oppOptions}
+          />
+        </TabsContent>
+
+        <TabsContent value="responses" className="mt-6">
+          <TenderResponsesBoard
+            responses={responses}
+            canWrite={canWrite}
+            opportunities={oppOptions}
+          />
+        </TabsContent>
+
+        <TabsContent value="bid" className="mt-6">
+          <BidDecisionPanel assessment={bidForClient} canWrite={canWrite} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

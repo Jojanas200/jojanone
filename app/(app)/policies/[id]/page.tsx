@@ -3,13 +3,15 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getClaims } from "@/server/auth/session";
 import { requireModuleAccess } from "@/server/auth/guard";
-import { getPolicy } from "@/server/services/policies";
+import { getPolicy, listPolicyVersions } from "@/server/services/policies";
 import {
   listAcknowledgements,
   listUnassignedEmployees,
 } from "@/server/services/policy-acknowledgements";
 import { AssignAck } from "./AssignAck";
 import { AckRowActions } from "./AckRowActions";
+import { PolicyDocument } from "./PolicyDocument";
+import { PolicyVersionHistory } from "./PolicyVersionHistory";
 import { WriteGate } from "../../WriteGate";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -53,15 +55,24 @@ export default async function PolicyDetailPage({ params }: Ctx) {
   const { id } = await params;
   const claims = await getClaims();
   if (!claims) redirect("/login");
-  await requireModuleAccess(claims, "policies");
+  const { access } = await requireModuleAccess(claims, "policies");
 
   const policy = await getPolicy(claims, id);
   if (!policy) notFound();
 
-  const [roster, unassigned] = await Promise.all([
+  const [roster, unassigned, versions] = await Promise.all([
     listAcknowledgements(claims, id),
     listUnassignedEmployees(claims, id),
+    listPolicyVersions(claims, id),
   ]);
+  const versionsForClient = versions.map((v) => ({
+    id: v.id,
+    version: v.version,
+    status: v.status,
+    policyName: v.policyName,
+    content: v.content,
+    createdAt: v.createdAt.toISOString(),
+  }));
 
   const acknowledged = roster.filter((r) => r.status === "acknowledged").length;
   const waived = roster.filter((r) => r.status === "waived").length;
@@ -127,6 +138,18 @@ export default async function PolicyDetailPage({ params }: Ctx) {
               policy.acknowledgementStatus}
           </p>
         </Card>
+      </div>
+
+      <div className="mb-8">
+        <PolicyDocument
+          policyId={policy.id}
+          content={policy.content}
+          canWrite={access.canWrite}
+        />
+      </div>
+
+      <div className="mb-8">
+        <PolicyVersionHistory versions={versionsForClient} />
       </div>
 
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

@@ -492,3 +492,65 @@ Prove, for a user in workspace A, that workspace B data is unreachable via **eve
 | Global search | No B results |
 | Report/export jobs | B data never included |
 | Jova retrieval | Only A records retrieved/cited |
+
+## 11. Post-M6 schema additions
+
+Tables/columns added after the M1 baseline. All are tenant-scoped via the shared
+`apply_tenant_rls(tbl)` helper (member-select / writer-write) unless noted; `updated_at`
+via the `set_updated_at()` trigger. The GDPR sub-registers, investor/tender readiness,
+`business_entities`, `hr_actions`, and `scenario_runs` tables were already present in the
+baseline migrations (sections 1–8) and were surfaced in the app during Waves 2–4 without
+schema change.
+
+```sql
+-- Business Confidence Score history (migration 0019) — one row per workspace per
+-- day, so Dashboard/Executive show a REAL day-over-day delta (never fabricated).
+create table score_history (
+  id            uuid primary key default gen_random_uuid(),
+  workspace_id  uuid not null references workspaces(id) on delete cascade,
+  score         integer not null,
+  status_label  text not null,
+  recorded_on   date not null default current_date,
+  created_at    timestamptz not null default now(),
+  unique (workspace_id, recorded_on)         -- upsert-on-conflict-do-nothing per day
+);
+
+-- Jova semantic memory (migration 0018) — pgvector store for remember/recall.
+-- Embeddings are 384-dim (all-MiniLM-L6-v2 in-process OR the gte-small Edge Fn).
+create table jova_memories (
+  id            uuid primary key default gen_random_uuid(),
+  workspace_id  uuid not null references workspaces(id) on delete cascade,
+  kind          text not null,               -- interaction | fact | preference | …
+  title         text,
+  content       text not null,
+  embedding     vector(384),                 -- pgvector; null until embeddings enabled
+  metadata      jsonb not null default '{}',
+  source_module text,
+  ref_id        uuid,
+  created_by    uuid,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+create index jova_memories_ws_idx        on jova_memories (workspace_id, kind);
+create index jova_memories_embedding_idx on jova_memories using hnsw (embedding vector_cosine_ops);
+
+-- Policy document body (migration 0020) — lets Jova draft, and users author,
+-- real policy content rather than metadata only.
+alter table policies add column content text;
+
+-- Policy version history (migration 0022) — an immutable snapshot captured each
+-- time a policy is published (draft/archived -> active). Rows are never updated.
+create table policy_versions (
+  id           uuid primary key default gen_random_uuid(),
+  workspace_id uuid not null references workspaces(id) on delete cascade,
+  policy_id    uuid not null references policies(id) on delete cascade,
+  version      text not null,
+  status       text not null,
+  policy_name  text not null,
+  content      text,
+  notes        text,
+  created_by   uuid,
+  created_at   timestamptz not null default now()   -- no updated_at (immutable)
+);
+create index policy_versions_policy_idx on policy_versions (policy_id, created_at desc);
+```

@@ -86,7 +86,7 @@ export function getOnboarding(
 /**
  * Merge a patch into the stored answers (save-and-continue). A key set to null
  * clears it. Non-persistable keys (secrets) and unknown keys are dropped by
- * stripNonPersistable before writing — a hostile client can never park a
+ * stripNonPersistable before writing - a hostile client can never park a
  * password or card number here.
  */
 export function saveOnboarding(
@@ -141,8 +141,8 @@ export interface CompleteResult {
 
 /**
  * Finish first-time onboarding: validate the initially-required set, stamp
- * completed_at, mirror the mapped facts into business_profiles, and — on the
- * FIRST completion only — seed starter records across the modules. All atomic.
+ * completed_at, mirror the mapped facts into business_profiles, and - on the
+ * FIRST completion only - seed starter records across the modules. All atomic.
  * Returns what's still missing when not ready. Idempotent: re-completing is a
  * no-op that never re-seeds.
  */

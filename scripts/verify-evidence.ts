@@ -16,6 +16,7 @@ import { createObligation } from "../src/server/services/compliance";
 import {
   confirmObligationEvidence,
   listEvidence,
+  listObligationEvidence,
 } from "../src/server/services/evidence";
 import { listActivities } from "../src/server/services/activity";
 import { provisionWorkspace } from "../src/server/services/provisioning";
@@ -84,6 +85,27 @@ async function main() {
       status: "action_required",
     });
 
+    // Standalone evidence first: recorded WITHOUT completing the obligation.
+    const partial = await confirmObligationEvidence({ sub: userA }, ob.id, {
+      title: "Draft CS01 prepared",
+      category: "compliance",
+      completeObligation: false,
+    });
+    check(
+      "standalone evidence records without completing",
+      !!partial?.evidenceId && partial.obligationCompleted === false,
+    );
+    const [still] = await withUser({ sub: userA }, (tx) =>
+      tx
+        .select({ status: complianceObligations.status })
+        .from(complianceObligations)
+        .where(eq(complianceObligations.id, ob.id)),
+    );
+    check(
+      "obligation stays in progress after standalone evidence",
+      still.status === "action_required",
+    );
+
     const result = await confirmObligationEvidence({ sub: userA }, ob.id, {
       title: "CS01 filed at Companies House",
       category: "compliance",
@@ -112,14 +134,29 @@ async function main() {
     check("evidence status is complete", row.evidenceStatus === "complete");
     check("completed_at was stamped", row.completedAt !== null);
 
-    // The evidence item is in A's library, linked to the obligation.
+    // Both evidence items are in A's library, linked to the obligation.
     const lib = await listEvidence({ sub: userA });
     check(
-      "evidence item recorded + linked to the obligation",
-      lib.length === 1 &&
-        lib[0].sourceModule === "compliance" &&
-        lib[0].sourceRecordId === ob.id &&
-        lib[0].fileName === "CS01-receipt.pdf",
+      "evidence items recorded + linked to the obligation",
+      lib.length === 2 &&
+        lib.every(
+          (e) => e.sourceModule === "compliance" && e.sourceRecordId === ob.id,
+        ) &&
+        lib.some((e) => e.fileName === "CS01-receipt.pdf"),
+    );
+
+    // The obligation-scoped evidence list returns both items for A,
+    // and nothing for B (RLS).
+    const obEvidence = await listObligationEvidence({ sub: userA }, ob.id);
+    check(
+      "obligation-scoped evidence returns both linked items",
+      obEvidence.length === 2 &&
+        obEvidence.some((e) => e.title.startsWith("CS01 filed")) &&
+        obEvidence.some((e) => e.title.startsWith("Draft CS01")),
+    );
+    check(
+      "B sees no evidence for A's obligation",
+      (await listObligationEvidence({ sub: userB }, ob.id)).length === 0,
     );
 
     // Audit trail shows the completion-with-evidence.

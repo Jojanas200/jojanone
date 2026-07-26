@@ -39,7 +39,7 @@ export default async function OnboardingPage() {
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             A few questions to set up your workspace. Only a handful are
-            required — you can refine the rest anytime.
+            required - you can refine the rest anytime.
           </p>
         </div>
         <OnboardingWizard initialAnswers={seeded} />

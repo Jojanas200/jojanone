@@ -22,6 +22,17 @@ type Profile = {
   customerCount: number;
   supplierCount: number;
   annualRevenueBand: string | null;
+  tradingName: string | null;
+  website: string | null;
+  phone: string | null;
+  contactEmail: string | null;
+  primaryContactName: string | null;
+  primaryContactRole: string | null;
+  vatNumber: string | null;
+  usesContractors: boolean;
+  operatesPublicService: boolean;
+  regulatedActivities: boolean;
+  reliesOnSuppliers: boolean;
   vatRegistered: boolean;
   employerRegistered: boolean;
   processesPersonalData: boolean;
@@ -47,6 +58,17 @@ export function ProfileForm({ profile }: { profile: Profile }) {
     customerCount: String(profile.customerCount),
     supplierCount: String(profile.supplierCount),
     annualRevenueBand: s(profile.annualRevenueBand),
+    tradingName: s(profile.tradingName),
+    website: s(profile.website),
+    phone: s(profile.phone),
+    contactEmail: s(profile.contactEmail),
+    primaryContactName: s(profile.primaryContactName),
+    primaryContactRole: s(profile.primaryContactRole),
+    vatNumber: s(profile.vatNumber),
+    usesContractors: profile.usesContractors,
+    operatesPublicService: profile.operatesPublicService,
+    regulatedActivities: profile.regulatedActivities,
+    reliesOnSuppliers: profile.reliesOnSuppliers,
     vatRegistered: profile.vatRegistered,
     employerRegistered: profile.employerRegistered,
     processesPersonalData: profile.processesPersonalData,
@@ -80,6 +102,17 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         customerCount: num(f.customerCount),
         supplierCount: num(f.supplierCount),
         annualRevenueBand: orNull(f.annualRevenueBand),
+        tradingName: orNull(f.tradingName),
+        website: orNull(f.website),
+        phone: orNull(f.phone),
+        contactEmail: orNull(f.contactEmail),
+        primaryContactName: orNull(f.primaryContactName),
+        primaryContactRole: orNull(f.primaryContactRole),
+        vatNumber: orNull(f.vatNumber),
+        usesContractors: f.usesContractors,
+        operatesPublicService: f.operatesPublicService,
+        regulatedActivities: f.regulatedActivities,
+        reliesOnSuppliers: f.reliesOnSuppliers,
         vatRegistered: f.vatRegistered,
         employerRegistered: f.employerRegistered,
         processesPersonalData: f.processesPersonalData,
@@ -134,6 +167,9 @@ export function ProfileForm({ profile }: { profile: Profile }) {
     <form onSubmit={submit} className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2">
         {text("Business name", "businessName", { placeholder: "Acme Ltd" })}
+        {text("Trading name", "tradingName", {
+          placeholder: "If different from the legal name",
+        })}
         {text("Company number", "companyNumber", { placeholder: "12345678" })}
         {text("Business type", "businessType", {
           placeholder: "Private limited company",
@@ -167,6 +203,21 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         />
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-2">
+        {text("Website", "website", { placeholder: "https://example.co.uk" })}
+        {text("Main telephone", "phone", { placeholder: "020 7946 0000" })}
+        {text("Main business email", "contactEmail", {
+          placeholder: "hello@example.co.uk",
+        })}
+        {text("VAT number", "vatNumber", { placeholder: "GB123456789" })}
+        {text("Primary contact", "primaryContactName", {
+          placeholder: "Jane Doe",
+        })}
+        {text("Primary contact role", "primaryContactRole", {
+          placeholder: "Director",
+        })}
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-4">
         {text("Employees", "employeeCount", { type: "number" })}
         {text("Contractors", "contractorCount", { type: "number" })}
@@ -194,6 +245,26 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           "Trades internationally",
           "tradesInternationally",
           "Buys or sells outside the UK.",
+        )}
+        {toggle(
+          "Uses contractors",
+          "usesContractors",
+          "Engages contractors or freelancers (IR35 in scope).",
+        )}
+        {toggle(
+          "Operates a public service",
+          "operatesPublicService",
+          "Delivers services to or for the public sector.",
+        )}
+        {toggle(
+          "Regulated activities",
+          "regulatedActivities",
+          "Carries out activities overseen by a regulator.",
+        )}
+        {toggle(
+          "Relies on external suppliers",
+          "reliesOnSuppliers",
+          "Key operations depend on third-party suppliers.",
         )}
       </div>
 

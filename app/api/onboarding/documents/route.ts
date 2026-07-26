@@ -26,7 +26,7 @@ export async function GET(req: Request) {
   const sourceModule =
     new URL(req.url).searchParams.get("sourceModule") ?? undefined;
   const rows = await listDocuments(claims, sourceModule);
-  // Never leak the raw object key to the client — downloads go via a signed URL.
+  // Never leak the raw object key to the client - downloads go via a signed URL.
   const documents = rows.map(({ objectKey: _o, ...rest }) => rest);
   return NextResponse.json({ documents });
 }

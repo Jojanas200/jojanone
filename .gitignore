@@ -26,3 +26,6 @@ supabase/.temp
 .temp
 .DS_Store
 *.log
+
+# local secret backups
+.env*.bak

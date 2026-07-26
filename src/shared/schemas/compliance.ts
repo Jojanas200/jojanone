@@ -56,7 +56,16 @@ export const createObligationSchema = z.object({
   notes: z.string().nullish(),
 });
 
-export const updateObligationSchema = createObligationSchema.partial();
+export const applicabilityEnum = z.enum([
+  "applicable",
+  "not_applicable",
+  "unclear",
+]);
+
+export const updateObligationSchema = createObligationSchema.partial().extend({
+  applicabilityStatus: applicabilityEnum.optional(),
+  naReason: z.string().nullish(),
+});
 
 // Focused schema for the common "advance the lifecycle" action.
 export const setObligationStatusSchema = z.object({

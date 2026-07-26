@@ -17,12 +17,14 @@ import { getUserEmails } from "@/server/services/members";
 import { InviteTeammate } from "./InviteTeammate";
 import { PendingInvites } from "./PendingInvites";
 import { MembersTable } from "./MembersTable";
+import { PermissionsMatrix } from "./PermissionsMatrix";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileForm } from "./ProfileForm";
 import { WorkspaceForm } from "./WorkspaceForm";
 import { ThemeSelector } from "./ThemeSelector";
+import { DocumentUploader } from "../../onboarding/DocumentUploader";
 
 export default async function SettingsPage() {
   const claims = await getClaims();
@@ -62,7 +64,7 @@ export default async function SettingsPage() {
       {showResumeSetup && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
           <p className="text-sm text-foreground">
-            Your workspace setup isn&apos;t finished yet — your saved answers
+            Your workspace setup isn&apos;t finished yet - your saved answers
             are waiting.
           </p>
           <Link
@@ -107,12 +109,23 @@ export default async function SettingsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="workspace" className="mt-4">
+        <TabsContent value="workspace" className="mt-4 space-y-4">
           <Card className="p-6">
             <h2 className="mb-4 text-base font-semibold text-foreground">
               Workspace
             </h2>
             <WorkspaceForm workspace={workspace} />
+          </Card>
+
+          <Card className="p-6">
+            <h2 className="text-base font-semibold text-foreground">
+              Company logo
+            </h2>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Upload your logo to brand your workspace - it replaces the Jojan
+              One mark in the sidebar for everyone on your team.
+            </p>
+            <DocumentUploader variant="logo" />
           </Card>
         </TabsContent>
 
@@ -174,6 +187,9 @@ export default async function SettingsPage() {
               }))}
             />
           </Card>
+          <div className="mt-4">
+            <PermissionsMatrix />
+          </div>
         </TabsContent>
 
         <TabsContent value="data" className="mt-4">

@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server";
 import { getClaims } from "@/server/auth/session";
-import { confirmObligationEvidence } from "@/server/services/evidence";
+import {
+  confirmObligationEvidence,
+  listObligationEvidence,
+} from "@/server/services/evidence";
 import { confirmEvidenceSchema } from "@/shared/schemas/evidence";
 
 type Ctx = { params: Promise<{ id: string }> };
+
+export async function GET(_req: Request, { params }: Ctx) {
+  const { id } = await params;
+  const claims = await getClaims();
+  if (!claims)
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const evidence = await listObligationEvidence(claims, id);
+  return NextResponse.json({ evidence });
+}
 
 export async function POST(req: Request, { params }: Ctx) {
   const { id } = await params;

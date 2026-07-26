@@ -86,7 +86,7 @@ function PlanRow({ plan }: { plan: Plan }) {
         <Input
           value={price}
           onChange={(e) => setPrice(e.target.value)}
-          placeholder="—"
+          placeholder="-"
           className="h-8"
           inputMode="decimal"
         />

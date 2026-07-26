@@ -25,7 +25,7 @@ const sensitivityBadge: Record<string, string | null> = {
 
 // -----------------------------------------------------------------------------
 // A single schema-driven field. Switches on field.type so every field type is
-// rendered by this one component — shared by the onboarding wizard and the
+// rendered by this one component - shared by the onboarding wizard and the
 // per-module setup cards.
 // -----------------------------------------------------------------------------
 export function FieldControl({
@@ -73,7 +73,7 @@ export function FieldControl({
       {control}
       {value === "unsure" ? (
         <p className="mt-1 text-xs text-amber-600 dark:text-amber-500">
-          We’ll add this to your review list — it won’t block setup.
+          We’ll add this to your review list - it won’t block setup.
         </p>
       ) : null}
       {showAsError ? (
@@ -113,7 +113,7 @@ function renderControl(
     case "team_invites":
       return (
         <p className="rounded-md border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
-          You can add these later in the relevant module — nothing to do now.
+          You can add these later in the relevant module - nothing to do now.
         </p>
       );
 

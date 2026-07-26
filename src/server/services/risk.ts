@@ -2,8 +2,11 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { withUser, type UserClaims } from "../db";
 import { risks } from "../db/schema";
 import { recordActivity } from "./activity";
+import { randomUUID } from "node:crypto";
 import type {
+  AddRiskMitigationInput,
   CreateRiskInput,
+  RiskMitigation,
   UpdateRiskInput,
 } from "../../shared/schemas/risk";
 
@@ -163,5 +166,70 @@ export function deleteRisk(claims: UserClaims, id: string) {
       });
     }
     return rows.length > 0;
+  });
+}
+
+// --- Mitigation/treatment actions (embedded jsonb on the risk row) ----------
+
+export function addRiskMitigation(
+  claims: UserClaims,
+  id: string,
+  input: AddRiskMitigationInput,
+) {
+  return withUser(claims, async (tx) => {
+    const current = (
+      await tx
+        .select({ mitigations: risks.mitigations })
+        .from(risks)
+        .where(and(eq(risks.id, id), isNull(risks.deletedAt)))
+        .limit(1)
+    )[0];
+    if (!current) return null;
+    const next: RiskMitigation[] = [
+      ...current.mitigations,
+      {
+        id: randomUUID(),
+        label: input.label,
+        dueDate: input.dueDate ?? null,
+        completedAt: null,
+      },
+    ];
+    const rows = await tx
+      .update(risks)
+      .set({ mitigations: next, updatedBy: claims.sub })
+      .where(and(eq(risks.id, id), isNull(risks.deletedAt)))
+      .returning();
+    return rows[0] ?? null;
+  });
+}
+
+/** Mark a mitigation done/undone; the completion timestamp is server-set. */
+export function setRiskMitigationDone(
+  claims: UserClaims,
+  id: string,
+  mitigationId: string,
+  done: boolean,
+) {
+  return withUser(claims, async (tx) => {
+    const current = (
+      await tx
+        .select({ mitigations: risks.mitigations })
+        .from(risks)
+        .where(and(eq(risks.id, id), isNull(risks.deletedAt)))
+        .limit(1)
+    )[0];
+    if (!current) return null;
+    if (!current.mitigations.some((m) => m.id === mitigationId)) return null;
+    const next = current.mitigations.map((m) =>
+      m.id === mitigationId
+        ? { ...m, completedAt: done ? new Date().toISOString() : null }
+        : m,
+    );
+    const rows = await tx
+      .update(risks)
+      .set({ mitigations: next, updatedBy: claims.sub })
+      .where(and(eq(risks.id, id), isNull(risks.deletedAt)))
+      .returning();
+    return rows[0] ?? null;
   });
 }

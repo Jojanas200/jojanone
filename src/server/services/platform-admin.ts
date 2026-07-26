@@ -33,11 +33,11 @@ export interface PlatformActor {
 // Platform administration ("Jojan One management"). This is the ONLY part of
 // the app that reads across tenants, so it is fenced off deliberately:
 //
-//  - Authority is an env allowlist (PLATFORM_ADMIN_EMAILS), NOT a DB role —
+//  - Authority is an env allowlist (PLATFORM_ADMIN_EMAILS), NOT a DB role -
 //    a tenant-side privilege escalation cannot make anyone a platform admin.
 //  - Cross-tenant reads use adminDb (RLS-bypassed) and are only ever reached
 //    through requirePlatformAdmin() in the /admin surface.
-//  - Operators see account/subscription/usage METADATA only — never the
+//  - Operators see account/subscription/usage METADATA only - never the
 //    customers' business records (contracts, HR, GDPR, evidence, etc.).
 
 function parseEmails(v: string | undefined): string[] {

@@ -19,6 +19,7 @@ import {
   deleteContract,
 } from "../src/server/services/contracts";
 import { provisionWorkspace } from "../src/server/services/provisioning";
+import { contractIssues } from "../app/(app)/contracts/issues";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -141,6 +142,53 @@ async function main() {
     check("A can soft-delete own contract", del === true);
     const aAfterDelete = await listContracts({ sub: userA });
     check("soft-deleted contract no longer listed", aAfterDelete.length === 0);
+
+    console.log("5b) Full-field create + issues engine");
+    const cFull = await createContract({ sub: userA }, wsA, {
+      contractType: "office",
+      title: "A - Office lease",
+      counterparty: "Landlord Ltd",
+      status: "active",
+      currency: "EUR",
+      valueMinor: 1200000,
+      startDate: "2024-01-01",
+      endDate: "2024-06-30",
+      noticePeriodDays: 30,
+      riskLevel: "high",
+      keyTerms: "5-year term, upward-only rent review",
+      obligations: "Quarterly rent in advance; internal repairs",
+      nextAction: "Serve break notice",
+      nextActionDate: "2024-05-01",
+      notes: "Created by verifier",
+    });
+    check(
+      "full-field contract persists (currency/terms/next action)",
+      cFull.currency === "EUR" &&
+        cFull.keyTerms === "5-year term, upward-only rent review" &&
+        cFull.nextAction === "Serve break notice" &&
+        cFull.noticePeriodDays === 30,
+    );
+    const issues = contractIssues(cFull);
+    check(
+      "issues engine flags expired-but-active and overdue action",
+      issues.some((i) => i.includes("still marked active")) &&
+        issues.some((i) => i.includes("overdue")),
+    );
+    check(
+      "issues engine is quiet for a healthy draft",
+      contractIssues({
+        status: "draft",
+        endDate: null,
+        owner: null,
+        noticePeriodDays: null,
+        nextAction: null,
+        nextActionDate: null,
+      }).length === 0,
+    );
+    check(
+      "full-field contract can be removed",
+      (await deleteContract({ sub: userA }, cFull.id)) === true,
+    );
 
     console.log("6) Cross-tenant WRITE is blocked by RLS");
     let blocked = false;

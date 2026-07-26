@@ -1,5 +1,5 @@
 // =============================================================================
-// Conditional onboarding schema — the single source of truth.
+// Conditional onboarding schema - the single source of truth.
 //
 // Order of sections is the wizard order. Only "initial" fields gate first-time
 // completion; everything else is progressive (collected later in-module) or
@@ -230,7 +230,7 @@ function mk(f: OnboardingSchema[number]["fields"][number]) {
 }
 
 export const ONBOARDING_SCHEMA: OnboardingSchema = [
-  // 1 — Account owner --------------------------------------------------------
+  // 1 - Account owner --------------------------------------------------------
   {
     id: "owner",
     title: "Account owner",
@@ -319,7 +319,7 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 2 — Company identity -----------------------------------------------------
+  // 2 - Company identity -----------------------------------------------------
   {
     id: "company",
     title: "Company identity",
@@ -496,7 +496,7 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 3 — Business operations --------------------------------------------------
+  // 3 - Business operations --------------------------------------------------
   {
     id: "ops",
     title: "Business operations",
@@ -650,12 +650,12 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 4 — Ownership & governance ----------------------------------------------
+  // 4 - Ownership & governance ----------------------------------------------
   {
     id: "governance",
     title: "Ownership & governance",
     summary:
-      "Just enough to configure the platform — full records live in Business Map and Governance.",
+      "Just enough to configure the platform - full records live in Business Map and Governance.",
     fields: [
       mk({
         id: "governance.owners",
@@ -723,7 +723,7 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 5 — Workforce profile ----------------------------------------------------
+  // 5 - Workforce profile ----------------------------------------------------
   {
     id: "workforce",
     title: "Workforce profile",
@@ -806,12 +806,12 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 6 — Compliance applicability --------------------------------------------
+  // 6 - Compliance applicability --------------------------------------------
   {
     id: "compliance",
     title: "Compliance applicability",
     summary:
-      "Quick yes / no / unsure. “Unsure” never blocks you — it creates a review to look at later.",
+      "Quick yes / no / unsure. “Unsure” never blocks you - it creates a review to look at later.",
     fields: [
       applicability(
         "compliance.company_filings",
@@ -834,12 +834,12 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 7 — Data protection & GDPR ----------------------------------------------
+  // 7 - Data protection & GDPR ----------------------------------------------
   {
     id: "gdpr",
     title: "Data protection & GDPR",
     summary:
-      "Organisational facts about how you handle personal data — do not upload personal data here.",
+      "Organisational facts about how you handle personal data - do not upload personal data here.",
     fields: [
       mk({
         id: "gdpr.data_subjects",
@@ -969,7 +969,7 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 8 — Contracts & suppliers ------------------------------------------------
+  // 8 - Contracts & suppliers ------------------------------------------------
   {
     id: "contracts",
     title: "Contracts & suppliers",
@@ -1042,7 +1042,7 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 9 — Risk & insurance -----------------------------------------------------
+  // 9 - Risk & insurance -----------------------------------------------------
   {
     id: "risk",
     title: "Risk & insurance",
@@ -1136,7 +1136,7 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 10 — Growth objectives ---------------------------------------------------
+  // 10 - Growth objectives ---------------------------------------------------
   {
     id: "growth",
     title: "Growth objectives",
@@ -1208,12 +1208,12 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 11 — Existing records & evidence -----------------------------------------
+  // 11 - Existing records & evidence -----------------------------------------
   {
     id: "evidence",
     title: "Existing records & evidence",
     summary:
-      "Optional. Bring documents in now or add them later in Evidence — each is filed with its own details.",
+      "Optional. Bring documents in now or add them later in Evidence - each is filed with its own details.",
     fields: [
       mk({
         id: "evidence.kinds",
@@ -1238,7 +1238,7 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 12 — Jova preferences ----------------------------------------------------
+  // 12 - Jova preferences ----------------------------------------------------
   {
     id: "jova",
     title: "Jova preferences",
@@ -1317,7 +1317,7 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 13 — Team access ---------------------------------------------------------
+  // 13 - Team access ---------------------------------------------------------
   {
     id: "team",
     title: "Team access",
@@ -1337,7 +1337,7 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
     ],
   },
 
-  // 14 — Plan & billing ------------------------------------------------------
+  // 14 - Plan & billing ------------------------------------------------------
   {
     id: "billing",
     title: "Plan & billing",
@@ -1420,7 +1420,7 @@ export const ONBOARDING_SCHEMA: OnboardingSchema = [
       mk({
         id: "billing.card_details",
         label: "Payment card",
-        help: "Collected securely by our payment provider at checkout — never entered or stored here.",
+        help: "Collected securely by our payment provider at checkout - never entered or stored here.",
         type: "text",
         required: "optional",
         sensitivity: "secret",

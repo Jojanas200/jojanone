@@ -9,9 +9,11 @@ import { inArray } from "drizzle-orm";
 import { adminDb } from "../src/server/db";
 import { organisations, workspaces } from "../src/server/db/schema";
 import {
+  addRiskMitigation,
   createRisk,
   deleteRisk,
   listRisks,
+  setRiskMitigationDone,
   setRiskStatus,
   updateRisk,
 } from "../src/server/services/risk";
@@ -152,6 +154,40 @@ async function main() {
       riskTitle: "hijacked",
     });
     check("B cannot update A's risk (row hidden)", hijack === null);
+
+    // --- Mitigation/treatment actions ---
+    const withMit = await addRiskMitigation({ sub: userA }, r.id, {
+      label: "Qualify a second supplier",
+      dueDate: "2026-09-30",
+    });
+    check(
+      "mitigation added with due date",
+      withMit?.mitigations.length === 1 &&
+        withMit.mitigations[0].label === "Qualify a second supplier" &&
+        withMit.mitigations[0].dueDate === "2026-09-30" &&
+        withMit.mitigations[0].completedAt === null,
+    );
+    const mitId = withMit!.mitigations[0].id;
+    const done = await setRiskMitigationDone({ sub: userA }, r.id, mitId, true);
+    check(
+      "mitigation can be completed (timestamp set)",
+      done?.mitigations[0].completedAt !== null,
+    );
+    const reopened = await setRiskMitigationDone(
+      { sub: userA },
+      r.id,
+      mitId,
+      false,
+    );
+    check(
+      "mitigation can be reopened",
+      reopened?.mitigations[0].completedAt === null,
+    );
+    check(
+      "B cannot add mitigations to A's risk (row hidden)",
+      (await addRiskMitigation({ sub: userB }, r.id, { label: "hack" })) ===
+        null,
+    );
 
     check(
       "A can soft-delete own risk",

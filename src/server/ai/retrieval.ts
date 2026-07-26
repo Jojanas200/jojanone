@@ -2,6 +2,7 @@ import type { UserClaims } from "../db";
 import { getSnapshot } from "../services/dashboard";
 import { getJovaBriefing } from "../services/jova";
 import { getBusinessProfile } from "../services/settings";
+import { recall } from "../services/jova-memory";
 
 // Retrieval for the AI layer. Assembles a grounded context block from the
 // caller's workspace ONLY - every source query runs through an RLS-scoped
@@ -25,6 +26,7 @@ export interface RetrievedContext {
 export async function retrieveContext(
   claims: UserClaims,
   workspaceId: string,
+  query?: string,
 ): Promise<RetrievedContext> {
   const [snapshot, briefing, profile] = await Promise.all([
     getSnapshot(claims),
@@ -68,6 +70,32 @@ export async function retrieveContext(
   }
   if (briefing.total === 0) {
     lines.push(`- No outstanding findings; the business is in good standing.`);
+  }
+
+  // Semantic memory: recall facts/past interactions relevant to the question.
+  // Best-effort - empty (and silent) when embeddings aren't configured.
+  if (query?.trim()) {
+    try {
+      const memories = await recall(claims, query, {
+        k: 5,
+        minSimilarity: 0.2,
+        workspaceId,
+      });
+      if (memories.length > 0) {
+        lines.push(``);
+        lines.push(`## Relevant memory`);
+        for (const m of memories) {
+          lines.push(`- ${m.title ? `${m.title}: ` : ""}${m.content}`);
+          sources.push({
+            module: m.sourceModule ?? "memory",
+            refId: m.id,
+            label: m.title ?? "Memory",
+          });
+        }
+      }
+    } catch {
+      // Memory is optional - never fail retrieval on it.
+    }
   }
 
   return {

@@ -12,7 +12,11 @@ import {
   createAssignment,
   deleteAssignment,
   hasAssignment,
+  issueCertificate,
   listAssignments,
+  listCertificates,
+  listProgress,
+  markLessonComplete,
   updateAssignment,
 } from "../src/server/services/academy";
 import { COURSES } from "../src/data/academy-catalog";
@@ -125,6 +129,58 @@ async function main() {
     check(
       "B cannot delete A's assignment",
       (await deleteAssignment({ sub: userB }, asg.id)) === false,
+    );
+
+    // --- Lesson progress + quiz certificate ---
+    const course = COURSES[0];
+    const p1 = await markLessonComplete(
+      { sub: userA },
+      wsA,
+      course.id,
+      course.lessons[0].id,
+    );
+    check(
+      "lesson completion creates a progress row",
+      p1?.lessonsCompleted.length === 1 && p1.completedAt === null,
+    );
+    const p2 = await markLessonComplete(
+      { sub: userA },
+      wsA,
+      course.id,
+      course.lessons[0].id,
+    );
+    check(
+      "re-completing a lesson is idempotent",
+      p2?.lessonsCompleted.length === 1,
+    );
+    for (const l of course.lessons.slice(1))
+      await markLessonComplete({ sub: userA }, wsA, course.id, l.id);
+    const finished = (await listProgress({ sub: userA })).find(
+      (x) => x.courseId === course.id,
+    );
+    check(
+      "completing every lesson stamps the course complete",
+      finished?.completedAt !== null &&
+        finished?.lessonsCompleted.length === course.lessons.length,
+    );
+    const cert = await issueCertificate({ sub: userA }, wsA, {
+      courseId: course.id,
+      quizScore: 90,
+    });
+    check(
+      "quiz pass issues a certificate with a reference",
+      !!cert?.reference &&
+        cert.quizScore === 90 &&
+        cert.courseTitle === course.title,
+    );
+    check(
+      "certificate pass completes the open assignment",
+      (await listAssignments({ sub: userA })).find((a) => a.id === asg.id)
+        ?.status === "completed",
+    );
+    check(
+      "B sees no certificates (RLS)",
+      (await listCertificates({ sub: userB })).length === 0,
     );
 
     check(

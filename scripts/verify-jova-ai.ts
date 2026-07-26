@@ -117,10 +117,14 @@ async function main() {
   let wsB = "";
   const savedProvider = process.env.AI_PROVIDER;
   const savedAnthropicKey = process.env.ANTHROPIC_API_KEY;
+  const savedOpenrouterKey = process.env.OPENROUTER_API_KEY;
 
   try {
     // --- Provider registry ---------------------------------------------------
+    // Unset BOTH provider keys so the "not configured" assertion is independent
+    // of whatever the developer has in their local .env.
     delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.OPENROUTER_API_KEY;
     process.env.AI_PROVIDER = "anthropic";
     check(
       "AI_PROVIDER selects the anthropic adapter",
@@ -305,6 +309,8 @@ async function main() {
     else process.env.AI_PROVIDER = savedProvider;
     if (savedAnthropicKey !== undefined)
       process.env.ANTHROPIC_API_KEY = savedAnthropicKey;
+    if (savedOpenrouterKey !== undefined)
+      process.env.OPENROUTER_API_KEY = savedOpenrouterKey;
     console.log("Cleanup…");
     try {
       const ids = [wsA, wsB].filter(Boolean);

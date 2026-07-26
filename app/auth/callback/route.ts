@@ -3,7 +3,7 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * The single landing point for every email link — signup confirmation, magic
+ * The single landing point for every email link - signup confirmation, magic
  * link, invite and password recovery. Supabase redirects here with either a
  * PKCE `code` (default templates) or a `token_hash` + `type` (token-hash
  * templates); we establish the session and forward the user on. Recovery always

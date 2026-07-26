@@ -18,6 +18,34 @@ export function listEvidence(claims: UserClaims) {
   );
 }
 
+/** Evidence recorded against one compliance obligation (RLS-scoped). */
+export function listObligationEvidence(
+  claims: UserClaims,
+  obligationId: string,
+) {
+  return withUser(claims, (tx) =>
+    tx
+      .select({
+        id: evidenceLibraryItems.id,
+        title: evidenceLibraryItems.title,
+        category: evidenceLibraryItems.category,
+        notes: evidenceLibraryItems.notes,
+        fileName: evidenceLibraryItems.fileName,
+        reviewDate: evidenceLibraryItems.reviewDate,
+        status: evidenceLibraryItems.status,
+        createdAt: evidenceLibraryItems.createdAt,
+      })
+      .from(evidenceLibraryItems)
+      .where(
+        and(
+          eq(evidenceLibraryItems.sourceModule, "compliance"),
+          eq(evidenceLibraryItems.sourceRecordId, obligationId),
+        ),
+      )
+      .orderBy(desc(evidenceLibraryItems.createdAt)),
+  );
+}
+
 export interface ConfirmEvidenceResult {
   evidenceId: string;
   obligationCompleted: boolean;

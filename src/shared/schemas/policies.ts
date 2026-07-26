@@ -37,11 +37,24 @@ export const createPolicySchema = z.object({
   acknowledgementRequired: z.boolean().optional(),
   acknowledgementStatus: acknowledgementStatusEnum.optional(),
   notes: z.string().nullish(),
+  content: z.string().max(50000).nullish(),
 });
 
 export const updatePolicySchema = createPolicySchema.partial();
 
 export const setPolicyStatusSchema = z.object({ status: policyStatusEnum });
+
+// Ask Jova to draft a full policy document. A template supplies the structure
+// and guided questions; the answers (keyed by question key, incl. "purpose")
+// shape the drafted sections. All fields optional beyond the name so a blank
+// draft still works.
+export const draftPolicySchema = z.object({
+  templateKey: z.string().trim().max(60).nullish(),
+  policyName: z.string().trim().min(1).max(200),
+  policyCategory: z.string().trim().max(80).nullish(),
+  answers: z.record(z.string(), z.string().max(5000)).default({}),
+});
+export type DraftPolicyInput = z.infer<typeof draftPolicySchema>;
 
 // --- Per-employee acknowledgements ------------------------------------------
 // Roster status is distinct from the policy-level rollup (acknowledgementStatus).

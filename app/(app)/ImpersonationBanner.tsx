@@ -11,7 +11,7 @@ export function ImpersonationBanner({ email }: { email: string }) {
   return (
     <div className="flex items-center justify-center gap-3 bg-amber-500 px-4 py-1.5 text-center text-xs font-medium text-amber-950">
       <span>
-        Impersonating <strong>{email}</strong> — you are acting as this user.
+        Impersonating <strong>{email}</strong> - you are acting as this user.
       </span>
       <button
         onClick={stop}

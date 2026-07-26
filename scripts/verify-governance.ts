@@ -88,6 +88,31 @@ async function main() {
         rec.approvalStatus === "unapproved",
     );
 
+    // Structured director-decision fields + explicit status round-trip.
+    // Created and removed here so later count assertions stay valid.
+    const director = await createGovernanceRecord({ sub: userA }, wsA, {
+      recordType: "director_decision",
+      title: "Approve bank mandate change",
+      status: "approved",
+      background: "Existing signatory left the company.",
+      optionsConsidered: "Retain single signatory vs dual authorisation.",
+      risksConsidered: "Fraud exposure on single signatory.",
+      decision: "Move to dual authorisation.",
+      decisionMaker: "Directors",
+    });
+    check(
+      "director-decision fields persist on create",
+      director?.background === "Existing signatory left the company." &&
+        director.optionsConsidered ===
+          "Retain single signatory vs dual authorisation." &&
+        director.risksConsidered === "Fraud exposure on single signatory." &&
+        director.status === "approved",
+    );
+    check(
+      "A can hard-delete the director record",
+      (await deleteGovernanceRecord({ sub: userA }, director.id)) === true,
+    );
+
     await createGovernanceRecord({ sub: userB }, wsB, {
       recordType: "director_decision",
       title: "Bank mandate change",

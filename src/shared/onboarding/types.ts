@@ -1,5 +1,5 @@
 // =============================================================================
-// Conditional onboarding schema — type definitions.
+// Conditional onboarding schema - type definitions.
 //
 // Onboarding is defined as DATA (see schema.ts), not one giant hand-built form.
 // Every field carries a stable id, data type, validation, required status,
@@ -22,7 +22,7 @@ export type FieldType =
   | "email"
   | "tel"
   | "url"
-  | "password" // never persisted by us — handled by Supabase Auth
+  | "password" // never persisted by us - handled by Supabase Auth
   | "number"
   | "date"
   | "select"
@@ -32,22 +32,22 @@ export type FieldType =
   | "color"
   | "address"
   | "consent" // must be true to satisfy the field
-  | "people_list" // repeatable people (directors/PSCs/owners) — progressive
-  | "team_invites" // repeatable invitations — progressive
-  | "file"; // optional document upload/import — progressive
+  | "people_list" // repeatable people (directors/PSCs/owners) - progressive
+  | "team_invites" // repeatable invitations - progressive
+  | "file"; // optional document upload/import - progressive
 
 // --- Required semantics -------------------------------------------------------
-//   initial      — must be answered to finish first-time onboarding
-//   progressive  — collected later inside the relevant module; optional now
-//   optional      — never required
+//   initial      - must be answered to finish first-time onboarding
+//   progressive  - collected later inside the relevant module; optional now
+//   optional      - never required
 export type RequiredMode = "initial" | "progressive" | "optional";
 
 // --- Sensitivity classification ----------------------------------------------
-//   secret            — never stored by Jojan One (auth password, card details)
-//   special_category  — GDPR special-category / criminal-offence data facts
-//   confidential      — financials, ownership %, PSCs
-//   standard          — ordinary business facts
-//   low               — cosmetic / marketing preferences
+//   secret            - never stored by Jojan One (auth password, card details)
+//   special_category  - GDPR special-category / criminal-offence data facts
+//   confidential      - financials, ownership %, PSCs
+//   standard          - ordinary business facts
+//   low               - cosmetic / marketing preferences
 export type Sensitivity =
   "secret" | "special_category" | "confidential" | "standard" | "low";
 

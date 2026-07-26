@@ -1,7 +1,8 @@
-import { sql } from "drizzle-orm";
+import { and, desc, inArray, sql } from "drizzle-orm";
 import { withUser, type UserClaims } from "../db";
 import {
   contracts,
+  dueDiligenceItems,
   employees,
   governanceRecords,
   processingActivities,
@@ -67,6 +68,84 @@ export function getExecutiveTotals(
       governanceRecords: count(gov),
       tenderPipeline: Number(ten[0]?.n ?? 0),
       tenderPipelineValue: Number(ten[0]?.value ?? 0),
+    };
+  });
+}
+
+// --- Decisions required ------------------------------------------------------
+// Real governance records still awaiting sign-off (draft/pending, not yet
+// approved). No new "decisions" table - these are actual records you can open.
+export interface PendingDecision {
+  id: string;
+  title: string;
+  recordType: string;
+  status: string;
+  description: string | null;
+  meetingDate: string | null;
+}
+
+export function listPendingDecisions(
+  claims: UserClaims,
+): Promise<PendingDecision[]> {
+  return withUser(claims, (tx) =>
+    tx
+      .select({
+        id: governanceRecords.id,
+        title: governanceRecords.title,
+        recordType: governanceRecords.recordType,
+        status: governanceRecords.status,
+        description: governanceRecords.description,
+        meetingDate: governanceRecords.meetingDate,
+      })
+      .from(governanceRecords)
+      .where(
+        and(
+          inArray(governanceRecords.status, ["draft", "pending"]),
+          sql`${governanceRecords.approvalStatus} <> 'approved'`,
+        ),
+      )
+      .orderBy(desc(governanceRecords.createdAt))
+      .limit(8),
+  );
+}
+
+// --- Growth readiness signals (honest facts, not a synthetic /100) -----------
+// Real counts from existing data; the full weighted readiness scores land when
+// their backing tables (data room, assessments, tender requirements) exist.
+export interface GrowthSignals {
+  ddReady: number;
+  ddTotal: number;
+  tenderActive: number;
+  tenderValueMinor: number;
+  tenderDeadlines30d: number;
+}
+
+const num = (v: unknown) => Number(v ?? 0);
+const LIVE_TENDER = sql`status not in ('won','lost','no_bid','archived')`;
+
+export function getGrowthSignals(claims: UserClaims): Promise<GrowthSignals> {
+  return withUser(claims, async (tx) => {
+    const [dd, ten] = await Promise.all([
+      tx
+        .select({
+          total: sql<number>`count(*) filter (where ${dueDiligenceItems.status} <> 'not_applicable')`,
+          ready: sql<number>`count(*) filter (where ${dueDiligenceItems.status} = 'ready')`,
+        })
+        .from(dueDiligenceItems),
+      tx
+        .select({
+          active: sql<number>`count(*) filter (where ${LIVE_TENDER})`,
+          value: sql<number>`coalesce(sum(${tenderOpportunities.contractValue}) filter (where ${LIVE_TENDER}), 0)`,
+          deadlines: sql<number>`count(*) filter (where ${LIVE_TENDER} and ${tenderOpportunities.submissionDeadline} between current_date and current_date + 30)`,
+        })
+        .from(tenderOpportunities),
+    ]);
+    return {
+      ddReady: num(dd[0]?.ready),
+      ddTotal: num(dd[0]?.total),
+      tenderActive: num(ten[0]?.active),
+      tenderValueMinor: num(ten[0]?.value),
+      tenderDeadlines30d: num(ten[0]?.deadlines),
     };
   });
 }

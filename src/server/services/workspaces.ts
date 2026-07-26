@@ -11,6 +11,7 @@ export function listMyWorkspaces(claims: UserClaims) {
         name: workspaces.name,
         role: memberships.role,
         suspendedAt: workspaces.suspendedAt,
+        brandColor: workspaces.brandColor,
       })
       .from(memberships)
       .innerJoin(workspaces, eq(workspaces.id, memberships.workspaceId))

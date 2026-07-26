@@ -35,6 +35,7 @@ export const createEmployeeSchema = z.object({
   employmentType: employmentTypeEnum.default("employee"),
   employmentStatus: employmentStatusEnum.default("active"),
   startDate: isoDate.nullish(),
+  probationEndDate: isoDate.nullish(),
   contractStatus: contractStatusEnum.default("missing"),
   rightToWorkStatus: rightToWorkEnum.default("outstanding"),
   rightToWorkExpiry: isoDate.nullish(),
@@ -42,6 +43,7 @@ export const createEmployeeSchema = z.object({
   trainingStatus: trainingEnum.default("outstanding"),
   nextReviewDate: isoDate.nullish(),
   riskLevel: riskBandEnum.default("low"),
+  emergencyContactRecorded: z.boolean().default(false),
   notes: z.string().nullish(),
 });
 

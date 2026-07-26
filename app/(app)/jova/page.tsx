@@ -2,10 +2,11 @@ import { redirect } from "next/navigation";
 import { getClaims } from "@/server/auth/session";
 import { requireModuleAccess } from "@/server/auth/guard";
 import { getJovaBriefing } from "@/server/services/jova";
+import { listConversations } from "@/server/ai/chat";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JovaBriefing } from "./JovaBriefing";
-import { AskJova } from "./AskJova";
+import { JovaChat } from "./JovaChat";
 
 const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString("en-GB", {
@@ -19,10 +20,18 @@ export default async function JovaPage() {
   const claims = await getClaims();
   if (!claims) redirect("/login");
   await requireModuleAccess(claims, "jova");
-  const b = await getJovaBriefing(claims);
+  const [b, convos] = await Promise.all([
+    getJovaBriefing(claims),
+    listConversations(claims),
+  ]);
+  const initialConversations = convos.map((c) => ({
+    id: c.id,
+    title: c.title,
+    updatedAt: c.updatedAt as unknown as string,
+  }));
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-8">
+    <div className="mx-auto max-w-5xl px-6 py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           Jova
@@ -41,7 +50,7 @@ export default async function JovaPage() {
         </TabsList>
 
         <TabsContent value="ask" className="mt-4">
-          <AskJova />
+          <JovaChat initialConversations={initialConversations} />
         </TabsContent>
 
         <TabsContent value="briefing" className="mt-4">

@@ -11,7 +11,7 @@ import {
 // Start an AUDITED impersonation: the platform admin assumes the target
 // workspace owner's session (via a server-minted magic-link OTP). A cookie
 // flags the session so the app shows an impersonation banner. Powerful and
-// fully logged — the operator can then act as that user until they stop.
+// fully logged - the operator can then act as that user until they stop.
 export async function POST(req: Request) {
   const actor = await requirePlatformAdmin();
   if (actor.role !== "operator")

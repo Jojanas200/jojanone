@@ -15,7 +15,7 @@ const ALWAYS_ALLOWED = new Set(["settings"]);
  * A scoped adviser who deep-links to a module outside their allow-list is
  * redirected to their first in-scope module BEFORE any data is fetched or sent
  * to the client. No-op for members with an unrestricted scope
- * (scopedModules === null) — i.e. everyone who is not a scoped adviser.
+ * (scopedModules === null) - i.e. everyone who is not a scoped adviser.
  *
  * Module route === "/" + moduleKey across the app, so no config lookup is
  * needed to build the destination.

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogClose,
@@ -31,17 +32,30 @@ const PROCEDURES = [
   "other",
 ] as const;
 
+const BLANK = {
+  title: "",
+  authority: "",
+  reference: "",
+  sector: "",
+  location: "",
+  valuePounds: "",
+  publicationDate: "",
+  clarificationDeadline: "",
+  submissionDeadline: "",
+  contractStartDate: "",
+  contractDuration: "",
+  procedureType: "open",
+  source: "",
+  owner: "",
+  summary: "",
+  eligibilityNotes: "",
+};
+
 export function NewOpportunity() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [f, setF] = useState({
-    title: "",
-    authority: "",
-    valuePounds: "",
-    submissionDeadline: "",
-    procedureType: "open",
-  });
+  const [f, setF] = useState({ ...BLANK });
   const set = (k: keyof typeof f) => (v: string) =>
     setF((p) => ({ ...p, [k]: v }));
 
@@ -50,12 +64,28 @@ export function NewOpportunity() {
     setLoading(true);
     try {
       const payload: Record<string, unknown> = {
-        title: f.title,
+        title: f.title.trim(),
         procedureType: f.procedureType,
       };
-      if (f.authority.trim()) payload.authority = f.authority.trim();
+      const text = (k: keyof typeof f) => {
+        const v = f[k].trim();
+        if (v) payload[k] = v;
+      };
+      text("authority");
+      text("reference");
+      text("sector");
+      text("location");
+      text("contractDuration");
+      text("source");
+      text("owner");
+      text("summary");
+      text("eligibilityNotes");
+      if (f.publicationDate) payload.publicationDate = f.publicationDate;
+      if (f.clarificationDeadline)
+        payload.clarificationDeadline = f.clarificationDeadline;
       if (f.submissionDeadline)
         payload.submissionDeadline = f.submissionDeadline;
+      if (f.contractStartDate) payload.contractStartDate = f.contractStartDate;
       const pounds = Number(f.valuePounds);
       if (Number.isFinite(pounds) && pounds > 0)
         payload.contractValue = Math.round(pounds * 100);
@@ -71,13 +101,7 @@ export function NewOpportunity() {
         );
       toast.success("Opportunity added");
       setOpen(false);
-      setF((p) => ({
-        ...p,
-        title: "",
-        authority: "",
-        valuePounds: "",
-        submissionDeadline: "",
-      }));
+      setF({ ...BLANK });
       router.refresh();
     } catch (err) {
       toast.error((err as Error).message);
@@ -91,7 +115,7 @@ export function NewOpportunity() {
       <DialogTrigger asChild>
         <Button>New opportunity</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>New tender opportunity</DialogTitle>
         </DialogHeader>
@@ -107,37 +131,75 @@ export function NewOpportunity() {
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="authority">Authority</Label>
-              <Input
-                id="authority"
-                value={f.authority}
-                onChange={(e) => set("authority")(e.target.value)}
-                placeholder="Borough Council"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="valuePounds">Value (£)</Label>
-              <Input
-                id="valuePounds"
-                type="number"
-                min={0}
-                value={f.valuePounds}
-                onChange={(e) => set("valuePounds")(e.target.value)}
-                placeholder="120000"
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label htmlFor="submissionDeadline">Submission deadline</Label>
-              <Input
-                id="submissionDeadline"
-                type="date"
-                value={f.submissionDeadline}
-                onChange={(e) => set("submissionDeadline")(e.target.value)}
-              />
-            </div>
+            <LabeledInput
+              id="authority"
+              label="Authority"
+              value={f.authority}
+              onChange={set("authority")}
+              placeholder="Borough Council"
+            />
+            <LabeledInput
+              id="reference"
+              label="Reference"
+              value={f.reference}
+              onChange={set("reference")}
+              placeholder="CF-2026-014"
+            />
+            <LabeledInput
+              id="sector"
+              label="Sector"
+              value={f.sector}
+              onChange={set("sector")}
+            />
+            <LabeledInput
+              id="location"
+              label="Location"
+              value={f.location}
+              onChange={set("location")}
+            />
+            <LabeledInput
+              id="valuePounds"
+              label="Value (£)"
+              type="number"
+              value={f.valuePounds}
+              onChange={set("valuePounds")}
+              placeholder="120000"
+            />
+            <LabeledInput
+              id="contractDuration"
+              label="Duration"
+              value={f.contractDuration}
+              onChange={set("contractDuration")}
+              placeholder="3 years + 1"
+            />
+            <LabeledInput
+              id="publicationDate"
+              label="Published"
+              type="date"
+              value={f.publicationDate}
+              onChange={set("publicationDate")}
+            />
+            <LabeledInput
+              id="clarificationDeadline"
+              label="Clarifications by"
+              type="date"
+              value={f.clarificationDeadline}
+              onChange={set("clarificationDeadline")}
+            />
+            <LabeledInput
+              id="submissionDeadline"
+              label="Submission deadline"
+              type="date"
+              value={f.submissionDeadline}
+              onChange={set("submissionDeadline")}
+            />
+            <LabeledInput
+              id="contractStartDate"
+              label="Contract starts"
+              type="date"
+              value={f.contractStartDate}
+              onChange={set("contractStartDate")}
+            />
             <div className="space-y-1.5">
               <Label>Procedure</Label>
               <Select
@@ -156,6 +218,38 @@ export function NewOpportunity() {
                 </SelectContent>
               </Select>
             </div>
+            <LabeledInput
+              id="source"
+              label="Source"
+              value={f.source}
+              onChange={set("source")}
+              placeholder="Find a Tender / Contracts Finder"
+            />
+          </div>
+          <LabeledInput
+            id="owner"
+            label="Owner"
+            value={f.owner}
+            onChange={set("owner")}
+          />
+          <div className="space-y-1.5">
+            <Label htmlFor="summary">Summary</Label>
+            <Textarea
+              id="summary"
+              rows={2}
+              value={f.summary}
+              onChange={(e) => set("summary")(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="eligibilityNotes">Eligibility notes</Label>
+            <Textarea
+              id="eligibilityNotes"
+              rows={2}
+              value={f.eligibilityNotes}
+              onChange={(e) => set("eligibilityNotes")(e.target.value)}
+              placeholder="Accreditations, insurance levels, financial standing…"
+            />
           </div>
           <DialogFooter>
             <DialogClose asChild>
@@ -170,5 +264,35 @@ export function NewOpportunity() {
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function LabeledInput({
+  id,
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type?: string;
+  placeholder?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        type={type}
+        min={type === "number" ? 0 : undefined}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+      />
+    </div>
   );
 }

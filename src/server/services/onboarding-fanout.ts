@@ -15,7 +15,7 @@ import type { OnboardingAnswers } from "../../shared/onboarding/types";
  * the modules from the answers, so each module opens pre-populated rather than
  * empty. Runs inside completeOnboarding's transaction (atomic) and only on the
  * first completion, so it never duplicates. These are starting points a user
- * refines — not a claim that the work is done.
+ * refines - not a claim that the work is done.
  */
 
 type Tx = Parameters<Parameters<typeof withUser>[1]>[0];
@@ -135,7 +135,7 @@ async function seedCompliance(
       reasonApplies: "You told us insurance requirements apply.",
     });
 
-  // "Unsure" answers become review obligations — surfaced, never blocking.
+  // "Unsure" answers become review obligations - surfaced, never blocking.
   const unsureTopics: Record<string, string> = {
     "compliance.company_filings": "company filing responsibilities",
     "compliance.pensions": "workplace pension duties",
@@ -319,7 +319,7 @@ async function seedPolicies(
       status: "draft" as const,
       version: "1.0",
       owner: w.owner,
-      notes: "Suggested from onboarding — review and adopt.",
+      notes: "Suggested from onboarding - review and adopt.",
       createdBy: actorSub,
       updatedBy: actorSub,
     })),
@@ -355,7 +355,7 @@ async function seedGdpr(
     ),
     specialCategoryData: yes(a, "gdpr.special_category"),
     processors: yes(a, "gdpr.shares_with_processors")
-      ? "Shared with processors — to be documented"
+      ? "Shared with processors - to be documented"
       : undefined,
     internationalTransfers: yes(a, "gdpr.transfers_outside_uk"),
     owner: str(a["gdpr.dp_owner"]),

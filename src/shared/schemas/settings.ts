@@ -18,10 +18,21 @@ export const updateBusinessProfileSchema = z.object({
   customerCount: z.number().int().min(0).max(100_000_000).optional(),
   supplierCount: z.number().int().min(0).max(1_000_000).optional(),
   annualRevenueBand: z.string().trim().max(60).nullish(),
+  tradingName: z.string().trim().max(200).nullish(),
+  website: z.string().trim().max(300).nullish(),
+  phone: z.string().trim().max(50).nullish(),
+  contactEmail: z.string().trim().max(200).nullish(),
+  primaryContactName: z.string().trim().max(200).nullish(),
+  primaryContactRole: z.string().trim().max(120).nullish(),
+  vatNumber: z.string().trim().max(20).nullish(),
   vatRegistered: z.boolean().optional(),
   employerRegistered: z.boolean().optional(),
   processesPersonalData: z.boolean().optional(),
   tradesInternationally: z.boolean().optional(),
+  usesContractors: z.boolean().optional(),
+  operatesPublicService: z.boolean().optional(),
+  regulatedActivities: z.boolean().optional(),
+  reliesOnSuppliers: z.boolean().optional(),
 });
 
 export const updateWorkspaceSchema = z.object({

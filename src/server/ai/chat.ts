@@ -1,8 +1,10 @@
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { withUser, type UserClaims } from "../db";
 import { conversations, jovaSources, messages } from "../db/schema";
 import { retrieveContext, type RetrievedContext } from "./retrieval";
 import { getActiveProvider, type LlmProvider } from "./provider";
+import { getEmbedder } from "./embedder";
+import { remember } from "../services/jova-memory";
 
 // Jova chat. Retrieval → grounded model answer (with citations, refusal, and
 // escalation) → deterministic fallback when the model is unavailable, refuses,
@@ -68,7 +70,7 @@ export async function ask(
   opts?: { provider?: LlmProvider },
 ): Promise<AskResult> {
   const provider = opts?.provider ?? (await getActiveProvider());
-  const ctx = await retrieveContext(claims, workspaceId);
+  const ctx = await retrieveContext(claims, workspaceId, input.question);
 
   // Prior turns (if continuing a conversation), oldest first.
   const history = input.conversationId
@@ -178,6 +180,29 @@ export async function ask(
     return convId;
   });
 
+  // Remember this exchange so Jova can recall it in future turns. Best-effort
+  // and only when embeddings are active (the model is already warm from recall)
+  // - a failure here must never affect the answer.
+  const embedder = getEmbedder();
+  if (await embedder.isAvailable()) {
+    try {
+      await remember(
+        claims,
+        workspaceId,
+        {
+          kind: "interaction",
+          title: input.question.slice(0, 80),
+          content: `Q: ${input.question}\nA: ${answer}`,
+          sourceModule: "jova",
+          refId: conversationId,
+        },
+        embedder,
+      );
+    } catch {
+      // memory is optional
+    }
+  }
+
   // De-duplicate the citation list for display.
   const seen = new Set<string>();
   const sources = ctx.sources
@@ -199,14 +224,41 @@ export async function ask(
   };
 }
 
+/** The workspace's conversations, most-recently-updated first (RLS-scoped). */
+export function listConversations(claims: UserClaims) {
+  return withUser(claims, (tx) =>
+    tx
+      .select({
+        id: conversations.id,
+        title: conversations.title,
+        updatedAt: conversations.updatedAt,
+      })
+      .from(conversations)
+      .orderBy(desc(conversations.updatedAt))
+      .limit(50),
+  );
+}
+
+/** Delete a conversation (messages + sources cascade). Returns true if removed. */
+export function deleteConversation(claims: UserClaims, id: string) {
+  return withUser(claims, async (tx) => {
+    const rows = await tx
+      .delete(conversations)
+      .where(eq(conversations.id, id))
+      .returning({ id: conversations.id });
+    return rows.length > 0;
+  });
+}
+
 /** Read a conversation's turns (RLS-scoped). */
 export function listConversationMessages(
   claims: UserClaims,
   conversationId: string,
 ) {
-  return withUser(claims, (tx) =>
-    tx
+  return withUser(claims, async (tx) => {
+    const rows = await tx
       .select({
+        id: messages.id,
         sender: messages.sender,
         content: messages.content,
         safetyDecision: messages.safetyDecision,
@@ -216,6 +268,28 @@ export function listConversationMessages(
       })
       .from(messages)
       .where(and(eq(messages.conversationId, conversationId)))
-      .orderBy(asc(messages.createdAt)),
-  );
+      .orderBy(asc(messages.createdAt));
+    if (rows.length === 0) return [];
+    // Rehydrate stored citations so sources survive a conversation reload.
+    const cites = await tx
+      .select({
+        messageId: jovaSources.messageId,
+        module: jovaSources.sourceModule,
+        label: jovaSources.note,
+      })
+      .from(jovaSources)
+      .where(
+        inArray(
+          jovaSources.messageId,
+          rows.map((r) => r.id),
+        ),
+      );
+    const byMessage = new Map<string, { module: string; label: string }[]>();
+    for (const c of cites) {
+      const arr = byMessage.get(c.messageId) ?? [];
+      arr.push({ module: c.module, label: c.label ?? "" });
+      byMessage.set(c.messageId, arr);
+    }
+    return rows.map((r) => ({ ...r, sources: byMessage.get(r.id) ?? [] }));
+  });
 }
