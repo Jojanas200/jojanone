@@ -12,8 +12,10 @@ type DdItem = {
 };
 
 const nice = (s: string) => s.replace(/_/g, " ");
-const priorityVariant: Record<string, "outline" | "secondary" | "destructive"> =
-  { high: "destructive", medium: "secondary", low: "outline" };
+const priorityVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = { high: "destructive", medium: "warning", low: "success" };
 const rank: Record<string, number> = { high: 0, medium: 1, low: 2 };
 
 // Prioritised plan: the assessment's recommended actions plus open

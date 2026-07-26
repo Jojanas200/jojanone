@@ -89,7 +89,7 @@ const statusVariant: Record<
 const priorityVariant: Record<
   string,
   "outline" | "secondary" | "destructive" | "success" | "warning"
-> = { high: "destructive", medium: "secondary", low: "outline" };
+> = { high: "destructive", medium: "warning", low: "success" };
 const evidenceLabel: Record<string, string> = {
   not_started: "None",
   in_progress: "Partial",

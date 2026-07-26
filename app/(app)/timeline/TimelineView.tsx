@@ -90,8 +90,8 @@ const priorityVariant: Record<
   "outline" | "secondary" | "destructive" | "success" | "warning"
 > = {
   high: "destructive",
-  medium: "secondary",
-  low: "outline",
+  medium: "warning",
+  low: "success",
   none: "outline",
 };
 
