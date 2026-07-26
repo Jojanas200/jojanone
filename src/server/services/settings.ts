@@ -1,5 +1,6 @@
 import { asc, eq } from "drizzle-orm";
 import { withUser, type UserClaims } from "../db";
+import { recordActivity } from "./activity";
 import { businessProfiles, memberships, workspaces } from "../db/schema";
 import type {
   UpdateBusinessProfileInput,
@@ -54,6 +55,11 @@ export function updateBusinessProfile(
       .returning();
     const updated = rows[0];
     if (!updated) return null;
+    await recordActivity(tx, workspaceId, {
+      module: "settings",
+      action: "updated",
+      title: "Business profile updated",
+    });
     // Recompute completion from the persisted row and store it.
     const completion = computeCompletion(updated);
     if (completion !== updated.profileCompletion) {

@@ -214,6 +214,8 @@ export const platformEvents = pgTable("platform_events", {
 export const userPreferences = pgTable("user_preferences", {
   userId: uuid("user_id").primaryKey(),
   theme: text("theme").notNull().default("default"),
+  digestFrequency: text("digest_frequency").notNull().default("daily"),
+  jovaStyle: text("jova_style").notNull().default("concise"),
   updatedAt: ts("updated_at").notNull().defaultNow(),
 });
 

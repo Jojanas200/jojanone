@@ -5,6 +5,7 @@ import { retrieveContext, type RetrievedContext } from "./retrieval";
 import { getActiveProvider, type LlmProvider } from "./provider";
 import { getEmbedder } from "./embedder";
 import { remember } from "../services/jova-memory";
+import { getUserPrefs } from "../services/prefs";
 
 // Jova chat. Retrieval → grounded model answer (with citations, refusal, and
 // escalation) → deterministic fallback when the model is unavailable, refuses,
@@ -72,6 +73,13 @@ export async function ask(
   const provider = opts?.provider ?? (await getActiveProvider());
   const ctx = await retrieveContext(claims, workspaceId, input.question);
 
+  // The user's saved response-style preference shapes the system prompt.
+  const { jovaStyle } = await getUserPrefs(claims);
+  const styleLine =
+    jovaStyle === "detailed"
+      ? "\n5. This user prefers DETAILED answers: expand with the relevant surrounding context from their workspace data, not just the headline."
+      : "";
+
   // Prior turns (if continuing a conversation), oldest first.
   const history = input.conversationId
     ? await loadHistory(claims, input.conversationId)
@@ -86,7 +94,7 @@ export async function ask(
   if (provider.isConfigured() && ctx) {
     try {
       const result = await provider.generate({
-        system: `${SYSTEM_PROMPT}\n\nCONTEXT:\n${ctx.contextText}`,
+        system: `${SYSTEM_PROMPT}${styleLine}\n\nCONTEXT:\n${ctx.contextText}`,
         messages: [
           ...history.map((h) => ({
             role:

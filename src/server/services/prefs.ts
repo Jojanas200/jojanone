@@ -46,3 +46,60 @@ export async function setUserTheme(
   );
   return t;
 }
+
+// --- Notification + Jova preferences (drive real behaviour) ------------------
+
+export const DIGEST_FREQUENCIES = ["daily", "weekly", "off"] as const;
+export type DigestFrequency = (typeof DIGEST_FREQUENCIES)[number];
+export const JOVA_STYLES = ["concise", "detailed"] as const;
+export type JovaStyle = (typeof JOVA_STYLES)[number];
+
+const normDigest = (v: unknown): DigestFrequency =>
+  DIGEST_FREQUENCIES.includes(v as DigestFrequency)
+    ? (v as DigestFrequency)
+    : "daily";
+const normStyle = (v: unknown): JovaStyle =>
+  JOVA_STYLES.includes(v as JovaStyle) ? (v as JovaStyle) : "concise";
+
+export async function getUserPrefs(claims: UserClaims): Promise<{
+  digestFrequency: DigestFrequency;
+  jovaStyle: JovaStyle;
+}> {
+  return withUser(claims, async (tx) => {
+    const row = (
+      await tx
+        .select({
+          digestFrequency: userPreferences.digestFrequency,
+          jovaStyle: userPreferences.jovaStyle,
+        })
+        .from(userPreferences)
+        .where(eq(userPreferences.userId, claims.sub))
+        .limit(1)
+    )[0];
+    return {
+      digestFrequency: normDigest(row?.digestFrequency),
+      jovaStyle: normStyle(row?.jovaStyle),
+    };
+  });
+}
+
+export async function setUserPrefs(
+  claims: UserClaims,
+  input: { digestFrequency?: string; jovaStyle?: string },
+) {
+  const patch: Record<string, string> = {};
+  if (input.digestFrequency !== undefined)
+    patch.digestFrequency = normDigest(input.digestFrequency);
+  if (input.jovaStyle !== undefined)
+    patch.jovaStyle = normStyle(input.jovaStyle);
+  await withUser(claims, (tx) =>
+    tx
+      .insert(userPreferences)
+      .values({ userId: claims.sub, ...patch })
+      .onConflictDoUpdate({
+        target: userPreferences.userId,
+        set: { ...patch, updatedAt: new Date() },
+      }),
+  );
+  return getUserPrefs(claims);
+}

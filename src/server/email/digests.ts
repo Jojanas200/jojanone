@@ -1,6 +1,11 @@
 import { and, eq } from "drizzle-orm";
 import { adminDb } from "../db/admin";
-import { memberships, notifications, workspaces } from "../db/schema";
+import {
+  memberships,
+  notifications,
+  workspaces,
+  userPreferences,
+} from "../db/schema";
 import { sendEmail, type EmailProvider } from "./provider";
 import { reminderDigestEmail } from "./templates";
 
@@ -82,6 +87,25 @@ export async function sendReminderDigests(opts?: {
     )[0];
     const email = owner ? await lookup(owner.userId) : null;
     if (!email) {
+      result.skipped++;
+      continue;
+    }
+
+    // Honour the owner's digest preference: off = never, weekly = Mondays.
+    const pref = owner
+      ? (
+          await adminDb
+            .select({ digestFrequency: userPreferences.digestFrequency })
+            .from(userPreferences)
+            .where(eq(userPreferences.userId, owner.userId))
+            .limit(1)
+        )[0]
+      : undefined;
+    const frequency = pref?.digestFrequency ?? "daily";
+    if (
+      frequency === "off" ||
+      (frequency === "weekly" && new Date().getUTCDay() !== 1)
+    ) {
       result.skipped++;
       continue;
     }

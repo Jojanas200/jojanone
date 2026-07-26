@@ -5,10 +5,10 @@ Lovable prototype (`Jojan One - Platform/src/routes/*`) against production,
 followed by the build-out that cleared it. Status last updated 2026-07-23 after
 the final reconciliation batch.
 
-**Programme status: COMPLETE**, except the two deferred items in the last
-section. Every shipped item passed the standard gates (tsc, prettier,
-adminDb/emdash guards) and, where it touches data, a 2-tenant RLS verifier
-against the hosted Supabase project.
+**Programme status: COMPLETE** - including the two formerly-deferred items
+(see the plumbing-first section near the end). Every shipped item passed the
+standard gates (tsc, prettier, adminDb/emdash guards) and, where it touches
+data, a 2-tenant RLS verifier against the hosted Supabase project.
 
 ## Tier 1 - Subsystems (all shipped)
 
@@ -95,14 +95,22 @@ Verifier: verify-jova-conversations (15).
 - Governance, Policies, earlier GDPR/HR/Risk/Compliance forms: shipped in the
   pre-audit reconciliation passes (see docs/06 progress log).
 
-## Remaining (deferred - need backend plumbing first)
+## Formerly deferred - now DONE (plumbing built first)
 
-1. Notification + Jova preference panels. UI-only stubs would violate the
-   honest-data rule: preferences must actually drive the digest cron and the
-   ask pipeline. Requires a preferences store read by both, then the UI.
-2. Resend invitation + tenant-visible audit log. Resend needs the invite
-   token/email flow re-triggered safely; the audit log needs a tenant-scoped
-   event surface (platform_audit_log is operator-only).
+1. Notification + Jova preferences - DONE. Migration 0026 adds
+   digest_frequency (daily/weekly/off) and jova_style (concise/detailed) to
+   user_preferences (self-access RLS). The reminder digest sender honours the
+   owner's frequency (off = never, weekly = Mondays); the Jova ask pipeline
+   appends a detailed-style rule to the system prompt when selected -
+   safeguards are not user-configurable. Settings -> Preferences tab drives
+   both. Verifier: verify-settings (14, incl. defaults, round-trip and
+   invalid-value normalisation); digest path re-verified by verify-team (23).
+2. Resend invitation + tenant audit trail - DONE. Resend rotates the token,
+   extends expiry and re-sends the invite email (owner-only route, button in
+   Pending invitations). Team and settings changes (invite sent/re-sent/
+   revoked, business-profile updates) are recorded into the tenant-scoped
+   activities trail and surfaced in a Settings -> Audit tab with actor +
+   date; record-level activity remains on the Timeline.
 
 ## Explicitly skipped (not parity gaps)
 - HR leave/absence, payroll, org chart, document attachments: absent in the

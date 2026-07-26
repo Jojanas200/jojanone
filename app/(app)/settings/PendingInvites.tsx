@@ -35,6 +35,21 @@ export function PendingInvites({ invites }: { invites: Invite[] }) {
     }
   }
 
+  async function resend(id: string) {
+    const res = await fetch(`/api/team/invite/${id}`, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) {
+      toast.success(
+        data.emailSent
+          ? "Invitation re-sent with a fresh link"
+          : "Invite link refreshed (email could not be sent)",
+      );
+      router.refresh();
+    } else {
+      toast.error(data?.error ?? "Could not resend");
+    }
+  }
+
   if (invites.length === 0) return null;
 
   return (
@@ -62,6 +77,14 @@ export function PendingInvites({ invites }: { invites: Invite[] }) {
             <span className="text-xs text-muted-foreground">
               expires {fmtDate(i.expiresAt)}
             </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => resend(i.id)}
+            >
+              Resend
+            </Button>
             <Button
               variant="ghost"
               size="icon"

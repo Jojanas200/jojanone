@@ -15,6 +15,7 @@ import {
   updateBusinessProfile,
   updateWorkspace,
 } from "../src/server/services/settings";
+import { getUserPrefs, setUserPrefs } from "../src/server/services/prefs";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -144,6 +145,26 @@ async function main() {
         businessName: "hijacked",
       },
     );
+    // --- User preferences (notifications + Jova style) ---
+    const defaults = await getUserPrefs({ sub: userA });
+    check(
+      "prefs default to daily digest + concise Jova",
+      defaults.digestFrequency === "daily" && defaults.jovaStyle === "concise",
+    );
+    const saved = await setUserPrefs(
+      { sub: userA },
+      { digestFrequency: "off", jovaStyle: "detailed" },
+    );
+    check(
+      "prefs round-trip (off + detailed)",
+      saved.digestFrequency === "off" && saved.jovaStyle === "detailed",
+    );
+    check(
+      "invalid pref values normalise safely",
+      (await setUserPrefs({ sub: userA }, { digestFrequency: "hourly" }))
+        .digestFrequency === "daily",
+    );
+
     check(
       "A cannot update B's profile (row hidden)",
       foreignProfileUpdate === null,

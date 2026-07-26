@@ -18,6 +18,9 @@ import { InviteTeammate } from "./InviteTeammate";
 import { PendingInvites } from "./PendingInvites";
 import { MembersTable } from "./MembersTable";
 import { PermissionsMatrix } from "./PermissionsMatrix";
+import { PreferencesForm } from "./PreferencesForm";
+import { getUserPrefs } from "@/server/services/prefs";
+import { getActivityFeed } from "@/server/services/timeline";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,16 +35,28 @@ export default async function SettingsPage() {
   const ws = await getActiveWorkspaceId(claims);
   if (!ws) redirect("/onboarding");
 
-  const [profile, workspace, members, role, overview, invites, onboarding] =
-    await Promise.all([
-      getBusinessProfile(claims, ws),
-      getWorkspace(claims, ws),
-      listMembers(claims, ws),
-      getWorkspaceRole(claims, ws),
-      getBillingOverview(claims, ws),
-      listPendingInvitations(claims, ws),
-      getOnboarding(claims, ws),
-    ]);
+  const [
+    profile,
+    workspace,
+    members,
+    role,
+    overview,
+    invites,
+    onboarding,
+    prefs,
+  ] = await Promise.all([
+    getBusinessProfile(claims, ws),
+    getWorkspace(claims, ws),
+    listMembers(claims, ws),
+    getWorkspaceRole(claims, ws),
+    getBillingOverview(claims, ws),
+    listPendingInvitations(claims, ws),
+    getOnboarding(claims, ws),
+    getUserPrefs(claims),
+  ]);
+  const auditTrail = (await getActivityFeed(claims))
+    .filter((a) => a.module === "team" || a.module === "settings")
+    .slice(0, 50);
   const showResumeSetup =
     isStarted(onboarding) && onboarding.completedAt === null;
 
@@ -82,6 +97,8 @@ export default async function SettingsPage() {
           <TabsTrigger value="workspace">Workspace</TabsTrigger>
           <TabsTrigger value="members">Members</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
+          <TabsTrigger value="preferences">Preferences</TabsTrigger>
+          <TabsTrigger value="audit">Audit</TabsTrigger>
           <TabsTrigger value="data">Data</TabsTrigger>
         </TabsList>
 
@@ -126,6 +143,51 @@ export default async function SettingsPage() {
               One mark in the sidebar for everyone on your team.
             </p>
             <DocumentUploader variant="logo" />
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="preferences" className="mt-4">
+          <PreferencesForm initial={prefs} />
+        </TabsContent>
+
+        <TabsContent value="audit" className="mt-4">
+          <Card className="overflow-hidden p-0">
+            <div className="border-b border-border p-4">
+              <h2 className="text-base font-semibold text-foreground">
+                Workspace audit trail
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Team and settings changes, newest first. Record-level activity
+                lives on the Timeline.
+              </p>
+            </div>
+            {auditTrail.length === 0 ? (
+              <p className="p-6 text-sm text-muted-foreground">
+                No team or settings changes recorded yet.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {auditTrail.map((a) => (
+                  <li
+                    key={a.id}
+                    className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm"
+                  >
+                    <span className="min-w-0 flex-1 truncate text-foreground">
+                      {a.title}
+                    </span>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {a.actorEmail ?? "System"} ·{" "}
+                      {new Date(a.createdAt).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        timeZone: "Europe/London",
+                      })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Card>
         </TabsContent>
 

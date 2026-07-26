@@ -5,6 +5,7 @@ import { withUser, type UserClaims } from "../db";
 import { invitations, memberships, subscriptions } from "../db/schema";
 import { filterKnownModules } from "@/config/modules.config";
 import { hasSeatAvailable } from "./billing";
+import { recordActivity } from "./activity";
 
 // Normalise an adviser scope: keep only known module keys, dedupe. Returns null
 // (= full access) for non-advisers or an empty selection.
@@ -67,6 +68,11 @@ export async function createInvitation(
         createdBy: claims.sub,
       })
       .returning({ id: invitations.id, email: invitations.email });
+    await recordActivity(tx, workspaceId, {
+      module: "team",
+      action: "created",
+      title: `Invite sent to ${rows[0].email}`,
+    });
     return {
       ok: true as const,
       result: { id: rows[0].id, email: rows[0].email, token },
@@ -105,7 +111,17 @@ export function revokeInvitation(claims: UserClaims, id: string) {
     const rows = await tx
       .delete(invitations)
       .where(eq(invitations.id, id))
-      .returning({ id: invitations.id });
+      .returning({
+        id: invitations.id,
+        email: invitations.email,
+        workspaceId: invitations.workspaceId,
+      });
+    if (rows[0])
+      await recordActivity(tx, rows[0].workspaceId, {
+        module: "team",
+        action: "deleted",
+        title: `Invite revoked for ${rows[0].email}`,
+      });
     return rows.length > 0;
   });
 }
@@ -197,4 +213,32 @@ export async function acceptInvitation(
     .where(eq(invitations.id, inv.id));
 
   return { ok: true, workspaceId: inv.workspaceId };
+}
+
+/**
+ * Regenerate a pending invite's token and extend its expiry so it can be
+ * re-sent. Returns the new raw token (for the email) or null if the invite is
+ * not visible to this user (RLS).
+ */
+export function regenerateInvitation(claims: UserClaims, id: string) {
+  const token = randomBytes(24).toString("hex");
+  const expiresAt = new Date(Date.now() + EXPIRY_DAYS * 86_400_000);
+  return withUser(claims, async (tx) => {
+    const rows = await tx
+      .update(invitations)
+      .set({ tokenHash: hashToken(token), expiresAt })
+      .where(and(eq(invitations.id, id), isNull(invitations.acceptedAt)))
+      .returning({
+        id: invitations.id,
+        email: invitations.email,
+        workspaceId: invitations.workspaceId,
+      });
+    if (!rows[0]) return null;
+    await recordActivity(tx, rows[0].workspaceId, {
+      module: "team",
+      action: "updated",
+      title: `Invite re-sent to ${rows[0].email}`,
+    });
+    return { id: rows[0].id, email: rows[0].email, token };
+  });
 }
