@@ -185,6 +185,54 @@ export const ALL_ASSESSMENT_QUESTIONS = INVESTOR_ASSESSMENT.flatMap(
   (s) => s.questions,
 );
 
+// Flat item shape used by the platform question-set editor: one row per
+// question, carrying its dimension. groupInvestorAssessment() rebuilds the
+// stepped wizard structure from a (possibly admin-overridden) flat list.
+export interface InvestorAssessmentItem {
+  id: string;
+  text: string;
+  dim: InvestorDimension;
+  redFlag?: boolean;
+}
+
+export const INVESTOR_STEP_LABELS: Record<InvestorDimension, string> = {
+  corporate: "Corporate structure",
+  financial: "Financial records",
+  legal: "Legal and contracts",
+  compliance: "Compliance and data",
+  commercial: "Commercial and market",
+  people: "People",
+  data_room: "Data room",
+};
+
+export const INVESTOR_ASSESSMENT_ITEMS: InvestorAssessmentItem[] =
+  INVESTOR_ASSESSMENT.flatMap((s) =>
+    s.questions.map((q) => ({
+      id: q.id,
+      text: q.text,
+      dim: s.dim,
+      redFlag: !!q.redFlag,
+    })),
+  );
+
+export function groupInvestorAssessment(
+  items: readonly InvestorAssessmentItem[],
+): AssessmentStep[] {
+  return INVESTOR_DIMENSIONS.filter((d) => items.some((i) => i.dim === d)).map(
+    (d) => ({
+      dim: d,
+      label: INVESTOR_STEP_LABELS[d],
+      questions: items
+        .filter((i) => i.dim === d)
+        .map((i) => ({
+          id: i.id,
+          text: i.text,
+          ...(i.redFlag ? { redFlag: true } : {}),
+        })),
+    }),
+  );
+}
+
 export const saveReadinessAssessmentSchema = z.object({
   answers: z.record(z.string(), answerOptionEnum),
 });

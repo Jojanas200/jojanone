@@ -12,6 +12,7 @@ import { listObligations } from "./compliance";
 import { getGdprAssessment } from "./gdpr-registers";
 import { listTenderOpportunities } from "./tender";
 import { saveReport } from "./reports";
+import { getQuestionSet } from "./question-sets";
 import {
   TENDER_BID_CHECKLIST,
   TENDER_DIMENSIONS,
@@ -157,7 +158,10 @@ export function deleteTenderResponse(claims: UserClaims, id: string) {
 }
 
 // --- Bid assessment (single current, scored by dimension) -------------------
-function scoreBid(answers: Record<string, boolean>) {
+function scoreBid(
+  answers: Record<string, boolean>,
+  checklist: typeof TENDER_BID_CHECKLIST = TENDER_BID_CHECKLIST,
+) {
   const met = (list: typeof TENDER_BID_CHECKLIST) =>
     list.length
       ? Math.round(
@@ -167,19 +171,15 @@ function scoreBid(answers: Record<string, boolean>) {
   const dim = Object.fromEntries(
     TENDER_DIMENSIONS.map((d) => [
       d,
-      met(TENDER_BID_CHECKLIST.filter((q) => q.dim === d)),
+      met(checklist.filter((q) => q.dim === d)),
     ]),
   ) as Record<(typeof TENDER_DIMENSIONS)[number], number>;
   const overall = Math.round(
     TENDER_DIMENSIONS.reduce((s, d) => s + dim[d], 0) /
       TENDER_DIMENSIONS.length,
   );
-  const gaps = TENDER_BID_CHECKLIST.filter((q) => !answers[q.key]).map(
-    (q) => q.label,
-  );
-  const strengths = TENDER_BID_CHECKLIST.filter((q) => answers[q.key]).map(
-    (q) => q.label,
-  );
+  const gaps = checklist.filter((q) => !answers[q.key]).map((q) => q.label);
+  const strengths = checklist.filter((q) => answers[q.key]).map((q) => q.label);
   const recommendation =
     overall >= 60 ? "bid" : overall >= 40 ? "conditional" : "no_bid";
   return { dim, overall, gaps, strengths, recommendation };
@@ -205,57 +205,63 @@ export function saveBidAssessment(
     decisionReason?: string | null;
   },
 ) {
-  return withUser(claims, async (tx) => {
-    const { dim, overall, gaps, strengths, recommendation } = scoreBid(
-      input.answers,
-    );
-    const existing = (
-      await tx
-        .select({ id: bidAssessments.id })
-        .from(bidAssessments)
-        .orderBy(desc(bidAssessments.updatedAt))
-        .limit(1)
-    )[0];
-    const values = {
-      strategicFitScore: dim.strategic_fit,
-      eligibilityScore: dim.eligibility,
-      capacityScore: dim.capacity,
-      evidenceScore: dim.evidence,
-      commercialScore: dim.commercial,
-      deliveryRiskScore: dim.delivery_risk,
-      overallScore: overall,
-      answers: input.answers,
-      strengths,
-      gaps,
-      recommendation,
-      ...(input.decision ? { decision: input.decision } : {}),
-      ...(input.decisionReason !== undefined
-        ? { decisionReason: input.decisionReason }
-        : {}),
-      completedAt: sql`now()`,
-    };
-    const row = existing
-      ? (
-          await tx
-            .update(bidAssessments)
-            .set(values)
-            .where(eq(bidAssessments.id, existing.id))
-            .returning()
-        )[0]
-      : (
-          await tx
-            .insert(bidAssessments)
-            .values({ workspaceId, ...values })
-            .returning()
-        )[0];
-    await recordActivity(tx, workspaceId, {
-      module: "tender-ready",
-      action: "updated",
-      title: `Bid assessment (${overall}%, ${recommendation})`,
-      referenceId: row.id,
+  return (async () => {
+    const checklist = (await getQuestionSet(
+      "tender_bid_checklist",
+    )) as unknown as typeof TENDER_BID_CHECKLIST;
+    return withUser(claims, async (tx) => {
+      const { dim, overall, gaps, strengths, recommendation } = scoreBid(
+        input.answers,
+        checklist,
+      );
+      const existing = (
+        await tx
+          .select({ id: bidAssessments.id })
+          .from(bidAssessments)
+          .orderBy(desc(bidAssessments.updatedAt))
+          .limit(1)
+      )[0];
+      const values = {
+        strategicFitScore: dim.strategic_fit,
+        eligibilityScore: dim.eligibility,
+        capacityScore: dim.capacity,
+        evidenceScore: dim.evidence,
+        commercialScore: dim.commercial,
+        deliveryRiskScore: dim.delivery_risk,
+        overallScore: overall,
+        answers: input.answers,
+        strengths,
+        gaps,
+        recommendation,
+        ...(input.decision ? { decision: input.decision } : {}),
+        ...(input.decisionReason !== undefined
+          ? { decisionReason: input.decisionReason }
+          : {}),
+        completedAt: sql`now()`,
+      };
+      const row = existing
+        ? (
+            await tx
+              .update(bidAssessments)
+              .set(values)
+              .where(eq(bidAssessments.id, existing.id))
+              .returning()
+          )[0]
+        : (
+            await tx
+              .insert(bidAssessments)
+              .values({ workspaceId, ...values })
+              .returning()
+          )[0];
+      await recordActivity(tx, workspaceId, {
+        module: "tender-ready",
+        action: "updated",
+        title: `Bid assessment (${overall}%, ${recommendation})`,
+        referenceId: row.id,
+      });
+      return row;
     });
-    return row;
-  });
+  })();
 }
 
 // --- Tender readiness (derived score + pipeline metrics) ---------------------

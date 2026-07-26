@@ -18,6 +18,7 @@ import {
 import {
   INVESTOR_ASSESSMENT,
   type AnswerOption,
+  type AssessmentStep,
 } from "@/shared/schemas/investor-readiness";
 
 type Assessment = {
@@ -50,9 +51,11 @@ const bandLabel = (n: number) =>
 export function InvestorReadinessPanel({
   assessment,
   canWrite,
+  steps = INVESTOR_ASSESSMENT,
 }: {
   assessment: Assessment;
   canWrite: boolean;
+  steps?: AssessmentStep[];
 }) {
   const router = useRouter();
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -155,6 +158,7 @@ export function InvestorReadinessPanel({
 
       {wizardOpen && (
         <AssessmentWizard
+          steps={steps}
           initial={(assessment?.answers ?? {}) as Record<string, string>}
           onClose={() => setWizardOpen(false)}
           onSaved={() => {
@@ -168,10 +172,12 @@ export function InvestorReadinessPanel({
 }
 
 function AssessmentWizard({
+  steps,
   initial,
   onClose,
   onSaved,
 }: {
+  steps: AssessmentStep[];
   initial: Record<string, string>;
   onClose: () => void;
   onSaved: () => void;
@@ -180,9 +186,9 @@ function AssessmentWizard({
   const [answers, setAnswers] = useState<Record<string, string>>(initial);
   const [saving, setSaving] = useState(false);
 
-  const total = INVESTOR_ASSESSMENT.length;
+  const total = steps.length;
   const done = step === total;
-  const current = INVESTOR_ASSESSMENT[step];
+  const current = steps[step];
   const progress = Math.round(((done ? total : step) / total) * 100);
   const stepComplete =
     !current || current.questions.every((q) => answers[q.id]);
@@ -220,16 +226,18 @@ function AssessmentWizard({
 
         {done ? (
           <ul className="max-h-[320px] space-y-1 overflow-y-auto rounded-lg border border-border p-3 text-xs">
-            {INVESTOR_ASSESSMENT.flatMap((s) => s.questions).map((q) => (
-              <li key={q.id}>
-                <span className="text-muted-foreground">{q.text}</span>{" "}
-                <strong className="text-foreground">
-                  {answers[q.id]
-                    ? OPTION_LABEL[answers[q.id] as AnswerOption]
-                    : "unanswered"}
-                </strong>
-              </li>
-            ))}
+            {steps
+              .flatMap((s) => s.questions)
+              .map((q) => (
+                <li key={q.id}>
+                  <span className="text-muted-foreground">{q.text}</span>{" "}
+                  <strong className="text-foreground">
+                    {answers[q.id]
+                      ? OPTION_LABEL[answers[q.id] as AnswerOption]
+                      : "unanswered"}
+                  </strong>
+                </li>
+              ))}
           </ul>
         ) : (
           <div className="space-y-3">

@@ -8,8 +8,10 @@ import {
   privacyNotices,
 } from "../db/schema";
 import { recordActivity } from "./activity";
+import { getQuestionSet } from "./question-sets";
 import {
   deriveGdprFindings,
+  type GdprChecklistItem,
   type GdprAnswer,
   type CreateDataBreachInput,
   type CreateDataRequestInput,
@@ -399,58 +401,66 @@ export function saveGdprAssessment(
   workspaceId: string,
   answers: Record<string, GdprAnswer>,
 ) {
-  return withUser(claims, async (tx) => {
-    const { score, gaps, recommendations } = deriveGdprFindings(answers);
-    const existing = (
-      await tx
-        .select({ id: gdprAssessments.id })
-        .from(gdprAssessments)
-        .orderBy(desc(gdprAssessments.updatedAt))
-        .limit(1)
-    )[0];
+  return (async () => {
+    const checklist = (await getQuestionSet(
+      "gdpr_health_check",
+    )) as unknown as GdprChecklistItem[];
+    return withUser(claims, async (tx) => {
+      const { score, gaps, recommendations } = deriveGdprFindings(
+        answers,
+        checklist,
+      );
+      const existing = (
+        await tx
+          .select({ id: gdprAssessments.id })
+          .from(gdprAssessments)
+          .orderBy(desc(gdprAssessments.updatedAt))
+          .limit(1)
+      )[0];
 
-    let row;
-    if (existing) {
-      row = (
-        await tx
-          .update(gdprAssessments)
-          .set({
-            answers,
-            score,
-            gaps,
-            recommendations,
-            status: "completed",
-            completedAt: sql`now()`,
-            updatedBy: claims.sub,
-          })
-          .where(eq(gdprAssessments.id, existing.id))
-          .returning()
-      )[0];
-    } else {
-      row = (
-        await tx
-          .insert(gdprAssessments)
-          .values({
-            workspaceId,
-            createdBy: claims.sub,
-            updatedBy: claims.sub,
-            assessmentType: "health_check",
-            answers,
-            score,
-            gaps,
-            recommendations,
-            status: "completed",
-            completedAt: sql`now()`,
-          })
-          .returning()
-      )[0];
-    }
-    await recordActivity(tx, workspaceId, {
-      module: "gdpr",
-      action: "updated",
-      title: `GDPR health check (${score}%)`,
-      referenceId: row.id,
+      let row;
+      if (existing) {
+        row = (
+          await tx
+            .update(gdprAssessments)
+            .set({
+              answers,
+              score,
+              gaps,
+              recommendations,
+              status: "completed",
+              completedAt: sql`now()`,
+              updatedBy: claims.sub,
+            })
+            .where(eq(gdprAssessments.id, existing.id))
+            .returning()
+        )[0];
+      } else {
+        row = (
+          await tx
+            .insert(gdprAssessments)
+            .values({
+              workspaceId,
+              createdBy: claims.sub,
+              updatedBy: claims.sub,
+              assessmentType: "health_check",
+              answers,
+              score,
+              gaps,
+              recommendations,
+              status: "completed",
+              completedAt: sql`now()`,
+            })
+            .returning()
+        )[0];
+      }
+      await recordActivity(tx, workspaceId, {
+        module: "gdpr",
+        action: "updated",
+        title: `GDPR health check (${score}%)`,
+        referenceId: row.id,
+      });
+      return row;
     });
-    return row;
-  });
+  })();
 }

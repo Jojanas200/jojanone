@@ -14,6 +14,8 @@ import { TenderReadinessHeader } from "./TenderReadinessHeader";
 import { TenderRequirementsBoard } from "./TenderRequirementsBoard";
 import { TenderResponsesBoard } from "./TenderResponsesBoard";
 import { BidDecisionPanel } from "./BidDecisionPanel";
+import { getQuestionSet } from "@/server/services/question-sets";
+import type { TenderDimension } from "@/shared/schemas/tender-readiness";
 import { WriteGate } from "../WriteGate";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -21,13 +23,20 @@ export default async function TenderReadyPage() {
   const claims = await getClaims();
   if (!claims) redirect("/login");
   const { access } = await requireModuleAccess(claims, "tender-ready");
-  const [rows, requirements, responses, bid, readiness] = await Promise.all([
-    listTenderOpportunities(claims),
-    listTenderRequirements(claims),
-    listTenderResponses(claims),
-    getBidAssessment(claims),
-    getTenderReadiness(claims),
-  ]);
+  const [rows, requirements, responses, bid, readiness, bidChecklistRaw] =
+    await Promise.all([
+      listTenderOpportunities(claims),
+      listTenderRequirements(claims),
+      listTenderResponses(claims),
+      getBidAssessment(claims),
+      getTenderReadiness(claims),
+      getQuestionSet("tender_bid_checklist"),
+    ]);
+  const bidChecklist = bidChecklistRaw as unknown as {
+    key: string;
+    label: string;
+    dim: TenderDimension;
+  }[];
   const canWrite = access.canWrite;
   const oppOptions = rows.map((o) => ({ id: o.id, title: o.title }));
 
@@ -107,7 +116,11 @@ export default async function TenderReadyPage() {
         </TabsContent>
 
         <TabsContent value="bid" className="mt-6">
-          <BidDecisionPanel assessment={bidForClient} canWrite={canWrite} />
+          <BidDecisionPanel
+            assessment={bidForClient}
+            canWrite={canWrite}
+            checklist={bidChecklist}
+          />
         </TabsContent>
       </Tabs>
     </div>

@@ -23,7 +23,11 @@ import { GdprAssessmentPanel } from "./GdprAssessmentPanel";
 import { WriteGate } from "../WriteGate";
 import { ModuleSetup } from "../../onboarding/ModuleSetup";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { GdprRecommendation } from "@/shared/schemas/gdpr-registers";
+import type {
+  GdprChecklistItem,
+  GdprRecommendation,
+} from "@/shared/schemas/gdpr-registers";
+import { getQuestionSet } from "@/server/services/question-sets";
 
 export default async function GdprPage() {
   const claims = await getClaims();
@@ -46,6 +50,9 @@ export default async function GdprPage() {
     getGdprAssessment(claims),
     listObligations(claims),
   ]);
+  const checklist = (await getQuestionSet(
+    "gdpr_health_check",
+  )) as unknown as GdprChecklistItem[];
   const canWrite = access.canWrite;
 
   // Page-level position, mirrored from the prototype's overview metrics.
@@ -262,6 +269,7 @@ export default async function GdprPage() {
           <GdprAssessmentPanel
             assessment={assessmentForClient}
             canWrite={canWrite}
+            checklist={checklist}
           />
         </TabsContent>
       </Tabs>

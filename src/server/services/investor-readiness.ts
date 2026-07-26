@@ -9,15 +9,16 @@ import { recordActivity } from "./activity";
 import { listDueDiligenceItems } from "./investor";
 import { saveReport } from "./reports";
 import {
-  ALL_ASSESSMENT_QUESTIONS,
-  INVESTOR_ASSESSMENT,
+  INVESTOR_ASSESSMENT_ITEMS,
   INVESTOR_DIMENSIONS,
   type AssessmentQuestion,
   type CreateDataRoomItemInput,
+  type InvestorAssessmentItem,
   type InvestorDimension,
   type SaveInvestorProfileInput,
   type UpdateDataRoomItemInput,
 } from "../../shared/schemas/investor-readiness";
+import { getQuestionSet } from "./question-sets";
 
 // Investor readiness: a single current fundraising profile, a data-room tracker,
 // and a scored readiness self-assessment. RLS-scoped via withUser().
@@ -170,24 +171,29 @@ function scoreQuestions(
   return answered ? Math.round((points / answered) * 100) : 0;
 }
 
-function scoreReadiness(answers: Record<string, string>) {
+function scoreReadiness(
+  answers: Record<string, string>,
+  items: readonly InvestorAssessmentItem[] = INVESTOR_ASSESSMENT_ITEMS,
+) {
   const dimScore = Object.fromEntries(
     INVESTOR_DIMENSIONS.map((d) => [
       d,
       scoreQuestions(
-        INVESTOR_ASSESSMENT.find((s) => s.dim === d)?.questions ?? [],
+        items.filter((q) => q.dim === d),
         answers,
       ),
     ]),
   ) as Record<InvestorDimension, number>;
-  const overall = scoreQuestions(ALL_ASSESSMENT_QUESTIONS, answers);
-  const gaps = ALL_ASSESSMENT_QUESTIONS.filter((q) => {
-    const a = answers[q.id];
-    return a && a !== "na" && a !== "yes";
-  }).map((q) => q.text);
-  const redFlags = ALL_ASSESSMENT_QUESTIONS.filter(
-    (q) => q.redFlag && answers[q.id] === "no",
-  ).map((q) => q.text);
+  const overall = scoreQuestions([...items], answers);
+  const gaps = items
+    .filter((q) => {
+      const a = answers[q.id];
+      return a && a !== "na" && a !== "yes";
+    })
+    .map((q) => q.text);
+  const redFlags = items
+    .filter((q) => q.redFlag && answers[q.id] === "no")
+    .map((q) => q.text);
   const recommendedActions = gaps.slice(0, 8).map((g) => `Address: ${g}`);
   return { overall, dimScore, gaps, redFlags, recommendedActions };
 }
@@ -208,54 +214,59 @@ export function saveReadinessAssessment(
   workspaceId: string,
   answers: Record<string, string>,
 ) {
-  return withUser(claims, async (tx) => {
-    const { overall, dimScore, gaps, redFlags, recommendedActions } =
-      scoreReadiness(answers);
-    const existing = (
-      await tx
-        .select({ id: investorReadinessAssessments.id })
-        .from(investorReadinessAssessments)
-        .orderBy(desc(investorReadinessAssessments.updatedAt))
-        .limit(1)
-    )[0];
-    const values = {
-      answers,
-      overallScore: overall,
-      corporateScore: dimScore.corporate,
-      financialScore: dimScore.financial,
-      legalScore: dimScore.legal,
-      complianceScore: dimScore.compliance,
-      commercialScore: dimScore.commercial,
-      peopleScore: dimScore.people,
-      dataRoomScore: dimScore.data_room,
-      gaps,
-      redFlags,
-      recommendedActions,
-      status: "completed" as const,
-      completedAt: sql`now()`,
-    };
-    const row = existing
-      ? (
-          await tx
-            .update(investorReadinessAssessments)
-            .set(values)
-            .where(eq(investorReadinessAssessments.id, existing.id))
-            .returning()
-        )[0]
-      : (
-          await tx
-            .insert(investorReadinessAssessments)
-            .values({ workspaceId, ...values })
-            .returning()
-        )[0];
-    await recordActivity(tx, workspaceId, {
-      module: "investor-ready",
-      action: "updated",
-      title: `Investor readiness (${overall}%)`,
-      referenceId: row.id,
+  return (async () => {
+    const items = (await getQuestionSet(
+      "investor_assessment",
+    )) as unknown as InvestorAssessmentItem[];
+    return withUser(claims, async (tx) => {
+      const { overall, dimScore, gaps, redFlags, recommendedActions } =
+        scoreReadiness(answers, items);
+      const existing = (
+        await tx
+          .select({ id: investorReadinessAssessments.id })
+          .from(investorReadinessAssessments)
+          .orderBy(desc(investorReadinessAssessments.updatedAt))
+          .limit(1)
+      )[0];
+      const values = {
+        answers,
+        overallScore: overall,
+        corporateScore: dimScore.corporate,
+        financialScore: dimScore.financial,
+        legalScore: dimScore.legal,
+        complianceScore: dimScore.compliance,
+        commercialScore: dimScore.commercial,
+        peopleScore: dimScore.people,
+        dataRoomScore: dimScore.data_room,
+        gaps,
+        redFlags,
+        recommendedActions,
+        status: "completed" as const,
+        completedAt: sql`now()`,
+      };
+      const row = existing
+        ? (
+            await tx
+              .update(investorReadinessAssessments)
+              .set(values)
+              .where(eq(investorReadinessAssessments.id, existing.id))
+              .returning()
+          )[0]
+        : (
+            await tx
+              .insert(investorReadinessAssessments)
+              .values({ workspaceId, ...values })
+              .returning()
+          )[0];
+      await recordActivity(tx, workspaceId, {
+        module: "investor-ready",
+        action: "updated",
+        title: `Investor readiness (${overall}%)`,
+        referenceId: row.id,
+      });
+      return row;
     });
-    return row;
-  });
+  })();
 }
 
 // --- Generate an Investor Readiness Report into the Reports library ----------

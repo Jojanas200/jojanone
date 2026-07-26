@@ -199,6 +199,17 @@ export const platformSettings = pgTable("platform_settings", {
   updatedByEmail: text("updated_by_email"),
 });
 
+// --- platform_question_sets (questionnaire overrides; service-role only) -----
+export const platformQuestionSets = pgTable("platform_question_sets", {
+  id: text("id").primaryKey(),
+  questions: jsonb("questions")
+    .notNull()
+    .default([])
+    .$type<Record<string, unknown>[]>(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
+  updatedByEmail: text("updated_by_email"),
+});
+
 // --- platform_events (cross-tenant product usage stream; service-role only) ---
 export const platformEvents = pgTable("platform_events", {
   id: uuid("id").primaryKey().defaultRandom(),

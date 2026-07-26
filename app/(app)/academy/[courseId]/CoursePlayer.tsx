@@ -19,6 +19,7 @@ import {
   getCourse,
   ACADEMY_DISCLAIMER,
   type CourseLesson,
+  type CourseQuizQuestion,
   type LessonCheckQuestion,
 } from "@/data/academy-catalog";
 import { printDocument } from "../../_shared/print";
@@ -37,11 +38,13 @@ export function CoursePlayer({
   completedLessons,
   certificate,
   canWrite,
+  quiz,
 }: {
   courseId: string;
   completedLessons: string[];
   certificate: Cert | null;
   canWrite: boolean;
+  quiz?: CourseQuizQuestion[];
 }) {
   const router = useRouter();
   const course = getCourse(courseId)!;
@@ -216,6 +219,7 @@ export function CoursePlayer({
       {quizOpen && (
         <QuizDialog
           courseId={courseId}
+          quiz={quiz ?? course.quiz}
           onClose={() => setQuizOpen(false)}
           onPassed={(c) => {
             setCert(c);
@@ -438,10 +442,12 @@ function CheckQuestion({ check: c }: { check: LessonCheckQuestion }) {
 
 function QuizDialog({
   courseId,
+  quiz,
   onClose,
   onPassed,
 }: {
   courseId: string;
+  quiz: CourseQuizQuestion[];
   onClose: () => void;
   onPassed: (c: Cert) => void;
 }) {
@@ -449,13 +455,11 @@ function QuizDialog({
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [graded, setGraded] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
-  const allAnswered = course.quiz.every((q) => answers[q.id] !== undefined);
+  const allAnswered = quiz.every((q) => answers[q.id] !== undefined);
 
   async function submit() {
-    const right = course.quiz.filter(
-      (q) => answers[q.id] === q.correct_index,
-    ).length;
-    const score = Math.round((right / course.quiz.length) * 100);
+    const right = quiz.filter((q) => answers[q.id] === q.correct_index).length;
+    const score = Math.round((right / quiz.length) * 100);
     setGraded(score);
     if (score >= 80) {
       setSaving(true);
@@ -487,11 +491,11 @@ function QuizDialog({
         <DialogHeader>
           <DialogTitle>Final quiz - {course.title}</DialogTitle>
           <DialogDescription>
-            {course.quiz.length} questions · 80% to pass · unlimited retries.
+            {quiz.length} questions · 80% to pass · unlimited retries.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-5">
-          {course.quiz.map((q, qi) => {
+          {quiz.map((q, qi) => {
             const chosen = answers[q.id];
             const wrong =
               graded !== null &&
@@ -537,7 +541,7 @@ function QuizDialog({
             {graded === null ? (
               <>
                 <p className="text-xs text-muted-foreground">
-                  {Object.keys(answers).length} of {course.quiz.length} answered
+                  {Object.keys(answers).length} of {quiz.length} answered
                 </p>
                 <Button onClick={submit} disabled={!allAnswered || saving}>
                   Submit quiz

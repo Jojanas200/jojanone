@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   TENDER_BID_CHECKLIST,
   TENDER_DIMENSIONS,
+  type TenderDimension,
 } from "@/shared/schemas/tender-readiness";
 import { nice } from "../_shared/format";
 
@@ -31,16 +32,16 @@ const recVariant: Record<string, "secondary" | "outline" | "destructive"> = {
 export function BidDecisionPanel({
   assessment,
   canWrite,
+  checklist = [...TENDER_BID_CHECKLIST],
 }: {
   assessment: Assessment;
   canWrite: boolean;
+  checklist?: { key: string; label: string; dim: TenderDimension }[];
 }) {
   const router = useRouter();
   const initial = (assessment?.answers ?? {}) as Record<string, boolean>;
   const [answers, setAnswers] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(
-      TENDER_BID_CHECKLIST.map((q) => [q.key, !!initial[q.key]]),
-    ),
+    Object.fromEntries(checklist.map((q) => [q.key, !!initial[q.key]])),
   );
   const [reason, setReason] = useState(assessment?.decisionReason ?? "");
   const [saving, setSaving] = useState(false);
@@ -48,11 +49,14 @@ export function BidDecisionPanel({
   const dimScore = useMemo(
     () =>
       TENDER_DIMENSIONS.map((d) => {
-        const items = TENDER_BID_CHECKLIST.filter((q) => q.dim === d);
+        const items = checklist.filter((q) => q.dim === d);
         const met = items.filter((q) => answers[q.key]).length;
-        return { dim: d, score: Math.round((met / items.length) * 100) };
+        return {
+          dim: d,
+          score: items.length ? Math.round((met / items.length) * 100) : 0,
+        };
       }),
-    [answers],
+    [answers, checklist],
   );
   const overall = useMemo(
     () =>
@@ -124,21 +128,23 @@ export function BidDecisionPanel({
             {nice(d)}
           </h3>
           <Card className="divide-y divide-border p-0">
-            {TENDER_BID_CHECKLIST.filter((q) => q.dim === d).map((q) => (
-              <div
-                key={q.key}
-                className="flex items-center justify-between gap-4 px-5 py-3.5"
-              >
-                <span className="text-sm text-foreground">{q.label}</span>
-                <Switch
-                  checked={!!answers[q.key]}
-                  disabled={!canWrite}
-                  onCheckedChange={(v) =>
-                    setAnswers((p) => ({ ...p, [q.key]: v === true }))
-                  }
-                />
-              </div>
-            ))}
+            {checklist
+              .filter((q) => q.dim === d)
+              .map((q) => (
+                <div
+                  key={q.key}
+                  className="flex items-center justify-between gap-4 px-5 py-3.5"
+                >
+                  <span className="text-sm text-foreground">{q.label}</span>
+                  <Switch
+                    checked={!!answers[q.key]}
+                    disabled={!canWrite}
+                    onCheckedChange={(v) =>
+                      setAnswers((p) => ({ ...p, [q.key]: v === true }))
+                    }
+                  />
+                </div>
+              ))}
           </Card>
         </div>
       ))}

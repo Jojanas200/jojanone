@@ -212,6 +212,16 @@ export const GDPR_CHECKLIST = [
 
 export type GdprRecommendation = { label: string; priority: "high" | "medium" };
 
+// Widened item shape so the platform-admin override (same fields, loaded from
+// the DB) is interchangeable with the code default below.
+export interface GdprChecklistItem {
+  key: string;
+  label: string;
+  gap: string;
+  recommendation: string;
+  priority: "high" | "medium";
+}
+
 // Tri-state answers from the health-check wizard. Only an explicit "yes" (or a
 // legacy boolean true) counts as met; "no" and "unsure" both leave a gap.
 export const gdprAnswerEnum = z.enum(["yes", "no", "unsure"]);
@@ -221,10 +231,14 @@ const isMet = (v: unknown) => v === true || v === "yes";
 
 // Single source of truth: score (% of met items), plain-language gaps, and
 // prioritised recommendations for the unmet items. Deterministic from answers.
-export function deriveGdprFindings(answers: Record<string, unknown>) {
-  const unmet = GDPR_CHECKLIST.filter((q) => !isMet(answers[q.key]));
-  const met = GDPR_CHECKLIST.length - unmet.length;
-  const score = Math.round((met / GDPR_CHECKLIST.length) * 100);
+export function deriveGdprFindings(
+  answers: Record<string, unknown>,
+  items: readonly GdprChecklistItem[] = GDPR_CHECKLIST,
+) {
+  const unmet = items.filter((q) => !isMet(answers[q.key]));
+  const met = items.length - unmet.length;
+  const score =
+    items.length === 0 ? 100 : Math.round((met / items.length) * 100);
   const gaps = unmet.map((q) => q.gap);
   const recommendations: GdprRecommendation[] = unmet.map((q) => ({
     label: q.recommendation,

@@ -8,6 +8,11 @@ import {
   listDataRoomItems,
 } from "@/server/services/investor-readiness";
 import { InvestorReadinessPanel } from "./InvestorReadinessPanel";
+import { getQuestionSet } from "@/server/services/question-sets";
+import {
+  groupInvestorAssessment,
+  type InvestorAssessmentItem,
+} from "@/shared/schemas/investor-readiness";
 import { InvestorActionPlan } from "./InvestorActionPlan";
 import { InvestorProfileForm } from "./InvestorProfileForm";
 import { DataRoomBoard } from "./DataRoomBoard";
@@ -18,12 +23,17 @@ export default async function InvestorReadyPage() {
   const claims = await getClaims();
   if (!claims) redirect("/login");
   const { access } = await requireModuleAccess(claims, "investor-ready");
-  const [rows, profile, dataRoom, readiness] = await Promise.all([
-    listDueDiligenceItems(claims),
-    getInvestorProfile(claims),
-    listDataRoomItems(claims),
-    getReadinessAssessment(claims),
-  ]);
+  const [rows, profile, dataRoom, readiness, assessmentItems] =
+    await Promise.all([
+      listDueDiligenceItems(claims),
+      getInvestorProfile(claims),
+      listDataRoomItems(claims),
+      getReadinessAssessment(claims),
+      getQuestionSet("investor_assessment"),
+    ]);
+  const assessmentSteps = groupInvestorAssessment(
+    assessmentItems as unknown as InvestorAssessmentItem[],
+  );
   const canWrite = access.canWrite;
 
   const readinessForClient = readiness
@@ -79,6 +89,7 @@ export default async function InvestorReadyPage() {
           <InvestorReadinessPanel
             assessment={readinessForClient}
             canWrite={canWrite}
+            steps={assessmentSteps}
           />
         </TabsContent>
 

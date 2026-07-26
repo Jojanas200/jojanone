@@ -2,7 +2,8 @@ import { notFound, redirect } from "next/navigation";
 import { getClaims } from "@/server/auth/session";
 import { requireModuleAccess } from "@/server/auth/guard";
 import { listCertificates, listProgress } from "@/server/services/academy";
-import { getCourse } from "@/data/academy-catalog";
+import { getCourse, type CourseQuizQuestion } from "@/data/academy-catalog";
+import { getQuestionSet } from "@/server/services/question-sets";
 import { CoursePlayer } from "./CoursePlayer";
 
 export default async function CoursePage({
@@ -17,10 +18,12 @@ export default async function CoursePage({
   const course = getCourse(courseId);
   if (!course) notFound();
 
-  const [progress, certificates] = await Promise.all([
+  const [progress, certificates, quizRaw] = await Promise.all([
     listProgress(claims),
     listCertificates(claims),
+    getQuestionSet(`academy_quiz:${courseId}`),
   ]);
+  const quiz = quizRaw as unknown as CourseQuizQuestion[];
   const mine = progress.find(
     (p) => p.courseId === courseId && p.learnerId === "owner",
   );
@@ -41,6 +44,7 @@ export default async function CoursePage({
             : null
         }
         canWrite={access.canWrite}
+        quiz={quiz}
       />
     </div>
   );

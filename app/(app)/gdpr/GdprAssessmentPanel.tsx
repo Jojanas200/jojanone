@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import {
   GDPR_CHECKLIST,
   type GdprAnswer,
+  type GdprChecklistItem,
   type GdprRecommendation,
 } from "@/shared/schemas/gdpr-registers";
 import { fmtDate } from "../_shared/format";
@@ -35,10 +36,13 @@ function normaliseAnswer(v: unknown): GdprAnswer | undefined {
   if (v === false || v === "no") return "no";
   return undefined;
 }
-function answersFrom(assessment: Assessment): Record<string, GdprAnswer> {
+function answersFrom(
+  assessment: Assessment,
+  checklist: readonly GdprChecklistItem[],
+): Record<string, GdprAnswer> {
   const src = (assessment?.answers ?? {}) as Record<string, unknown>;
   const out: Record<string, GdprAnswer> = {};
-  for (const q of GDPR_CHECKLIST) {
+  for (const q of checklist) {
     const n = normaliseAnswer(src[q.key]);
     if (n) out[q.key] = n;
   }
@@ -50,22 +54,24 @@ const OPTIONS: GdprAnswer[] = ["yes", "no", "unsure"];
 export function GdprAssessmentPanel({
   assessment,
   canWrite,
+  checklist = [...GDPR_CHECKLIST],
 }: {
   assessment: Assessment;
   canWrite: boolean;
+  checklist?: GdprChecklistItem[];
 }) {
   const router = useRouter();
   const [running, setRunning] = useState(false);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, GdprAnswer>>(() =>
-    answersFrom(assessment),
+    answersFrom(assessment, checklist),
   );
   const [saving, setSaving] = useState(false);
 
   const score = assessment?.score ?? 0;
 
   function start() {
-    setAnswers(answersFrom(assessment));
+    setAnswers(answersFrom(assessment, checklist));
     setStep(0);
     setRunning(true);
   }
@@ -91,9 +97,9 @@ export function GdprAssessmentPanel({
 
   // --- Wizard --------------------------------------------------------------
   if (running) {
-    const total = GDPR_CHECKLIST.length;
-    const q = GDPR_CHECKLIST[step];
-    const answered = GDPR_CHECKLIST.filter((x) => answers[x.key]).length;
+    const total = checklist.length;
+    const q = checklist[step];
+    const answered = checklist.filter((x) => answers[x.key]).length;
     const isLast = step === total - 1;
     return (
       <Card className="p-6">
