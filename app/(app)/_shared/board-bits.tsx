@@ -5,6 +5,7 @@
 // private folder (underscore prefix) so it is never treated as a route.
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -225,6 +226,56 @@ export function SwitchField({
         )}
       </div>
       <Switch checked={checked} onCheckedChange={(v) => onChange(v === true)} />
+    </div>
+  );
+}
+
+// Client-side pagination controls for the register tables. Renders nothing
+// when everything fits on one page, so small workspaces never see it.
+export function Pager({
+  page,
+  pageCount,
+  total,
+  pageSize,
+  onPage,
+}: {
+  page: number;
+  pageCount: number;
+  total: number;
+  pageSize: number;
+  onPage: (p: number) => void;
+}) {
+  if (pageCount <= 1) return null;
+  const from = page * pageSize + 1;
+  const to = Math.min(total, (page + 1) * pageSize);
+  return (
+    <div className="mt-3 flex items-center justify-between gap-3">
+      <p className="text-xs text-muted-foreground">
+        Showing {from}-{to} of {total}
+      </p>
+      <div className="flex items-center gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 text-xs"
+          disabled={page === 0}
+          onClick={() => onPage(page - 1)}
+        >
+          Previous
+        </Button>
+        <span className="px-2 text-xs text-muted-foreground">
+          {page + 1} / {pageCount}
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 text-xs"
+          disabled={page >= pageCount - 1}
+          onClick={() => onPage(page + 1)}
+        >
+          Next
+        </Button>
+      </div>
     </div>
   );
 }

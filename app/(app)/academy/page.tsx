@@ -33,10 +33,13 @@ const fmtDate = (d: string | null) =>
       })
     : "-";
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
   assigned: "outline",
-  in_progress: "secondary",
-  completed: "secondary",
+  in_progress: "warning",
+  completed: "success",
   overdue: "destructive",
 };
 

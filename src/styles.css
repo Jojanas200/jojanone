@@ -507,16 +507,15 @@
   letter-spacing: -0.02em;
 }
 
-/* Brand logo blending: the source JPEG has a white background. On light + clay
-   (Soft-UI) surfaces, multiply drops the white into the surface. On the Dark
-   theme, invert + screen turns the dark marks light and drops the (now black)
-   background, so the lockup stays visible. */
+/* Brand logo: the source PNG is transparent, so light themes need no
+   blending. On the Dark theme the navy wordmark would sink into the surface,
+   so invert + hue-rotate lifts it to a light blue while keeping the accent
+   blues in family. */
 .brand-logo {
-  mix-blend-mode: multiply;
+  mix-blend-mode: normal;
 }
 :is(.dark, [data-theme="dark"]) .brand-logo {
-  mix-blend-mode: screen;
-  filter: invert(1) grayscale(1) brightness(1.4);
+  filter: invert(1) hue-rotate(180deg) saturate(1.2);
 }
 
 /* -------- Landing semantic surfaces (theme-driven) -------- */

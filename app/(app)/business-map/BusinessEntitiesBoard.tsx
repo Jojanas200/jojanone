@@ -67,16 +67,22 @@ const STATUSES = [
 const IMPORTANCE = ["high", "medium", "low", "none"];
 const RISKS = ["low", "medium", "high"];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  active: "secondary",
-  review_due: "outline",
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  active: "success",
+  review_due: "warning",
   at_risk: "destructive",
   archived: "outline",
   missing_info: "destructive",
 };
-const riskVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  low: "outline",
-  medium: "secondary",
+const riskVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  low: "success",
+  medium: "warning",
   high: "destructive",
 };
 

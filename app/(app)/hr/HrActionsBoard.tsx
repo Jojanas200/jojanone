@@ -50,13 +50,18 @@ const TYPES = [
 const STATUSES = ["open", "in_progress", "completed"];
 const PRIORITIES = ["high", "medium", "low", "none"];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  open: "destructive",
-  in_progress: "secondary",
-  completed: "outline",
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  open: "warning",
+  in_progress: "warning",
+  completed: "success",
 };
-const priorityVariant: Record<string, "outline" | "secondary" | "destructive"> =
-  { high: "destructive", medium: "secondary", low: "outline", none: "outline" };
+const priorityVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = { high: "destructive", medium: "warning", low: "success", none: "outline" };
 
 const overdue = (d: string | null, status: string) =>
   !!d && status !== "completed" && new Date(d).getTime() < Date.now();

@@ -21,6 +21,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AreaField,
@@ -32,6 +38,7 @@ import {
   SelectField,
   StatTiles,
   TextField,
+  Pager,
 } from "../_shared/board-bits";
 import { fmtDate, nice } from "../_shared/format";
 import { printDocument, type PrintBlock } from "../_shared/print";
@@ -55,16 +62,22 @@ const RESPONSES = ["avoid", "reduce", "transfer", "accept", "monitor"];
 const EFFECTIVENESS = ["strong", "adequate", "weak", "none"];
 const SCORES = ["1", "2", "3", "4", "5"];
 
-const ratingVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  low: "outline",
-  medium: "secondary",
+const ratingVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  low: "success",
+  medium: "warning",
   high: "destructive",
   critical: "destructive",
 };
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
   open: "destructive",
-  accepted: "secondary",
-  closed: "outline",
+  accepted: "warning",
+  closed: "success",
 };
 
 const bandClass = (score: number) =>
@@ -186,17 +199,29 @@ export function RiskBoard({
     (r) => r.status === "open" || r.status === "accepted",
   ).length;
 
+  // Client-side pagination keeps the register readable as records grow.
+  const PAGE_SIZE = 25;
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  const cur = Math.min(page, pageCount - 1);
+  const paged = shown.slice(cur * PAGE_SIZE, cur * PAGE_SIZE + PAGE_SIZE);
+
   return (
     <>
       <StatTiles tiles={tiles} />
 
       <Tabs defaultValue="register">
-        <TabsList>
-          <TabsTrigger value="register">Register ({risks.length})</TabsTrigger>
-          <TabsTrigger value="matrix">
-            Matrix{openMatrixCount > 0 ? ` (${openMatrixCount})` : ""}
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <TabsList>
+            <TabsTrigger value="register">
+              Register ({risks.length})
+            </TabsTrigger>
+            <TabsTrigger value="matrix">
+              Matrix{openMatrixCount > 0 ? ` (${openMatrixCount})` : ""}
+            </TabsTrigger>
+          </TabsList>
+          <ScoringExplainer />
+        </div>
 
         <TabsContent value="matrix" className="mt-4">
           <RiskMatrix risks={risks} onPick={setActive} />
@@ -264,7 +289,7 @@ export function RiskBoard({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {shown.map((r) => (
+                    {paged.map((r) => (
                       <TableRow
                         key={r.id}
                         onClick={() => setActive(r)}
@@ -306,6 +331,13 @@ export function RiskBoard({
               </div>
             )}
           </Card>
+          <Pager
+            page={cur}
+            pageCount={pageCount}
+            total={shown.length}
+            pageSize={PAGE_SIZE}
+            onPage={setPage}
+          />
         </TabsContent>
       </Tabs>
 
@@ -978,5 +1010,61 @@ function RiskEditForm({
         </div>
       </div>
     </form>
+  );
+}
+
+// Plain-English explanation of the 5x5 scoring model, mirroring the service's
+// rating bands exactly (>=20 critical, >=12 high, >=6 medium, else low).
+function ScoringExplainer() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-xs text-muted-foreground"
+        onClick={() => setOpen(true)}
+      >
+        How is this calculated?
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>How risk scores are calculated</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 text-sm text-foreground">
+            <p>
+              Each risk is scored on a 5×5 matrix:{" "}
+              <span className="font-medium">likelihood × impact</span> (each
+              1–5), giving a score from 1 to 25.
+            </p>
+            <ul className="space-y-1.5">
+              <li className="flex items-center gap-2">
+                <Badge variant="success">Low</Badge> score 1–5
+              </li>
+              <li className="flex items-center gap-2">
+                <Badge variant="warning">Medium</Badge> score 6–11
+              </li>
+              <li className="flex items-center gap-2">
+                <Badge variant="destructive">High</Badge> score 12–19
+              </li>
+              <li className="flex items-center gap-2">
+                <Badge variant="destructive">Critical</Badge> score 20–25
+              </li>
+            </ul>
+            <p>
+              <span className="font-medium">Inherent</span> is the raw risk
+              before controls; <span className="font-medium">residual</span> is
+              re-scored with your controls in place. The register sorts by
+              residual score, and the matrix plots residual likelihood × impact.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Scoring is a structured judgement to aid prioritisation, not a
+              precise measurement.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

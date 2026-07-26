@@ -31,6 +31,7 @@ import {
   StatTiles,
   SwitchField,
   TextField,
+  Pager,
 } from "../_shared/board-bits";
 import { fmtDate, nice } from "../_shared/format";
 import type { listProcessingActivities } from "@/server/services/gdpr";
@@ -111,6 +112,13 @@ export function GdprBoard({
 
   const filtersActive = !!search || basisF !== "all" || statusF !== "all";
 
+  // Client-side pagination keeps the register readable as records grow.
+  const PAGE_SIZE = 25;
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  const cur = Math.min(page, pageCount - 1);
+  const paged = shown.slice(cur * PAGE_SIZE, cur * PAGE_SIZE + PAGE_SIZE);
+
   return (
     <>
       <StatTiles tiles={tiles} />
@@ -175,7 +183,7 @@ export function GdprBoard({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {shown.map((a) => (
+                {paged.map((a) => (
                   <TableRow
                     key={a.id}
                     onClick={() => setActive(a)}
@@ -220,6 +228,14 @@ export function GdprBoard({
           </div>
         )}
       </Card>
+
+      <Pager
+        page={cur}
+        pageCount={pageCount}
+        total={shown.length}
+        pageSize={PAGE_SIZE}
+        onPage={setPage}
+      />
 
       <ActivityDrawer
         activity={active}

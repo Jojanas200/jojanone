@@ -46,11 +46,14 @@ const TYPES = [
 ];
 const STATUSES = ["open", "in_progress", "completed", "closed"];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  open: "destructive",
-  in_progress: "secondary",
-  completed: "secondary",
-  closed: "outline",
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  open: "warning",
+  in_progress: "warning",
+  completed: "success",
+  closed: "success",
 };
 
 const isLive = (s: string) => s === "open" || s === "in_progress";

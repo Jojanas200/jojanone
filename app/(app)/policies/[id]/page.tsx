@@ -13,8 +13,15 @@ import { AckRowActions } from "./AckRowActions";
 import { PolicyDocument } from "./PolicyDocument";
 import { PolicyVersionHistory } from "./PolicyVersionHistory";
 import { WriteGate } from "../../WriteGate";
+import {
+  PolicyHeaderActions,
+  PolicyProperties,
+  ProfessionalReview,
+  type PolicyLite,
+} from "./PolicyTools";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -37,8 +44,8 @@ const fmtDate = (d: string | Date | null) =>
 
 const policyStatusVariant: Record<
   string,
-  "outline" | "secondary" | "destructive"
-> = { draft: "outline", active: "secondary", archived: "destructive" };
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = { draft: "outline", active: "success", archived: "outline" };
 
 const ackStatusVariant: Record<
   string,
@@ -73,6 +80,22 @@ export default async function PolicyDetailPage({ params }: Ctx) {
     content: v.content,
     createdAt: v.createdAt.toISOString(),
   }));
+
+  const policyLite: PolicyLite = {
+    id: policy.id,
+    policyName: policy.policyName,
+    policyCategory: policy.policyCategory,
+    version: policy.version,
+    owner: policy.owner,
+    status: policy.status,
+    approvalDate: policy.approvalDate,
+    reviewDate: policy.reviewDate,
+    acknowledgementRequired: policy.acknowledgementRequired,
+    notes: policy.notes,
+    content: policy.content,
+    professionalReviewStatus: policy.professionalReviewStatus,
+    professionalReviewNote: policy.professionalReviewNote,
+  };
 
   const acknowledged = roster.filter((r) => r.status === "acknowledged").length;
   const waived = roster.filter((r) => r.status === "waived").length;
@@ -110,6 +133,9 @@ export default async function PolicyDetailPage({ params }: Ctx) {
             {policy.owner ? ` · Owner: ${policy.owner}` : ""}
           </p>
         </div>
+        <WriteGate>
+          <PolicyHeaderActions policy={policyLite} />
+        </WriteGate>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -140,105 +166,136 @@ export default async function PolicyDetailPage({ params }: Ctx) {
         </Card>
       </div>
 
-      <div className="mb-8">
-        <PolicyDocument
-          policyId={policy.id}
-          content={policy.content}
-          canWrite={access.canWrite}
-        />
-      </div>
+      <Tabs defaultValue="document">
+        <TabsList>
+          <TabsTrigger value="document">Document</TabsTrigger>
+          <TabsTrigger value="properties">Properties</TabsTrigger>
+          <TabsTrigger value="professional">Professional review</TabsTrigger>
+          <TabsTrigger value="signoff">
+            Sign-off{roster.length ? ` (${roster.length})` : ""}
+          </TabsTrigger>
+          <TabsTrigger value="versions">
+            Versions{versions.length ? ` (${versions.length})` : ""}
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="mb-8">
-        <PolicyVersionHistory versions={versionsForClient} />
-      </div>
+        <TabsContent value="document" className="mt-6">
+          <PolicyDocument
+            policyId={policy.id}
+            content={policy.content}
+            canWrite={access.canWrite}
+          />
+        </TabsContent>
 
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">
-            Staff sign-off
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Record which team members have acknowledged this policy.
-          </p>
-        </div>
-        <WriteGate>
-          <AssignAck policyId={policy.id} employees={unassigned} />
-        </WriteGate>
-      </div>
+        <TabsContent value="properties" className="mt-6">
+          <PolicyProperties policy={policyLite} canWrite={access.canWrite} />
+        </TabsContent>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {stats.map((s) => (
-          <Card key={s.label} className="p-4">
-            <p className="text-2xl font-semibold text-foreground">{s.value}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">{s.label}</p>
-          </Card>
-        ))}
-      </div>
+        <TabsContent value="professional" className="mt-6">
+          <ProfessionalReview policy={policyLite} canWrite={access.canWrite} />
+        </TabsContent>
 
-      <Card className="overflow-hidden p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Employee</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Signed</TableHead>
-                <TableHead>Version</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {roster.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="py-10 text-center text-sm text-muted-foreground"
-                  >
-                    No one assigned yet. Use “Assign staff” to request sign-off.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                roster.map((r) => (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-medium text-foreground">
-                      {r.fullName}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {r.jobTitle ?? "-"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={ackStatusVariant[r.status] ?? "outline"}>
-                        {r.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {fmtDate(r.acknowledgedAt)}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {r.policyVersion ?? "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <WriteGate>
-                        <AckRowActions
-                          policyId={policy.id}
-                          ackId={r.id}
-                          status={r.status}
-                        />
-                      </WriteGate>
-                    </TableCell>
+        <TabsContent value="versions" className="mt-6">
+          <PolicyVersionHistory versions={versionsForClient} />
+        </TabsContent>
+
+        <TabsContent value="signoff" className="mt-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">
+                Staff sign-off
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Record which team members have acknowledged this policy.
+              </p>
+            </div>
+            <WriteGate>
+              <AssignAck policyId={policy.id} employees={unassigned} />
+            </WriteGate>
+          </div>
+
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {stats.map((s) => (
+              <Card key={s.label} className="p-4">
+                <p className="text-2xl font-semibold text-foreground">
+                  {s.value}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {s.label}
+                </p>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="overflow-hidden p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Employee</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Signed</TableHead>
+                    <TableHead>Version</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {roster.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={6}
+                        className="py-10 text-center text-sm text-muted-foreground"
+                      >
+                        No one assigned yet. Use “Assign staff” to request
+                        sign-off.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    roster.map((r) => (
+                      <TableRow key={r.id}>
+                        <TableCell className="font-medium text-foreground">
+                          {r.fullName}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {r.jobTitle ?? "-"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={ackStatusVariant[r.status] ?? "outline"}
+                          >
+                            {r.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {fmtDate(r.acknowledgedAt)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {r.policyVersion ?? "-"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <WriteGate>
+                            <AckRowActions
+                              policyId={policy.id}
+                              ackId={r.id}
+                              status={r.status}
+                            />
+                          </WriteGate>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
 
-      <p className="mt-4 text-[11px] text-muted-foreground">
-        Sign-off is recorded by a workspace member on the employee’s behalf and
-        stored with the policy version in force at the time.
-      </p>
+          <p className="mt-4 text-[11px] text-muted-foreground">
+            Sign-off is recorded by a workspace member on the employee’s behalf
+            and stored with the policy version in force at the time.
+          </p>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

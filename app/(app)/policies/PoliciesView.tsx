@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Pager } from "../_shared/board-bits";
 import {
   Select,
   SelectContent,
@@ -49,10 +50,13 @@ const fmtDate = (d: string | null) =>
       })
     : "-";
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
   draft: "outline",
-  active: "secondary",
-  archived: "destructive",
+  active: "success",
+  archived: "outline",
 };
 
 const ackLabel: Record<string, string> = {
@@ -124,6 +128,13 @@ export function PoliciesView({
 
   const registerFiltersActive =
     !!query || statusF !== "all" || categoryF !== "all";
+
+  // Client-side pagination keeps the register readable as records grow.
+  const PAGE_SIZE = 25;
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  const cur = Math.min(page, pageCount - 1);
+  const paged = shown.slice(cur * PAGE_SIZE, cur * PAGE_SIZE + PAGE_SIZE);
 
   return (
     <>
@@ -239,7 +250,7 @@ export function PoliciesView({
                       </TableCell>
                     </TableRow>
                   ) : (
-                    shown.map((p) => (
+                    paged.map((p) => (
                       <TableRow key={p.id}>
                         <TableCell className="font-medium">
                           <Link
@@ -290,6 +301,13 @@ export function PoliciesView({
               </Table>
             </div>
           </Card>
+          <Pager
+            page={cur}
+            pageCount={pageCount}
+            total={shown.length}
+            pageSize={PAGE_SIZE}
+            onPage={setPage}
+          />
         </TabsContent>
 
         {/* --- Template library --------------------------------------------- */}

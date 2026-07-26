@@ -39,10 +39,13 @@ type Req = Awaited<ReturnType<typeof listTenderRequirements>>[number];
 
 const STATUSES = ["not_started", "in_progress", "met", "not_met"];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
   not_started: "outline",
-  in_progress: "secondary",
-  met: "secondary",
+  in_progress: "warning",
+  met: "success",
   not_met: "destructive",
 };
 

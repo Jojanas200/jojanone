@@ -76,22 +76,24 @@ const PRIORITIES = ["high", "medium", "low", "none"];
 
 const statusVariant: Record<
   string,
-  "outline" | "secondary" | "default" | "destructive"
+  "outline" | "secondary" | "default" | "destructive" | "success" | "warning"
 > = {
-  completed: "secondary",
+  completed: "success",
   overdue: "destructive",
-  open: "outline",
-  in_progress: "default",
+  open: "warning",
+  in_progress: "warning",
   upcoming: "outline",
   info: "outline",
 };
-const priorityVariant: Record<string, "outline" | "secondary" | "destructive"> =
-  {
-    high: "destructive",
-    medium: "secondary",
-    low: "outline",
-    none: "outline",
-  };
+const priorityVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  high: "destructive",
+  medium: "secondary",
+  low: "outline",
+  none: "outline",
+};
 
 const fmtDay = (iso: string) =>
   new Date(iso).toLocaleDateString("en-GB", {

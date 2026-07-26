@@ -68,13 +68,16 @@ const STATUSES = [
   "archived",
 ];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
   identified: "outline",
-  assessing: "outline",
-  bid: "secondary",
-  drafting: "secondary",
-  submitted: "secondary",
-  won: "secondary",
+  assessing: "warning",
+  bid: "warning",
+  drafting: "warning",
+  submitted: "success",
+  won: "success",
   no_bid: "outline",
   lost: "destructive",
   archived: "outline",

@@ -30,6 +30,7 @@ import {
   SelectField,
   StatTiles,
   TextField,
+  Pager,
 } from "../_shared/board-bits";
 import { fmtDate, nice } from "../_shared/format";
 import type { listGovernanceRecords } from "@/server/services/governance";
@@ -53,12 +54,15 @@ const STATUSES = [
   "completed",
 ];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
   draft: "outline",
-  pending: "secondary",
-  approved: "secondary",
-  completed: "secondary",
-  deferred: "outline",
+  pending: "warning",
+  approved: "success",
+  completed: "success",
+  deferred: "warning",
   rejected: "destructive",
 };
 
@@ -112,6 +116,13 @@ export function GovernanceBoard({
   }, [records, search, typeF, statusF]);
 
   const filtersActive = !!search || typeF !== "all" || statusF !== "all";
+
+  // Client-side pagination keeps the register readable as records grow.
+  const PAGE_SIZE = 25;
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  const cur = Math.min(page, pageCount - 1);
+  const paged = shown.slice(cur * PAGE_SIZE, cur * PAGE_SIZE + PAGE_SIZE);
 
   return (
     <>
@@ -176,7 +187,7 @@ export function GovernanceBoard({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {shown.map((r) => (
+                {paged.map((r) => (
                   <TableRow
                     key={r.id}
                     onClick={() => setActive(r)}
@@ -206,6 +217,14 @@ export function GovernanceBoard({
           </div>
         )}
       </Card>
+
+      <Pager
+        page={cur}
+        pageCount={pageCount}
+        total={shown.length}
+        pageSize={PAGE_SIZE}
+        onPage={setPage}
+      />
 
       <RecordDrawer
         record={active}

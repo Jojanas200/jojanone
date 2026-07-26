@@ -30,6 +30,7 @@ import {
   StatTiles,
   SwitchField,
   TextField,
+  Pager,
 } from "../_shared/board-bits";
 import { fmtDate, nice } from "../_shared/format";
 import type { listEmployees } from "@/server/services/hr";
@@ -46,17 +47,25 @@ const CONTRACT = ["signed", "pending", "missing"];
 const ACK = ["complete", "outstanding"];
 const RISKS = ["low", "medium", "high"];
 
-const rtwVariant: Record<string, "secondary" | "destructive" | "outline"> = {
-  verified: "secondary",
+const rtwVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  verified: "success",
   not_required: "outline",
   outstanding: "destructive",
   expired: "destructive",
 };
-const trainingVariant: Record<string, "secondary" | "destructive" | "outline"> =
-  { complete: "secondary", outstanding: "destructive", overdue: "destructive" };
-const riskVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  low: "outline",
-  medium: "secondary",
+const trainingVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = { complete: "success", outstanding: "destructive", overdue: "destructive" };
+const riskVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  low: "success",
+  medium: "warning",
   high: "destructive",
 };
 
@@ -171,6 +180,13 @@ export function HrBoard({
   const filtersActive =
     !!search || typeF !== "all" || statusF !== "all" || deptF !== "all";
 
+  // Client-side pagination keeps the register readable as records grow.
+  const PAGE_SIZE = 25;
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  const cur = Math.min(page, pageCount - 1);
+  const paged = shown.slice(cur * PAGE_SIZE, cur * PAGE_SIZE + PAGE_SIZE);
+
   return (
     <>
       <StatTiles tiles={tiles} />
@@ -242,7 +258,7 @@ export function HrBoard({
 
       {view === "cards" && employees.length > 0 && shown.length > 0 && (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {shown.map((e) => (
+          {paged.map((e) => (
             <button
               key={e.id}
               type="button"
@@ -299,7 +315,7 @@ export function HrBoard({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {shown.map((e) => (
+                {paged.map((e) => (
                   <TableRow
                     key={e.id}
                     onClick={() => setActive(e)}
@@ -343,6 +359,14 @@ export function HrBoard({
           </div>
         )}
       </Card>
+
+      <Pager
+        page={cur}
+        pageCount={pageCount}
+        total={shown.length}
+        pageSize={PAGE_SIZE}
+        onPage={setPage}
+      />
 
       <EmployeeDrawer
         employee={active}

@@ -38,10 +38,13 @@ type Resp = Awaited<ReturnType<typeof listTenderResponses>>[number];
 
 const STATUSES = ["draft", "in_review", "final"];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
   draft: "outline",
-  in_review: "secondary",
-  final: "secondary",
+  in_review: "warning",
+  final: "success",
 };
 
 const wordCount = (s: string | null) =>

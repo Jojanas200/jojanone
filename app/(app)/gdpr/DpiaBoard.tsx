@@ -39,14 +39,20 @@ type Dpia = Awaited<ReturnType<typeof listDpias>>[number];
 const STATUSES = ["draft", "approved", "review_due"];
 const RISKS = ["low", "medium", "high"];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
   draft: "outline",
-  approved: "secondary",
-  review_due: "destructive",
+  approved: "success",
+  review_due: "warning",
 };
-const riskVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  low: "outline",
-  medium: "secondary",
+const riskVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  low: "success",
+  medium: "warning",
   high: "destructive",
 };
 

@@ -1,11 +1,10 @@
 import Image from "next/image";
 
 /**
- * Jojan One lockup (hexagon mark + wordmark). The source JPEG has a white
- * background. The `.brand-logo` class blends it into whatever theme surface it
- * sits on: multiply drops the white out on the light + Soft-UI themes, and on
- * the Dark theme it inverts + screens so the mark stays visible on dark.
- * Size via `className` (defaults to a header-height mark).
+ * Jojan One lockup (hexagon mark + wordmark), cropped from
+ * public/assets/logo.png with a transparent background. The `.brand-logo`
+ * class only adjusts the Dark theme (invert + hue-rotate) so the navy
+ * wordmark stays readable. Size via `className`.
  */
 export function BrandLogo({
   className = "h-8 w-auto",
@@ -16,10 +15,10 @@ export function BrandLogo({
 }) {
   return (
     <Image
-      src="/assets/logo.jpg"
+      src="/assets/logo-header.png"
       alt="Jojan One"
-      width={1920}
-      height={819}
+      width={680}
+      height={210}
       priority={priority}
       className={`brand-logo ${className}`}
     />

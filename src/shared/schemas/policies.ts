@@ -38,6 +38,10 @@ export const createPolicySchema = z.object({
   acknowledgementStatus: acknowledgementStatusEnum.optional(),
   notes: z.string().nullish(),
   content: z.string().max(50000).nullish(),
+  professionalReviewStatus: z
+    .enum(["not_required", "recommended", "reviewed"])
+    .optional(),
+  professionalReviewNote: z.string().max(2000).nullish(),
 });
 
 export const updatePolicySchema = createPolicySchema.partial();

@@ -31,6 +31,7 @@ import {
   StatTiles,
   SwitchField,
   TextField,
+  Pager,
 } from "../_shared/board-bits";
 import { fmtDate, nice } from "../_shared/format";
 import { printDocument, type PrintBlock } from "../_shared/print";
@@ -74,16 +75,21 @@ const STATUSES = [
 const PRIORITIES = ["high", "medium", "low"];
 const RECURRENCES = ["none", "annual", "quarterly", "monthly", "weekly"];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  action_required: "destructive",
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  action_required: "warning",
   overdue: "destructive",
-  in_progress: "secondary",
-  completed: "secondary",
+  in_progress: "warning",
+  completed: "success",
   upcoming: "outline",
   not_applicable: "outline",
 };
-const priorityVariant: Record<string, "outline" | "secondary" | "destructive"> =
-  { high: "destructive", medium: "secondary", low: "outline" };
+const priorityVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = { high: "destructive", medium: "secondary", low: "outline" };
 const evidenceLabel: Record<string, string> = {
   not_started: "None",
   in_progress: "Partial",
@@ -188,6 +194,13 @@ export function ComplianceBoard({
     priorityF !== "all" ||
     statusF !== "all";
 
+  // Client-side pagination keeps the register readable as records grow.
+  const PAGE_SIZE = 25;
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  const cur = Math.min(page, pageCount - 1);
+  const paged = shown.slice(cur * PAGE_SIZE, cur * PAGE_SIZE + PAGE_SIZE);
+
   return (
     <>
       <StatTiles tiles={tiles} />
@@ -269,7 +282,7 @@ export function ComplianceBoard({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {shown.map((o) => (
+                {paged.map((o) => (
                   <TableRow
                     key={o.id}
                     onClick={() => setActive(o)}
@@ -313,6 +326,14 @@ export function ComplianceBoard({
           </div>
         )}
       </Card>
+
+      <Pager
+        page={cur}
+        pageCount={pageCount}
+        total={shown.length}
+        pageSize={PAGE_SIZE}
+        onPage={setPage}
+      />
 
       <ObligationDrawer
         obligation={active}

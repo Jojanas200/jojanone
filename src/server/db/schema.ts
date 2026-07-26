@@ -604,6 +604,10 @@ export const policies = pgTable("policies", {
     .notNull()
     .default("not_started"), // not_started | partial | complete
   notes: text("notes"),
+  professionalReviewStatus: text("professional_review_status")
+    .notNull()
+    .default("not_required"), // not_required | recommended | reviewed
+  professionalReviewNote: text("professional_review_note"),
   content: text("content"), // full policy body (Jova-drafted or authored)
   createdBy: uuid("created_by"),
   updatedBy: uuid("updated_by"),

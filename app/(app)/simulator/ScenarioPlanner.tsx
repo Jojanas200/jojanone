@@ -41,9 +41,12 @@ type ScenarioRun = {
   createdAt: string | Date;
 };
 
-const impactVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  low: "outline",
-  medium: "secondary",
+const impactVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  low: "success",
+  medium: "warning",
   high: "destructive",
 };
 

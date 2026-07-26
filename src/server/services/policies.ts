@@ -207,7 +207,7 @@ function buildPolicyPrompt(
   const questions = questionsFor(input.templateKey);
   const qa = questions
     .map((q) => {
-      const a = input.answers[q.key]?.trim();
+      const a = (input.answers ?? {})[q.key]?.trim();
       return a ? `- ${q.question}\n  ${a}` : null;
     })
     .filter(Boolean)
@@ -243,10 +243,12 @@ function composeFromTemplate(
   const topic = input.policyName.trim().toLowerCase();
   const questions = questionsFor(input.templateKey);
 
-  // Group answers by the section they target.
+  // Group answers by the section they target. Defensive: direct service
+  // callers may omit answers entirely (the API route's zod default fills {}).
+  const answers = input.answers ?? {};
   const byTarget: Record<string, string[]> = {};
   for (const q of questions) {
-    const a = input.answers[q.key]?.trim();
+    const a = answers[q.key]?.trim();
     if (a) (byTarget[q.sectionTarget] ??= []).push(a);
   }
 

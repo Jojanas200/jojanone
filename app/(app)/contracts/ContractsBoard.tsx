@@ -11,6 +11,7 @@ import {
   TableProperties,
 } from "lucide-react";
 import { contractIssues } from "./issues";
+import { Pager } from "../_shared/board-bits";
 import { printDocument, type PrintBlock } from "../_shared/print";
 import type { EntityOption } from "./NewContract";
 import { Card } from "@/components/ui/card";
@@ -66,17 +67,23 @@ const STATUSES = [
 ];
 const RISKS = ["low", "medium", "high"];
 
-const riskVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  low: "outline",
-  medium: "secondary",
+const riskVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  low: "success",
+  medium: "warning",
   high: "destructive",
 };
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  active: "secondary",
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  active: "success",
   draft: "outline",
   expired: "destructive",
   archived: "outline",
-  pending_signature: "outline",
+  pending_signature: "warning",
 };
 
 const money = (minor: number, currency: string) =>
@@ -155,6 +162,13 @@ export function ContractsBoard({
     { label: "High risk", value: String(stats.highRisk) },
     { label: "Recorded value", value: money(stats.value, "GBP") },
   ];
+
+  // Client-side pagination keeps the register readable as records grow.
+  const PAGE_SIZE = 25;
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  const cur = Math.min(page, pageCount - 1);
+  const paged = shown.slice(cur * PAGE_SIZE, cur * PAGE_SIZE + PAGE_SIZE);
 
   return (
     <>
@@ -263,7 +277,7 @@ export function ContractsBoard({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {shown.map((c) => {
+                {paged.map((c) => {
                   const issues = contractIssues(c);
                   return (
                     <TableRow
@@ -316,7 +330,7 @@ export function ContractsBoard({
         </Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {shown.map((c) => {
+          {paged.map((c) => {
             const issues = contractIssues(c);
             return (
               <button
@@ -353,6 +367,14 @@ export function ContractsBoard({
           })}
         </div>
       )}
+
+      <Pager
+        page={cur}
+        pageCount={pageCount}
+        total={shown.length}
+        pageSize={PAGE_SIZE}
+        onPage={setPage}
+      />
 
       <ContractDrawer
         contract={active}

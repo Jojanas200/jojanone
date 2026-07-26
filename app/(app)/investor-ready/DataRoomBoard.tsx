@@ -39,11 +39,14 @@ type Item = Awaited<ReturnType<typeof listDataRoomItems>>[number];
 const STATUSES = ["missing", "requested", "in_progress", "ready"];
 const CONF = ["standard", "confidential", "restricted"];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
   missing: "destructive",
-  requested: "outline",
-  in_progress: "secondary",
-  ready: "secondary",
+  requested: "warning",
+  in_progress: "warning",
+  ready: "success",
 };
 
 export function DataRoomBoard({

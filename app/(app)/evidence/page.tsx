@@ -22,8 +22,11 @@ const fmtDate = (d: string | Date | null) =>
       })
     : "-";
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  current: "secondary",
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  current: "success",
   in_review: "outline",
   expired: "destructive",
   archived: "outline",

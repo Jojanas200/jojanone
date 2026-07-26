@@ -30,6 +30,7 @@ import {
   SelectField,
   SwitchField,
   TextField,
+  Pager,
 } from "../_shared/board-bits";
 import { fmtDate, nice } from "../_shared/format";
 import { RowActions } from "./RowActions";
@@ -55,19 +56,24 @@ const STATUSES = [
 ];
 const PRIORITIES = ["high", "medium", "low"];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
   missing: "destructive",
-  in_progress: "secondary",
-  ready: "secondary",
-  needs_review: "outline",
+  in_progress: "warning",
+  ready: "success",
+  needs_review: "warning",
   not_applicable: "outline",
 };
-const priorityVariant: Record<string, "outline" | "secondary" | "destructive"> =
-  {
-    high: "destructive",
-    medium: "secondary",
-    low: "outline",
-  };
+const priorityVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  high: "destructive",
+  medium: "warning",
+  low: "success",
+};
 
 export function DueDiligenceBoard({
   items,
@@ -100,6 +106,13 @@ export function DueDiligenceBoard({
 
   const filtersActive =
     !!search || categoryF !== "all" || statusF !== "all" || priorityF !== "all";
+
+  // Client-side pagination keeps the register readable as records grow.
+  const PAGE_SIZE = 25;
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(shown.length / PAGE_SIZE));
+  const cur = Math.min(page, pageCount - 1);
+  const paged = shown.slice(cur * PAGE_SIZE, cur * PAGE_SIZE + PAGE_SIZE);
 
   return (
     <>
@@ -186,7 +199,7 @@ export function DueDiligenceBoard({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {shown.map((i) => (
+                {paged.map((i) => (
                   <TableRow
                     key={i.id}
                     onClick={() => setActive(i)}
@@ -224,6 +237,14 @@ export function DueDiligenceBoard({
           </div>
         )}
       </Card>
+
+      <Pager
+        page={cur}
+        pageCount={pageCount}
+        total={shown.length}
+        pageSize={PAGE_SIZE}
+        onPage={setPage}
+      />
 
       <ItemDrawer
         item={active}

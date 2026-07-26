@@ -41,14 +41,20 @@ type Breach = Awaited<ReturnType<typeof listDataBreaches>>[number];
 const STATUSES = ["open", "contained", "closed"];
 const RISKS = ["low", "medium", "high"];
 
-const statusVariant: Record<string, "outline" | "secondary" | "destructive"> = {
+const statusVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
   open: "destructive",
-  contained: "secondary",
-  closed: "outline",
+  contained: "warning",
+  closed: "success",
 };
-const riskVariant: Record<string, "outline" | "secondary" | "destructive"> = {
-  low: "outline",
-  medium: "secondary",
+const riskVariant: Record<
+  string,
+  "outline" | "secondary" | "destructive" | "success" | "warning"
+> = {
+  low: "success",
+  medium: "warning",
   high: "destructive",
 };
 
