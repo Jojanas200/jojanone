@@ -367,7 +367,9 @@ export default async function DashboardPage() {
       )}
 
       {/* Module quick links */}
-      <h2 className="mb-3 text-sm font-semibold text-foreground">Modules</h2>
+      <h2 className="mb-3 text-sm font-semibold text-foreground">
+        Quick Navigation
+      </h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[
           {

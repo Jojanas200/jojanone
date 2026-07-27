@@ -216,29 +216,44 @@ export default async function ExecutivePage() {
       </Card>
 
       {/* Management summary */}
-      <div className="mb-6 grid gap-3 sm:grid-cols-2">
-        {summary.map((b) => (
-          <Card key={b.label} className="p-4">
-            <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              {b.label}
-            </p>
-            {b.items.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{b.empty}</p>
-            ) : (
-              <ul className="space-y-1 text-sm text-foreground">
-                {b.items.map((it, i) => (
-                  <li key={i} className="flex gap-2">
-                    <span className="text-primary">•</span>
-                    <span className="min-w-0">{it}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
-        ))}
-      </div>
+      <Card className="mb-6 p-5">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-primary">
+            Management summary
+          </span>
+          <Badge variant={statusBadge(s.statusLabel)}>{s.statusLabel}</Badge>
+        </div>
+        <p className="mt-2 text-sm text-foreground">
+          Overall position is <strong>{s.statusLabel.toLowerCase()}</strong>{" "}
+          with a Business Confidence Score of {s.score}.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          {summary.map((b) => (
+            <div key={b.label}>
+              <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                {b.label}
+              </p>
+              {b.items.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{b.empty}</p>
+              ) : (
+                <ul className="space-y-1 text-sm text-foreground">
+                  {b.items.map((it, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="text-primary">•</span>
+                      <span className="min-w-0">{it}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      </Card>
 
       {/* Executive metrics */}
+      <h2 className="mb-3 text-sm font-semibold text-foreground">
+        Executive metrics
+      </h2>
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {metrics.map((m) => (
           <Card key={m.label} className="p-4">

@@ -78,7 +78,7 @@ function Nav({
     (ALWAYS_ALLOWED.has(key) || !disabledModules.includes(key));
   return (
     <nav
-      aria-label="Modules"
+      aria-label="Quick Navigation"
       className={`flex-1 overflow-y-auto py-4 ${collapsed ? "px-2" : "px-3"}`}
     >
       {MODULES_BY_SECTION.map(({ section, items }) => {
@@ -103,7 +103,7 @@ function Nav({
                     aria-current={active ? "page" : undefined}
                     className={`${item} ${
                       active
-                        ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
+                        ? "bg-primary font-medium text-primary-foreground"
                         : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                     }`}
                   >
@@ -173,12 +173,14 @@ function MobileNav({
   allowedModules,
   disabledModules,
   brandLogoSrc,
+  brandColor,
   workspaceName,
 }: {
   pathname: string;
   allowedModules: string[] | null;
   disabledModules?: string[];
   brandLogoSrc?: string | null;
+  brandColor?: string | null;
   workspaceName: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -194,7 +196,11 @@ function MobileNav({
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-64 bg-sidebar p-0">
+      <SheetContent
+        side="left"
+        className="w-64 bg-sidebar p-0"
+        style={brandVars(brandColor)}
+      >
         <SheetHeader className="flex h-16 flex-row items-center space-y-0 border-b border-sidebar-border px-5">
           <SidebarBrand src={brandLogoSrc} label={workspaceName} />
           <SheetTitle className="sr-only">Navigation</SheetTitle>
@@ -329,6 +335,7 @@ export function AppShell({
                   allowedModules={allowedModules}
                   disabledModules={disabledModules}
                   brandLogoSrc={brandLogoSrc}
+                  brandColor={brandColor}
                   workspaceName={workspaceName}
                 />
                 <BrandLogo className="h-6 w-auto md:hidden" />
