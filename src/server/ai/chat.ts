@@ -6,6 +6,11 @@ import { getActiveProvider, type LlmProvider } from "./provider";
 import { getEmbedder } from "./embedder";
 import { remember } from "../services/jova-memory";
 import { getUserPrefs } from "../services/prefs";
+import {
+  searchTrusted,
+  type WebSearchProvider,
+  type WebSearchResult,
+} from "./web-search";
 
 // Jova chat. Retrieval → grounded model answer (with citations, refusal, and
 // escalation) → deterministic fallback when the model is unavailable, refuses,
@@ -34,7 +39,7 @@ export interface AskResult {
   provider: string | null;
   model: string | null;
   safetyDecision: SafetyDecision;
-  sources: { module: string; label: string }[];
+  sources: { module: string; label: string; url?: string | null }[];
 }
 
 export interface AskInput {
@@ -71,10 +76,40 @@ export async function ask(
   claims: UserClaims,
   workspaceId: string,
   input: AskInput,
-  opts?: { provider?: LlmProvider },
+  opts?: { provider?: LlmProvider; webSearch?: WebSearchProvider },
 ): Promise<AskResult> {
   const provider = opts?.provider ?? (await getActiveProvider());
   const ctx = await retrieveContext(claims, workspaceId, input.question);
+
+  // Controlled, read-only web search of trusted official sources. Flag-gated
+  // (off by default) and redacted before any query leaves the platform; a
+  // failure or empty result never affects the answer.
+  let webResults: WebSearchResult[] = [];
+  try {
+    const web = await searchTrusted(workspaceId, input.question, {
+      provider: opts?.webSearch,
+    });
+    webResults = web.results;
+  } catch {
+    webResults = [];
+  }
+  if (webResults.length > 0) {
+    ctx.contextText +=
+      `\n\n## Web sources (controlled read-only search of trusted official sites)\n` +
+      webResults
+        .map(
+          (r, i) =>
+            `[W${i + 1}] ${r.title} - ${r.publisher} (${r.url}) accessed ${r.accessedAt}\n${r.snippet}`,
+        )
+        .join("\n");
+    for (const r of webResults)
+      ctx.sources.push({
+        module: "web",
+        refId: null,
+        label: `${r.publisher}: ${r.title}`,
+        url: r.url,
+      });
+  }
 
   // A file attached to the question joins the grounded context and is cited
   // like any other source.
@@ -90,6 +125,10 @@ export async function ask(
   }
 
   // The user's saved response-style preference shapes the system prompt.
+  const webRules =
+    webResults.length > 0
+      ? "\nWeb-source rules: the CONTEXT includes numbered Web sources from a controlled, read-only search of trusted official sites. When you use one, name the publisher and include its link, and keep sourced facts clearly separate from your own explanation. If the web sources do not verify a claim, say it cannot be verified from them. You cannot browse further, submit forms or take any external action."
+      : "";
   const { jovaStyle } = await getUserPrefs(claims);
   const styleLine =
     jovaStyle === "detailed"
@@ -110,7 +149,7 @@ export async function ask(
   if (provider.isConfigured() && ctx) {
     try {
       const result = await provider.generate({
-        system: `${SYSTEM_PROMPT}${styleLine}\n\nCONTEXT:\n${ctx.contextText}`,
+        system: `${SYSTEM_PROMPT}${styleLine}${webRules}\n\nCONTEXT:\n${ctx.contextText}`,
         messages: [
           ...history.map((h) => ({
             role:
@@ -201,6 +240,7 @@ export async function ask(
           messageId,
           sourceModule: s.module,
           note: s.label,
+          url: s.url ?? null,
         })),
       );
     }
@@ -231,15 +271,17 @@ export async function ask(
     }
   }
 
-  // De-duplicate the citation list for display.
+  // De-duplicate the citation list for display (web sources stay distinct
+  // per link so every internet-supported answer shows its provenance).
   const seen = new Set<string>();
   const sources = ctx.sources
     .filter((s) => {
-      if (seen.has(s.module)) return false;
-      seen.add(s.module);
+      const key = s.module === "web" ? `web:${s.url}` : s.module;
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     })
-    .map((s) => ({ module: s.module, label: s.label }));
+    .map((s) => ({ module: s.module, label: s.label, url: s.url ?? null }));
 
   return {
     conversationId,
@@ -304,6 +346,7 @@ export function listConversationMessages(
         messageId: jovaSources.messageId,
         module: jovaSources.sourceModule,
         label: jovaSources.note,
+        url: jovaSources.url,
       })
       .from(jovaSources)
       .where(

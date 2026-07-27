@@ -864,6 +864,19 @@ export const jovaSources = pgTable("jova_sources", {
   sourceModule: text("source_module").notNull(),
   sourceRecordId: uuid("source_record_id"),
   note: text("note"),
+  url: text("url"),
+});
+
+// Audit log of Jova's controlled web searches: redacted query + result
+// domains only (no personal data). Service-role only - RLS with no policies.
+export const jovaWebSearches = pgTable("jova_web_searches", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  workspaceId: uuid("workspace_id").notNull(),
+  redactedQuery: text("redacted_query").notNull(),
+  provider: text("provider").notNull(),
+  resultCount: integer("result_count").notNull().default(0),
+  resultDomains: text("result_domains").array().notNull().default([]),
+  createdAt: ts("created_at").notNull().defaultNow(),
 });
 
 // --- score_history (daily Business Confidence Score snapshots) ---------------

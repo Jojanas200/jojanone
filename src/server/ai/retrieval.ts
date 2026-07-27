@@ -15,6 +15,7 @@ export interface RetrievedSource {
   module: string;
   refId: string | null;
   label: string;
+  url?: string | null;
 }
 
 export interface RetrievedContext {

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Copy, Paperclip, Plus, Trash2, X } from "lucide-react";
+import { Copy, ExternalLink, Paperclip, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,7 @@ type Turn = {
   mode?: "model" | "deterministic";
   provider?: string | null;
   safety?: "answered" | "refused" | "escalate";
-  sources?: { module: string; label: string }[];
+  sources?: { module: string; label: string; url?: string | null }[];
 };
 
 const MODULE_ROUTE: Record<string, string> = {
@@ -94,8 +94,10 @@ const relTime = (d: string) => {
 
 export function JovaChat({
   initialConversations,
+  webSearchEnabled = false,
 }: {
   initialConversations: Conversation[];
+  webSearchEnabled?: boolean;
 }) {
   const [conversations, setConversations] = useState(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -356,10 +358,26 @@ export function JovaChat({
                       )}
                       {[
                         ...new Map(
-                          (t.sources ?? []).map((s) => [s.module, s]),
+                          (t.sources ?? []).map((s) => [
+                            s.module === "web" ? `web:${s.url}` : s.module,
+                            s,
+                          ]),
                         ).values(),
                       ].map((s) =>
-                        MODULE_ROUTE[s.module] ? (
+                        s.module === "web" && s.url ? (
+                          <a
+                            key={`web:${s.url}`}
+                            href={s.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            title={s.label}
+                          >
+                            <Badge variant="secondary">
+                              <ExternalLink className="mr-1 h-3 w-3" />
+                              {s.label.split(":")[0]}
+                            </Badge>
+                          </a>
+                        ) : MODULE_ROUTE[s.module] ? (
                           <Link
                             key={s.module}
                             href={MODULE_ROUTE[s.module]}
@@ -470,8 +488,12 @@ export function JovaChat({
           </Button>
         </form>
         <p className="mt-2 text-[11px] text-muted-foreground">
-          Jova answers from your workspace data and won&apos;t give regulated
-          legal or financial advice. Guidance, not advice.
+          Jova answers from your workspace data
+          {webSearchEnabled
+            ? " and controlled read-only searches of trusted official sources (GOV.UK, ICO, HSE and similar), always citing the publisher, link and date"
+            : ""}{" "}
+          and won&apos;t give regulated legal or financial advice. Guidance, not
+          advice.
         </p>
       </div>
     </div>

@@ -3,6 +3,8 @@ import { getClaims } from "@/server/auth/session";
 import { requireModuleAccess } from "@/server/auth/guard";
 import { getJovaBriefing } from "@/server/services/jova";
 import { listConversations } from "@/server/ai/chat";
+import { getPlatformSettings } from "@/server/services/platform-settings";
+import { WEB_SEARCH_FLAG, getWebSearchProvider } from "@/server/ai/web-search";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JovaBriefing } from "./JovaBriefing";
@@ -20,10 +22,14 @@ export default async function JovaPage() {
   const claims = await getClaims();
   if (!claims) redirect("/login");
   await requireModuleAccess(claims, "jova");
-  const [b, convos] = await Promise.all([
+  const [b, convos, settings] = await Promise.all([
     getJovaBriefing(claims),
     listConversations(claims),
+    getPlatformSettings(),
   ]);
+  const webSearchEnabled =
+    settings.featureFlags[WEB_SEARCH_FLAG] === true &&
+    getWebSearchProvider().isConfigured();
   const initialConversations = convos.map((c) => ({
     id: c.id,
     title: c.title,
@@ -50,7 +56,10 @@ export default async function JovaPage() {
         </TabsList>
 
         <TabsContent value="ask" className="mt-4">
-          <JovaChat initialConversations={initialConversations} />
+          <JovaChat
+            initialConversations={initialConversations}
+            webSearchEnabled={webSearchEnabled}
+          />
         </TabsContent>
 
         <TabsContent value="briefing" className="mt-4">

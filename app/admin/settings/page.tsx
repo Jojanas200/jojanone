@@ -11,9 +11,11 @@ import {
   ANTHROPIC_DEFAULT_MODEL,
   OPENROUTER_DEFAULT_MODEL,
 } from "@/server/ai/provider";
+import { WEB_SEARCH_FLAG, getWebSearchProvider } from "@/server/ai/web-search";
 import { PlatformSettingsForm } from "./PlatformSettingsForm";
 import { AnnouncementForm } from "./AnnouncementForm";
 import { ModuleFlags } from "./ModuleFlags";
+import { WebSearchToggle } from "./WebSearchToggle";
 import { PlanEditor } from "./PlanEditor";
 
 type Provider = "anthropic" | "openrouter" | "deterministic";
@@ -35,6 +37,10 @@ export default async function AdminSettingsPage() {
   ]);
   const isOperator = role === "operator";
   const disabled = disabledModuleKeys(s.featureFlags);
+  const webProvider = getWebSearchProvider();
+  const nonModuleFlags = Object.fromEntries(
+    Object.entries(s.featureFlags).filter(([k]) => !k.startsWith("module.")),
+  );
 
   // Which providers have a key in this environment (booleans only, no secrets).
   const keyPresent: Record<string, boolean> = {
@@ -113,11 +119,29 @@ export default async function AdminSettingsPage() {
               kill-switch). Settings is always available.
             </p>
             <ModuleFlags
+              otherFlags={nonModuleFlags}
               modules={MODULES.filter((m) => m.key !== "settings").map((m) => ({
                 key: m.key,
                 title: m.title,
               }))}
               disabled={disabled}
+            />
+          </Card>
+
+          <Card className="mt-4 max-w-2xl p-6">
+            <h2 className="mb-1 text-base font-semibold text-foreground">
+              Jova web search
+            </h2>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Off by default. Enable only once the search provider, privacy
+              controls and data-processing terms are in place - Jova is not
+              represented as internet-connected while this is off.
+            </p>
+            <WebSearchToggle
+              enabled={s.featureFlags[WEB_SEARCH_FLAG] === true}
+              providerConfigured={webProvider.isConfigured()}
+              providerName={webProvider.name}
+              allFlags={s.featureFlags}
             />
           </Card>
 

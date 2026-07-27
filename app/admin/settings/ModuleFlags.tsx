@@ -9,9 +9,12 @@ import { Switch } from "@/components/ui/switch";
 export function ModuleFlags({
   modules,
   disabled,
+  otherFlags = {},
 }: {
   modules: { key: string; title: string }[];
   disabled: string[];
+  /** Non-module feature flags to carry through unchanged on save. */
+  otherFlags?: Record<string, boolean>;
 }) {
   const router = useRouter();
   const [off, setOff] = useState<Set<string>>(new Set(disabled));
@@ -24,7 +27,7 @@ export function ModuleFlags({
     setOff(next);
     setBusy(true);
     try {
-      const featureFlags: Record<string, boolean> = {};
+      const featureFlags: Record<string, boolean> = { ...otherFlags };
       for (const k of next) featureFlags[`module.${k}`] = false;
       const res = await fetch("/api/admin/settings", {
         method: "POST",
