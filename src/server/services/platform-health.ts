@@ -1,6 +1,8 @@
 import { sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { isCacheConfigured } from "../cache/redis";
+import { getPlatformSettings } from "./platform-settings";
+import { WEB_SEARCH_FLAG, getWebSearchProvider } from "../ai/web-search";
 
 // System health + integration configuration for the platform admin. A live DB
 // round-trip plus presence-only booleans for every optional integration (never
@@ -31,6 +33,40 @@ export async function getSystemHealth(): Promise<SystemHealth> {
 
   const bool = (present: unknown): CheckStatus =>
     present ? "ok" : "not_configured";
+
+  // Web search is two-part: a server-side provider key AND the platform flag.
+  // Flag on without a key is a misconfiguration worth surfacing as an error.
+  const webProvider = getWebSearchProvider();
+  let webFlagOn = false;
+  try {
+    const settings = await getPlatformSettings();
+    webFlagOn = settings.featureFlags[WEB_SEARCH_FLAG] === true;
+  } catch {
+    webFlagOn = false;
+  }
+  const webSearch: Integration =
+    webFlagOn && webProvider.isConfigured()
+      ? {
+          key: "web_search",
+          label: "Jova web search",
+          status: "ok",
+          detail: `Enabled: controlled read-only search of trusted official sources via ${webProvider.name}.`,
+        }
+      : webFlagOn
+        ? {
+            key: "web_search",
+            label: "Jova web search",
+            status: "error",
+            detail:
+              "Platform flag is ON but no provider key is set (WEB_SEARCH_PROVIDER + its API key). Searches stay off.",
+          }
+        : {
+            key: "web_search",
+            label: "Jova web search",
+            status: "not_configured",
+            detail:
+              "Off by default. Enable in Settings once the provider key and privacy controls are in place.",
+          };
 
   const integrations: Integration[] = [
     {
@@ -86,6 +122,7 @@ export async function getSystemHealth(): Promise<SystemHealth> {
       status: bool(process.env.CRON_SECRET),
       detail: "Auth for the reminder/digest cron endpoints.",
     },
+    webSearch,
   ];
 
   return { database, integrations, healthy: database === "ok" };
