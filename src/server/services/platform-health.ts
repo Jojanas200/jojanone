@@ -60,13 +60,20 @@ export async function getSystemHealth(): Promise<SystemHealth> {
             detail:
               "Platform flag is ON but no provider key is set (WEB_SEARCH_PROVIDER + its API key). Searches stay off.",
           }
-        : {
-            key: "web_search",
-            label: "Jova web search",
-            status: "not_configured",
-            detail:
-              "Off by default. Enable in Settings once the provider key and privacy controls are in place.",
-          };
+        : webProvider.isConfigured()
+          ? {
+              key: "web_search",
+              label: "Jova web search",
+              status: "not_configured",
+              detail: `Provider key detected (${webProvider.name}) but the feature is switched off. Flip the toggle in Admin Settings to enable.`,
+            }
+          : {
+              key: "web_search",
+              label: "Jova web search",
+              status: "not_configured",
+              detail:
+                "Off by default. Set WEB_SEARCH_PROVIDER and its API key in the server environment, then enable in Settings.",
+            };
 
   const integrations: Integration[] = [
     {
