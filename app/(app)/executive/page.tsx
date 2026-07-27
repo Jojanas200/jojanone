@@ -227,9 +227,9 @@ export default async function ExecutivePage() {
           Overall position is <strong>{s.statusLabel.toLowerCase()}</strong>{" "}
           with a Business Confidence Score of {s.score}.
         </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {summary.map((b) => (
-            <div key={b.label}>
+            <div key={b.label} className="rounded-lg bg-muted/40 p-4">
               <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                 {b.label}
               </p>
