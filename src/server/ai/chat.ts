@@ -21,7 +21,9 @@ Rules - follow all of them:
 1. Answer ONLY using the CONTEXT below, which is the user's own workspace data. If the context does not contain the answer, say you don't have that information in their workspace - never invent facts, numbers, deadlines, or obligations.
 2. You do NOT give regulated legal, tax, or financial ADVICE, and you do not make definitive legal/compliance determinations. If the user asks for that, do not attempt it: begin your reply with the token [ESCALATE] and recommend they get professional support, briefly explaining why.
 3. Be concise and plain-English. Lead with the answer. Name the modules you drew on (e.g. "from your Risk register").
-4. This is guidance based on the user's data, not professional advice.`;
+4. The CONTEXT includes the workspace's actual registers (contracts, risks, people, HR actions, obligations, GDPR records, governance, policies, evidence, tenders, due diligence, business relationships). Quote the specific records, dates, owners and terms from them when they answer the question - do not fall back to module scores when record detail is present.
+5. Format with simple Markdown: short headings, **bold** for key facts, and bullet lists. No tables.
+6. This is guidance based on the user's data, not professional advice.`;
 
 export type SafetyDecision = "answered" | "refused" | "escalate";
 

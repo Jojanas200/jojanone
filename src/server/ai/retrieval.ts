@@ -3,6 +3,7 @@ import { getSnapshot } from "../services/dashboard";
 import { getJovaBriefing } from "../services/jova";
 import { getBusinessProfile } from "../services/settings";
 import { recall } from "../services/jova-memory";
+import { collectModuleRecords } from "./records";
 
 // Retrieval for the AI layer. Assembles a grounded context block from the
 // caller's workspace ONLY - every source query runs through an RLS-scoped
@@ -28,10 +29,11 @@ export async function retrieveContext(
   workspaceId: string,
   query?: string,
 ): Promise<RetrievedContext> {
-  const [snapshot, briefing, profile] = await Promise.all([
+  const [snapshot, briefing, profile, records] = await Promise.all([
     getSnapshot(claims),
     getJovaBriefing(claims),
     getBusinessProfile(claims, workspaceId),
+    collectModuleRecords(claims, query),
   ]);
 
   const sources: RetrievedSource[] = [];
@@ -70,6 +72,23 @@ export async function retrieveContext(
   }
   if (briefing.total === 0) {
     lines.push(`- No outstanding findings; the business is in good standing.`);
+  }
+
+  // The actual registers: record-level detail from every module (RLS-scoped),
+  // ranked against the question so relevant records survive the caps.
+  for (const block of records) {
+    lines.push(``);
+    lines.push(
+      `## ${block.heading} (${
+        block.lines.length < block.total
+          ? `showing ${block.lines.length} most relevant of ${block.total}`
+          : `${block.total} record${block.total === 1 ? "" : "s"}`
+      })`,
+    );
+    for (const l of block.lines) {
+      lines.push(`- ${l.text}`);
+      sources.push({ module: l.module, refId: l.refId, label: l.label });
+    }
   }
 
   // Semantic memory: recall facts/past interactions relevant to the question.

@@ -7,6 +7,7 @@ import { Copy, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { JovaMarkdown } from "./JovaMarkdown";
 
 export type Conversation = { id: string; title: string; updatedAt: string };
 
@@ -278,7 +279,11 @@ export function JovaChat({
                       : "border border-border bg-card text-foreground"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{t.text}</p>
+                  {t.role === "jova" ? (
+                    <JovaMarkdown text={t.text} />
+                  ) : (
+                    <p className="whitespace-pre-wrap">{t.text}</p>
+                  )}
                   {t.role === "jova" && (
                     <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-border pt-2">
                       {t.safety === "escalate" && (
