@@ -40,6 +40,7 @@ export interface AskResult {
 export interface AskInput {
   question: string;
   conversationId?: string | null;
+  attachment?: { name: string; content: string; truncated?: boolean } | null;
 }
 
 // Deterministic answer from retrieved context - the launch engine. Grounded,
@@ -74,6 +75,19 @@ export async function ask(
 ): Promise<AskResult> {
   const provider = opts?.provider ?? (await getActiveProvider());
   const ctx = await retrieveContext(claims, workspaceId, input.question);
+
+  // A file attached to the question joins the grounded context and is cited
+  // like any other source.
+  if (input.attachment) {
+    ctx.contextText += `\n\n## Attached document: ${input.attachment.name}${
+      input.attachment.truncated ? " (truncated)" : ""
+    }\n${input.attachment.content}`;
+    ctx.sources.unshift({
+      module: "attachment",
+      refId: null,
+      label: input.attachment.name,
+    });
+  }
 
   // The user's saved response-style preference shapes the system prompt.
   const { jovaStyle } = await getUserPrefs(claims);
@@ -132,6 +146,8 @@ export async function ask(
     }
   } else {
     answer = deterministicAnswer(ctx);
+    if (input.attachment)
+      answer += `\n\nNote: I could not analyse the attached file "${input.attachment.name}" because AI answering is not configured for this workspace.`;
   }
 
   // Persist the turn (user + assistant) with provenance + citations.
@@ -158,7 +174,9 @@ export async function ask(
       workspaceId,
       conversationId: convId,
       sender: "user",
-      content: input.question,
+      content: input.attachment
+        ? `${input.question}\n\n[Attached file: ${input.attachment.name}]`
+        : input.question,
     });
 
     const asstRows = await tx

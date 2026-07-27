@@ -1,9 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Copy, Plus, Trash2 } from "lucide-react";
+import { Copy, Paperclip, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ export type Conversation = { id: string; title: string; updatedAt: string };
 type Turn = {
   role: "user" | "jova";
   text: string;
+  attachmentName?: string;
   mode?: "model" | "deterministic";
   provider?: string | null;
   safety?: "answered" | "refused" | "escalate";
@@ -21,6 +22,8 @@ type Turn = {
 };
 
 const MODULE_ROUTE: Record<string, string> = {
+  evidence: "/evidence",
+  "business-map": "/business-map",
   compliance: "/compliance",
   contracts: "/contracts",
   risk: "/risk",
@@ -34,6 +37,9 @@ const MODULE_ROUTE: Record<string, string> = {
 };
 
 const MODULE_LABEL: Record<string, string> = {
+  evidence: "Evidence",
+  "business-map": "Business Map",
+  attachment: "Attachment",
   compliance: "Compliance",
   contracts: "Contracts",
   risk: "Risk",
@@ -66,6 +72,18 @@ const SUGGESTIONS = [
   "Summarise my compliance position",
 ];
 
+// Copy answers as normal text: markdown syntax stripped, bullets kept.
+const plainText = (md: string) =>
+  md
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*\n]+)\*/g, "$1")
+    .replace(/__([^_]+)__/g, "$1")
+    .replace(/`{1,3}([^`]*)`{1,3}/g, "$1")
+    .replace(/^\s*[-*+]\s+/gm, "\u2022 ")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .trim();
+
 const relTime = (d: string) => {
   const days = Math.floor((Date.now() - new Date(d).getTime()) / 864e5);
   if (days <= 0) return "today";
@@ -84,6 +102,34 @@ export function JovaChat({
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [attachment, setAttachment] = useState<{
+    name: string;
+    text: string;
+    truncated: boolean;
+  } | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function attachFile(file: File) {
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/jova/attachments", {
+        method: "POST",
+        body: form,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error ?? "Could not read the file");
+      setAttachment(data.attachment);
+      toast.success(`Attached ${data.attachment.name}`);
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
   const [loading, setLoading] = useState(false);
 
   // "Ask Jova about this" deep links (/jova?q=...) pre-fill the composer so
@@ -143,14 +189,25 @@ export function JovaChat({
   async function send(question: string) {
     const q = question.trim();
     if (!q || busy) return;
+    const att = attachment;
     setInput("");
-    setTurns((t) => [...t, { role: "user", text: q }]);
+    setAttachment(null);
+    setTurns((t) => [
+      ...t,
+      { role: "user", text: q, attachmentName: att?.name },
+    ]);
     setBusy(true);
     try {
       const res = await fetch("/api/jova/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: q, conversationId: activeId }),
+        body: JSON.stringify({
+          question: q,
+          conversationId: activeId,
+          attachment: att
+            ? { name: att.name, content: att.text, truncated: att.truncated }
+            : undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Failed");
@@ -282,14 +339,26 @@ export function JovaChat({
                   {t.role === "jova" ? (
                     <JovaMarkdown text={t.text} />
                   ) : (
-                    <p className="whitespace-pre-wrap">{t.text}</p>
+                    <>
+                      <p className="whitespace-pre-wrap">{t.text}</p>
+                      {t.attachmentName && (
+                        <p className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-background/20 px-2 py-0.5 text-[11px]">
+                          <Paperclip className="h-3 w-3" />
+                          {t.attachmentName}
+                        </p>
+                      )}
+                    </>
                   )}
                   {t.role === "jova" && (
                     <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-border pt-2">
                       {t.safety === "escalate" && (
                         <Badge variant="destructive">Escalated</Badge>
                       )}
-                      {t.sources?.map((s) =>
+                      {[
+                        ...new Map(
+                          (t.sources ?? []).map((s) => [s.module, s]),
+                        ).values(),
+                      ].map((s) =>
                         MODULE_ROUTE[s.module] ? (
                           <Link
                             key={s.module}
@@ -312,7 +381,9 @@ export function JovaChat({
                       <button
                         type="button"
                         onClick={() => {
-                          navigator.clipboard.writeText(t.text);
+                          navigator.clipboard.writeText(
+                            t.role === "jova" ? plainText(t.text) : t.text,
+                          );
                           toast.success("Copied");
                         }}
                         className="ml-auto inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
@@ -335,6 +406,23 @@ export function JovaChat({
           </ul>
         </div>
 
+        {attachment && (
+          <div className="mt-3 flex items-center gap-2 rounded-lg border border-border bg-muted/40 px-3 py-1.5 text-xs text-foreground">
+            <Paperclip className="h-3.5 w-3.5 shrink-0" />
+            <span className="min-w-0 truncate">
+              {attachment.name}
+              {attachment.truncated ? " (long file - first part attached)" : ""}
+            </span>
+            <button
+              type="button"
+              aria-label="Remove attachment"
+              onClick={() => setAttachment(null)}
+              className="ml-auto text-muted-foreground hover:text-destructive"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -342,6 +430,27 @@ export function JovaChat({
           }}
           className="mt-4 flex items-end gap-2"
         >
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pdf,.docx,.txt,.md,.csv,.json"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void attachFile(f);
+            }}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            aria-label="Attach a file"
+            title="Attach a file (PDF, DOCX, TXT, CSV)"
+            disabled={uploading || busy}
+            onClick={() => fileRef.current?.click()}
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}

@@ -4,6 +4,11 @@ import { ArrowLeft } from "lucide-react";
 import { getClaims } from "@/server/auth/session";
 import { requireModuleAccess } from "@/server/auth/guard";
 import { getPolicy, listPolicyVersions } from "@/server/services/policies";
+import { runPolicyCheck } from "@/shared/policies/check";
+import { POLICY_TEMPLATES } from "@/shared/policies/templates";
+import { JovaPolicyCheck } from "./JovaPolicyCheck";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   listAcknowledgements,
   listUnassignedEmployees,
@@ -97,6 +102,17 @@ export default async function PolicyDetailPage({ params }: Ctx) {
     professionalReviewNote: policy.professionalReviewNote,
   };
 
+  const check = runPolicyCheck(policy.content ?? "", {
+    owner: policy.owner,
+    reviewDate: policy.reviewDate,
+    version: policy.version,
+    templateKey:
+      POLICY_TEMPLATES.find(
+        (t) => t.title.toLowerCase() === policy.policyName.trim().toLowerCase(),
+      )?.key ?? null,
+    category: policy.policyCategory,
+  });
+
   const acknowledged = roster.filter((r) => r.status === "acknowledged").length;
   const waived = roster.filter((r) => r.status === "waived").length;
   const pending = roster.filter((r) => r.status === "pending").length;
@@ -127,15 +143,35 @@ export default async function PolicyDetailPage({ params }: Ctx) {
             <Badge variant={policyStatusVariant[policy.status] ?? "outline"}>
               {policy.status}
             </Badge>
+            {policy.status === "draft" && check.readyForAdoption && (
+              <Badge variant="success">Ready for adoption</Badge>
+            )}
+            {policy.status === "draft" && !check.readyForAdoption && (
+              <Badge variant="destructive">{check.criticals} to resolve</Badge>
+            )}
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {policy.policyCategory ?? "Uncategorised"} · v{policy.version}
             {policy.owner ? ` · Owner: ${policy.owner}` : ""}
           </p>
         </div>
-        <WriteGate>
-          <PolicyHeaderActions policy={policyLite} />
-        </WriteGate>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="outline" size="sm">
+            <a href={`/api/policies/${policy.id}/export?format=pdf`}>
+              <Download className="mr-1.5 h-3.5 w-3.5" />
+              PDF{policy.status === "active" ? "" : " (draft)"}
+            </a>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <a href={`/api/policies/${policy.id}/export?format=docx`}>
+              <Download className="mr-1.5 h-3.5 w-3.5" />
+              DOCX{policy.status === "active" ? "" : " (draft)"}
+            </a>
+          </Button>
+          <WriteGate>
+            <PolicyHeaderActions policy={policyLite} />
+          </WriteGate>
+        </div>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -169,6 +205,14 @@ export default async function PolicyDetailPage({ params }: Ctx) {
       <Tabs defaultValue="document">
         <TabsList>
           <TabsTrigger value="document">Document</TabsTrigger>
+          <TabsTrigger value="check">
+            Jova Check
+            {check.criticals > 0
+              ? ` (${check.criticals})`
+              : check.warnings > 0
+                ? ` (${check.warnings})`
+                : ""}
+          </TabsTrigger>
           <TabsTrigger value="properties">Properties</TabsTrigger>
           <TabsTrigger value="professional">Professional review</TabsTrigger>
           <TabsTrigger value="signoff">
@@ -183,6 +227,19 @@ export default async function PolicyDetailPage({ params }: Ctx) {
           <PolicyDocument
             policyId={policy.id}
             content={policy.content}
+            canWrite={access.canWrite}
+          />
+        </TabsContent>
+
+        <TabsContent value="check" className="mt-6">
+          <JovaPolicyCheck
+            policyId={policy.id}
+            status={policy.status}
+            items={check.items}
+            criticals={check.criticals}
+            warnings={check.warnings}
+            ready={check.readyForAdoption}
+            recommendations={policy.jovaRecommendations ?? []}
             canWrite={access.canWrite}
           />
         </TabsContent>

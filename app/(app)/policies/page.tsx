@@ -74,6 +74,7 @@ export default async function PoliciesPage() {
           businessName: profile?.businessName ?? null,
           industry: profile?.industry ?? null,
           employeeCount: profile?.employeeCount ?? null,
+          primaryContactName: profile?.primaryContactName ?? null,
         }}
       />
 

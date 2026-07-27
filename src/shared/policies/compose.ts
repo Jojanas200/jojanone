@@ -13,6 +13,7 @@ export interface ComposeProfile {
   businessName?: string | null;
   industry?: string | null;
   employeeCount?: number | null;
+  primaryContactName?: string | null;
 }
 
 export interface ComposeDraftInput {
@@ -51,13 +52,17 @@ export function composeFromTemplate(
       staff > 0
         ? `This policy applies to all ${staff} employees of ${name}, together with contractors, temporary staff and volunteers acting on its behalf.`
         : `This policy applies to all staff, contractors, temporary workers and volunteers acting on behalf of ${name}.`,
-    roles:
-      "The business owner ([Business owner]) is accountable for this policy. Managers apply it day to day; all staff are expected to read, understand and follow it, and to raise concerns promptly.",
+    roles: `${
+      profile?.primaryContactName?.trim()
+        ? `${profile.primaryContactName.trim()}, as business owner,`
+        : "The business owner"
+    } is accountable for this policy. Managers apply it day to day; all staff are expected to read, understand and follow it, and to raise concerns promptly.`,
     policy_statements: `${name} will maintain proportionate, practical arrangements for ${topic}, acting fairly and lawfully and keeping appropriate records.`,
     procedures:
       "We will make this policy available to everyone in scope and explain it at induction, keep the records needed to show it is being followed, and act on issues raised without unreasonable delay.",
-    reporting:
-      "Questions, concerns or suspected breaches should be raised with [Business owner], who will respond promptly and keep the person informed.",
+    reporting: `Questions, concerns or suspected breaches should be raised with ${
+      profile?.primaryContactName?.trim() || "the business owner"
+    }, who will respond promptly and keep the person informed.`,
     records:
       "We will keep the records needed to demonstrate this policy is being followed, for as long as required and no longer.",
     professional_support:

@@ -620,6 +620,12 @@ export const policies = pgTable("policies", {
     .default("not_required"), // not_required | recommended | reviewed
   professionalReviewNote: text("professional_review_note"),
   content: text("content"), // full policy body (Jova-drafted or authored)
+  // Jova's advice lives beside the document, never inside adopted wording.
+  jovaRecommendations: text("jova_recommendations")
+    .array()
+    .notNull()
+    .default([]),
+  adoptedAt: ts("adopted_at"),
   createdBy: uuid("created_by"),
   updatedBy: uuid("updated_by"),
   createdAt: ts("created_at").notNull().defaultNow(),
