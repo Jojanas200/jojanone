@@ -1,5 +1,6 @@
-import mammoth from "mammoth";
-import { PDFParse } from "pdf-parse";
+// The parsers are imported lazily inside their own branches: they are heavy,
+// and a bundling/runtime problem with one format must never break the route
+// for the others (plain-text extraction has no dependencies at all).
 
 // Text extraction for files attached to Jova questions. The extracted text is
 // placed into the grounded CONTEXT block, so Jova reasons over the document
@@ -29,6 +30,7 @@ export async function extractAttachmentText(
   let raw = "";
   try {
     if (mime === "application/pdf" || lower.endsWith(".pdf")) {
+      const { PDFParse } = await import("pdf-parse");
       const parser = new PDFParse({ data: new Uint8Array(buf) });
       try {
         raw = (await parser.getText()).text ?? "";
@@ -40,6 +42,7 @@ export async function extractAttachmentText(
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
       lower.endsWith(".docx")
     ) {
+      const mammoth = (await import("mammoth")).default;
       raw = (await mammoth.extractRawText({ buffer: buf })).value ?? "";
     } else if (
       mime.startsWith("text/") ||

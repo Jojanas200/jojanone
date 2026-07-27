@@ -35,9 +35,17 @@ export async function POST(req: Request) {
       { status: 400 },
     );
 
-  const buf = Buffer.from(await file.arrayBuffer());
-  const result = await extractAttachmentText(file.name, file.type || "", buf);
-  if (!result.ok)
-    return NextResponse.json({ error: result.error }, { status: 400 });
-  return NextResponse.json({ attachment: result.attachment });
+  try {
+    const buf = Buffer.from(await file.arrayBuffer());
+    const result = await extractAttachmentText(file.name, file.type || "", buf);
+    if (!result.ok)
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    return NextResponse.json({ attachment: result.attachment });
+  } catch (err) {
+    console.error("jova attachment extraction failed:", err);
+    return NextResponse.json(
+      { error: "Could not process that file. Try a different format." },
+      { status: 500 },
+    );
+  }
 }

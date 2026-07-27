@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Keep Node-only drivers (postgres, the ioredis TCP cache client) external
-  // rather than bundled into the server output.
-  serverExternalPackages: ["postgres", "ioredis"],
+  // Keep Node-only drivers (postgres, the ioredis TCP cache client) and the
+  // document parsers (pdf-parse ships pdf.js worker assets that break when
+  // webpack-bundled; mammoth similarly prefers plain require) external rather
+  // than bundled into the server output.
+  serverExternalPackages: ["postgres", "ioredis", "pdf-parse", "mammoth"],
   eslint: {
     // Lint runs as a separate step (`npm run lint`). During the TanStack→Next
     // migration the repo also contains dormant TanStack files with their own
