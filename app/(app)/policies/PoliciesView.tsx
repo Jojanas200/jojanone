@@ -83,6 +83,9 @@ export function PoliciesView({
   canWrite: boolean;
   profile: ComposeProfile;
 }) {
+  // Controlled tabs so Overview shortcuts can jump into the library.
+  const [tab, setTab] = useState("overview");
+
   // Register filters
   const [query, setQuery] = useState("");
   const [statusF, setStatusF] = useState("all");
@@ -138,6 +141,35 @@ export function PoliciesView({
   const registerFiltersActive =
     !!query || statusF !== "all" || categoryF !== "all";
 
+  // Overview: what needs attention now + standard policies not yet on the
+  // register (mirrors the prototype's Overview tab).
+  const today = new Date().toISOString().slice(0, 10);
+  const overdue = policies.filter(
+    (p) => p.status !== "archived" && p.reviewDate && p.reviewDate < today,
+  );
+  const drafts = policies.filter((p) => p.status === "draft");
+  const attention = [
+    ...overdue.map((p) => ({ p, why: "Review overdue" })),
+    ...drafts
+      .filter((d) => !overdue.some((o) => o.id === d.id))
+      .map((p) => ({ p, why: "Draft - not yet active" })),
+  ].slice(0, 8);
+  const registerNames = new Set(
+    policies.map((p) => p.policyName.toLowerCase()),
+  );
+  const missing = POLICY_TEMPLATES.filter(
+    (t) => !registerNames.has(t.title.toLowerCase()),
+  );
+
+  // Review schedule: active policies ordered by next review date.
+  const scheduled = policies
+    .filter((p) => p.status === "active")
+    .sort((a, b) =>
+      (a.reviewDate ?? "9999").localeCompare(b.reviewDate ?? "9999"),
+    );
+  const daysUntil = (d: string | null) =>
+    d ? Math.ceil((new Date(d).getTime() - Date.now()) / 864e5) : null;
+
   // Client-side pagination keeps the register readable as records grow.
   const PAGE_SIZE = 25;
   const [page, setPage] = useState(0);
@@ -157,15 +189,133 @@ export function PoliciesView({
         </div>
       )}
 
-      <Tabs defaultValue="register">
+      <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
-          <TabsTrigger value="register">
-            Register{policies.length ? ` (${policies.length})` : ""}
-          </TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="library">
             Template library ({POLICY_TEMPLATES.length})
           </TabsTrigger>
+          <TabsTrigger value="register">
+            Register{policies.length ? ` (${policies.length})` : ""}
+          </TabsTrigger>
+          <TabsTrigger value="schedule">Review schedule</TabsTrigger>
         </TabsList>
+
+        {/* --- Overview ------------------------------------------------------ */}
+        <TabsContent value="overview" className="mt-6 space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card className="p-5">
+              <h3 className="text-sm font-semibold text-foreground">
+                Attention now
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Reviews overdue and drafts not yet in force.
+              </p>
+              {attention.length === 0 ? (
+                <p className="mt-4 text-sm text-muted-foreground">
+                  Nothing needs attention - all policies are current.
+                </p>
+              ) : (
+                <ul className="mt-3 divide-y divide-border">
+                  {attention.map(({ p, why }) => (
+                    <li
+                      key={p.id}
+                      className="flex items-center justify-between gap-3 py-2"
+                    >
+                      <div className="min-w-0">
+                        <Link
+                          href={`/policies/${p.id}`}
+                          className="block truncate text-sm font-medium text-foreground hover:underline"
+                        >
+                          {p.policyName}
+                        </Link>
+                        <p className="text-xs text-muted-foreground">
+                          {p.policyCategory ?? "Uncategorised"} · v{p.version}
+                        </p>
+                      </div>
+                      <Badge
+                        variant={
+                          why === "Review overdue" ? "destructive" : "warning"
+                        }
+                        className="shrink-0"
+                      >
+                        {why}
+                      </Badge>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
+            <Card className="p-5">
+              <h3 className="text-sm font-semibold text-foreground">
+                Missing standard policies
+              </h3>
+              <p className="text-xs text-muted-foreground">
+                Common documents most UK businesses maintain. Start one when it
+                applies to you.
+              </p>
+              {missing.length === 0 ? (
+                <p className="mt-4 text-sm text-muted-foreground">
+                  All standard policies are present on your register.
+                </p>
+              ) : (
+                <ul className="mt-3 space-y-1.5">
+                  {missing.slice(0, 10).map((t) => (
+                    <li
+                      key={t.key}
+                      className="flex items-center justify-between gap-3 rounded-md border border-dashed border-border px-3 py-2"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {t.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {t.category}
+                        </p>
+                      </div>
+                      {canWrite && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openDraft(t.key)}
+                        >
+                          Start
+                        </Button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          </div>
+
+          <Card className="p-5">
+            <h3 className="text-sm font-semibold text-foreground">
+              Template library
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              {POLICY_TEMPLATES.length} guided templates across policies,
+              notices, procedures, contracts and handbooks.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {TEMPLATE_CATEGORIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    setLibCat(c);
+                    setTab("library");
+                  }}
+                  className="rounded-full border border-border bg-card px-3 py-1 text-xs text-foreground transition hover:bg-muted"
+                >
+                  {c} ·{" "}
+                  {POLICY_TEMPLATES.filter((t) => t.category === c).length}
+                </button>
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
 
         {/* --- Register ------------------------------------------------------ */}
         <TabsContent value="register" className="mt-6">
@@ -404,6 +554,67 @@ export function PoliciesView({
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* --- Review schedule ----------------------------------------------- */}
+        <TabsContent value="schedule" className="mt-6">
+          <Card className="p-5">
+            <h3 className="text-sm font-semibold text-foreground">
+              Review schedule
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Active policies ordered by next review date.
+            </p>
+            {scheduled.length === 0 ? (
+              <p className="mt-4 text-sm text-muted-foreground">
+                No active policies yet. Activate a policy and its review date
+                will appear here.
+              </p>
+            ) : (
+              <ul className="mt-3 divide-y divide-border">
+                {scheduled.map((p) => {
+                  const days = daysUntil(p.reviewDate);
+                  return (
+                    <li
+                      key={p.id}
+                      className="flex items-center justify-between gap-3 py-2"
+                    >
+                      <div className="min-w-0">
+                        <Link
+                          href={`/policies/${p.id}`}
+                          className="block truncate text-sm font-medium text-foreground hover:underline"
+                        >
+                          {p.policyName}
+                        </Link>
+                        <p className="text-xs text-muted-foreground">
+                          Review {fmtDate(p.reviewDate)} · Owner{" "}
+                          {p.owner ?? "-"} · v{p.version}
+                        </p>
+                      </div>
+                      {days === null ? (
+                        <Badge variant="outline" className="shrink-0">
+                          No date set
+                        </Badge>
+                      ) : (
+                        <Badge
+                          variant={
+                            days < 0
+                              ? "destructive"
+                              : days <= 30
+                                ? "warning"
+                                : "success"
+                          }
+                          className="shrink-0"
+                        >
+                          {days < 0 ? `${-days}d overdue` : `${days}d`}
+                        </Badge>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </Card>
         </TabsContent>
       </Tabs>
 
