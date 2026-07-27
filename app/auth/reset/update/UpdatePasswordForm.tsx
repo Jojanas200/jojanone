@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 
 export function UpdatePasswordForm() {
@@ -66,9 +66,8 @@ export function UpdatePasswordForm() {
     >
       <div className="space-y-1.5">
         <Label htmlFor="password">New password</Label>
-        <Input
+        <PasswordInput
           id="password"
-          type="password"
           required
           minLength={6}
           value={password}
@@ -78,9 +77,8 @@ export function UpdatePasswordForm() {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="confirm">Confirm new password</Label>
-        <Input
+        <PasswordInput
           id="confirm"
-          type="password"
           required
           minLength={6}
           value={confirm}
