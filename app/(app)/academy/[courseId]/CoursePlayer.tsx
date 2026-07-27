@@ -24,7 +24,12 @@ import {
 } from "@/data/academy-catalog";
 import { printDocument } from "../../_shared/print";
 
-type Cert = { reference: string; quizScore: number; completedAt: string };
+type Cert = {
+  id: string;
+  reference: string;
+  quizScore: number;
+  completedAt: string;
+};
 
 const strengthTone: Record<string, string> = {
   best: "border-emerald-500/50 bg-emerald-500/10",
@@ -158,9 +163,16 @@ export function CoursePlayer({
             Certificate earned - {cert.quizScore}% ·{" "}
             <span className="font-mono text-xs">{cert.reference}</span>
           </p>
-          <Button size="sm" variant="outline" onClick={printCertificate}>
-            Print certificate
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" asChild>
+              <a href={`/api/academy/certificates/${cert.id}/pdf`}>
+                Download certificate (PDF)
+              </a>
+            </Button>
+            <Button size="sm" variant="outline" onClick={printCertificate}>
+              Print
+            </Button>
+          </div>
         </Card>
       )}
 
@@ -473,6 +485,7 @@ function QuizDialog({
         if (!res.ok) throw new Error(data?.error ?? "Failed");
         toast.success(`Passed with ${score}% - certificate issued`);
         onPassed({
+          id: data.certificate.id,
           reference: data.certificate.reference,
           quizScore: score,
           completedAt: new Date().toISOString(),

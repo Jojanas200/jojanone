@@ -73,6 +73,18 @@ export function listCertificates(claims: UserClaims) {
   );
 }
 
+/** One certificate by id (RLS-scoped - only the owner workspace can read it). */
+export function getCertificate(claims: UserClaims, id: string) {
+  return withUser(claims, async (tx) => {
+    const rows = await tx
+      .select()
+      .from(academyCertificates)
+      .where(eq(academyCertificates.id, id))
+      .limit(1);
+    return rows[0] ?? null;
+  });
+}
+
 /** In-flight learning progress rows (RLS-scoped). */
 export function listProgress(claims: UserClaims) {
   return withUser(claims, (tx) =>

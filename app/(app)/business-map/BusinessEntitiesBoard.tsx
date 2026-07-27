@@ -48,8 +48,10 @@ type Entity = Awaited<ReturnType<typeof listEntities>>[number];
 const TYPE_LABEL: Record<string, string> = {
   customer: "Customer",
   supplier: "Supplier",
+  director: "Director",
   employee: "Employee",
   contractor: "Contractor",
+  tech_lead: "Technology lead",
   adviser: "Adviser",
   regulator: "Regulator",
   partner: "Business partner",
@@ -102,9 +104,9 @@ const MAP_GROUPS: {
   { key: "suppliers", label: "Suppliers", icon: Truck, types: ["supplier"] },
   {
     key: "people",
-    label: "People",
+    label: "Team & Key People",
     icon: Users,
-    types: ["employee", "contractor"],
+    types: ["director", "employee", "contractor", "tech_lead"],
   },
   {
     key: "advisers",

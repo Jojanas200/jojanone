@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getClaims } from "@/server/auth/session";
+import { getClaims, getSessionUser } from "@/server/auth/session";
 import { getActiveWorkspaceId } from "@/server/services/workspaces";
 import {
   issueCertificate,
   markLessonComplete,
 } from "@/server/services/academy";
+import { getBusinessProfile } from "@/server/services/settings";
 
 const lessonSchema = z.object({
   courseId: z.string().min(1).max(80),
@@ -32,7 +33,17 @@ export async function POST(req: Request) {
   const asQuiz = quizSchema.safeParse(body);
   if (asQuiz.success) {
     if (asQuiz.data.quizScore < 80) return NextResponse.json({ passed: false });
-    const certificate = await issueCertificate(claims, ws, asQuiz.data);
+    // Name the learner on the certificate: the business contact if recorded,
+    // otherwise the signed-in user's email address.
+    const [profile, sessionUser] = await Promise.all([
+      getBusinessProfile(claims, ws),
+      getSessionUser(),
+    ]);
+    const certificate = await issueCertificate(claims, ws, {
+      ...asQuiz.data,
+      learnerName:
+        profile?.primaryContactName?.trim() || sessionUser?.email || null,
+    });
     if (!certificate)
       return NextResponse.json({ error: "unknown course" }, { status: 404 });
     return NextResponse.json({ passed: true, certificate }, { status: 201 });

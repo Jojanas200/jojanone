@@ -37,6 +37,7 @@ export default async function CoursePage({
         certificate={
           cert
             ? {
+                id: cert.id,
                 reference: cert.reference,
                 quizScore: cert.quizScore,
                 completedAt: cert.completedAt.toISOString(),

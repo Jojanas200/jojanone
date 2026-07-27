@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -23,6 +24,9 @@ export type CatalogueCourse = {
   description: string;
   duration: number;
   difficulty: string;
+  /** 0-100 when the learner has started the course. */
+  progressPct?: number | null;
+  completed?: boolean;
 };
 
 export function Catalogue({
@@ -138,6 +142,21 @@ export function Catalogue({
                 <p className="mt-1 flex-1 text-sm text-muted-foreground">
                   {c.description}
                 </p>
+                {c.completed ? (
+                  <div className="mt-3 flex items-center gap-2">
+                    <Progress value={100} className="h-1.5" />
+                    <Badge variant="success" className="shrink-0">
+                      Completed
+                    </Badge>
+                  </div>
+                ) : c.progressPct != null && c.progressPct > 0 ? (
+                  <div className="mt-3 flex items-center gap-2">
+                    <Progress value={c.progressPct} className="h-1.5" />
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {c.progressPct}%
+                    </span>
+                  </div>
+                ) : null}
                 <div className="mt-4 flex gap-2">
                   <Button asChild variant="outline" className="flex-1">
                     <Link href={`/academy/${c.id}`}>

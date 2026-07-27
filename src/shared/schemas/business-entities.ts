@@ -5,8 +5,10 @@ import { z } from "zod";
 export const entityTypeEnum = z.enum([
   "customer",
   "supplier",
+  "director",
   "employee",
   "contractor",
+  "tech_lead",
   "adviser",
   "regulator",
   "partner",

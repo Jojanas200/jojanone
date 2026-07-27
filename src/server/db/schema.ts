@@ -1002,8 +1002,10 @@ export const academyCertificates = pgTable("academy_certificates", {
 export const entityType = pgEnum("entity_type", [
   "customer",
   "supplier",
+  "director",
   "employee",
   "contractor",
+  "tech_lead",
   "adviser",
   "regulator",
   "partner",

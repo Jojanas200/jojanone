@@ -16,6 +16,7 @@ import { listEvidence } from "../services/evidence";
 import { listTenderOpportunities } from "../services/tender";
 import { listDueDiligenceItems } from "../services/investor";
 import { listEntities } from "../services/business-entities";
+import { listAssignments, listCertificates } from "../services/academy";
 
 // Record-level retrieval for Jova: the actual registers, not just scores.
 // Every list call is an existing RLS-scoped service, so a workspace can only
@@ -103,6 +104,8 @@ export async function collectModuleRecords(
     tenders,
     dd,
     entities,
+    training,
+    certificates,
   ] = await Promise.all([
     listContracts(claims),
     listRisks(claims),
@@ -119,6 +122,8 @@ export async function collectModuleRecords(
     listTenderOpportunities(claims),
     listDueDiligenceItems(claims),
     listEntities(claims),
+    listAssignments(claims),
+    listCertificates(claims),
   ]);
 
   const employeeName = new Map(employees.map((e) => [e.id, e.fullName]));
@@ -385,6 +390,37 @@ export async function collectModuleRecords(
           part("priority", d.priority),
           part("owner", d.owner),
           part("review", d.reviewDate),
+        ]),
+      })),
+    },
+    {
+      module: "academy",
+      heading: "Training (Academy assignments)",
+      total: training.length,
+      lines: training.map((a) => ({
+        module: "academy",
+        refId: a.id,
+        label: a.courseTitle,
+        text: join([
+          `"${a.courseTitle}" for ${a.learnerName ?? (a.learnerId === "owner" ? "the owner" : a.learnerId)} (${a.status})`,
+          part("due", a.dueDate),
+          a.legallyRequired ? "legally required" : "",
+        ]),
+      })),
+    },
+    {
+      module: "academy",
+      heading: "Training certificates",
+      total: certificates.length,
+      lines: certificates.map((c) => ({
+        module: "academy",
+        refId: c.id,
+        label: c.reference,
+        text: join([
+          `Certificate ${c.reference}: "${c.courseTitle ?? c.courseId}"`,
+          part("learner", c.learnerName),
+          `score ${c.quizScore}%`,
+          part("completed", c.completedAt.toISOString().slice(0, 10)),
         ]),
       })),
     },
