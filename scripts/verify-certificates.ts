@@ -81,6 +81,7 @@ async function main() {
     const cert = await issueCertificate({ sub: userA }, wsA, {
       courseId: course.id,
       quizScore: 90,
+      learnerId: userA,
       learnerName: "Jordan Blake",
     });
     check(
@@ -91,6 +92,10 @@ async function main() {
         cert.courseTitle === course.title,
     );
     if (!cert) throw new Error("no certificate issued");
+    check(
+      "certificate belongs to the signed-in user (learnerId = sub)",
+      cert.learnerId === userA,
+    );
 
     const fetched = await getCertificate({ sub: userA }, cert.id);
     check("owner workspace can fetch the certificate by id", !!fetched);

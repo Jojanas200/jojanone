@@ -18,10 +18,19 @@ export async function getClaims(): Promise<UserClaims | null> {
 export async function getSessionUser(): Promise<{
   sub: string;
   email: string | null;
+  fullName: string | null;
 } | null> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  return user ? { sub: user.id, email: user.email ?? null } : null;
+  if (!user) return null;
+  const rawName = (user.user_metadata as Record<string, unknown> | undefined)
+    ?.full_name;
+  return {
+    sub: user.id,
+    email: user.email ?? null,
+    fullName:
+      typeof rawName === "string" && rawName.trim() ? rawName.trim() : null,
+  };
 }

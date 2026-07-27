@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { getSessionUser } from "@/server/auth/session";
+import {
+  getBusinessProfile,
+  updateBusinessProfile,
+} from "@/server/services/settings";
 import { getActiveWorkspaceId } from "@/server/services/workspaces";
 import { provisionWorkspace } from "@/server/services/provisioning";
 import { getOnboarding, saveOnboarding } from "@/server/services/onboarding";
@@ -66,5 +71,30 @@ export async function PATCH(req: Request) {
   }
 
   const state = await saveOnboarding(claims, ws, body);
+
+  // Fan the owner's name out of the answers blob: auth metadata (the per-user
+  // identity used on certificates) and the business profile's primary contact
+  // when that is still empty. Best-effort - never fails the save.
+  const ownerName = asName(body["owner.full_name"]);
+  if (ownerName) {
+    if (ownerName !== user.fullName) {
+      try {
+        const supabase = await createClient();
+        await supabase.auth.updateUser({ data: { full_name: ownerName } });
+      } catch {
+        // metadata update is best-effort
+      }
+    }
+    try {
+      const profile = await getBusinessProfile(claims, ws);
+      if (profile && !profile.primaryContactName?.trim())
+        await updateBusinessProfile(claims, ws, {
+          primaryContactName: ownerName,
+        });
+    } catch {
+      // profile fan-out is best-effort
+    }
+  }
+
   return NextResponse.json(state);
 }

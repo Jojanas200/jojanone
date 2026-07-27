@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getClaims, getSessionUser } from "@/server/auth/session";
-import { getActiveWorkspaceId } from "@/server/services/workspaces";
+import { getSessionUser } from "@/server/auth/session";
+import {
+  getActiveWorkspaceId,
+  getWorkspaceRole,
+} from "@/server/services/workspaces";
 import {
   issueCertificate,
   markLessonComplete,
@@ -22,9 +25,10 @@ const quizSchema = z.object({
 // certificate). Grading happens client-side from the shared catalogue; the
 // pass threshold is enforced here.
 export async function POST(req: Request) {
-  const claims = await getClaims();
-  if (!claims)
+  const user = await getSessionUser();
+  if (!user)
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  const claims = { sub: user.sub };
   const ws = await getActiveWorkspaceId(claims);
   if (!ws)
     return NextResponse.json({ error: "no active workspace" }, { status: 400 });
@@ -33,16 +37,21 @@ export async function POST(req: Request) {
   const asQuiz = quizSchema.safeParse(body);
   if (asQuiz.success) {
     if (asQuiz.data.quizScore < 80) return NextResponse.json({ passed: false });
-    // Name the learner on the certificate: the business contact if recorded,
-    // otherwise the signed-in user's email address.
-    const [profile, sessionUser] = await Promise.all([
+    // The certificate belongs to the signed-in user and carries THEIR name:
+    // auth full name first; for the owner the business primary contact can
+    // stand in; the email address is the last resort.
+    const [profile, role] = await Promise.all([
       getBusinessProfile(claims, ws),
-      getSessionUser(),
+      getWorkspaceRole(claims, ws),
     ]);
+    const ownerFallback =
+      role === "owner_admin"
+        ? profile?.primaryContactName?.trim() || null
+        : null;
     const certificate = await issueCertificate(claims, ws, {
       ...asQuiz.data,
-      learnerName:
-        profile?.primaryContactName?.trim() || sessionUser?.email || null,
+      learnerId: user.sub,
+      learnerName: user.fullName ?? ownerFallback ?? user.email,
     });
     if (!certificate)
       return NextResponse.json({ error: "unknown course" }, { status: 404 });
@@ -59,6 +68,7 @@ export async function POST(req: Request) {
     ws,
     parsed.data.courseId,
     parsed.data.lessonId,
+    user.sub,
   );
   if (!progress)
     return NextResponse.json({ error: "unknown course" }, { status: 404 });

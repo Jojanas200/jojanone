@@ -50,7 +50,7 @@ const statusVariant: Record<
 export default async function AcademyPage() {
   const claims = await getClaims();
   if (!claims) redirect("/login");
-  await requireModuleAccess(claims, "academy");
+  const { access } = await requireModuleAccess(claims, "academy");
   const [assignments, certificates, progress, recommendations] =
     await Promise.all([
       listAssignments(claims),
@@ -63,10 +63,14 @@ export default async function AcademyPage() {
     (a) => a.status !== "completed" && a.dueDate && a.dueDate < today,
   ).length;
 
-  // Per-course learning state for the signed-in owner.
+  // Per-course learning state for the signed-in user (legacy "owner" rows
+  // belong to the workspace owner).
+  const isOwner = access.role === "owner_admin";
+  const mineOf = (learnerId: string) =>
+    learnerId === claims.sub || (isOwner && learnerId === "owner");
   const byCourse = new Map(
     progress
-      .filter((p) => p.learnerId === "owner")
+      .filter((p) => mineOf(p.learnerId))
       .map((p) => {
         const total = getCourse(p.courseId)?.lessons.length ?? 0;
         const pct =
@@ -88,7 +92,8 @@ export default async function AcademyPage() {
         ] as const;
       }),
   );
-  const certified = new Set(certificates.map((c) => c.courseId));
+  const myCertificates = certificates.filter((c) => mineOf(c.learnerId));
+  const certified = new Set(myCertificates.map((c) => c.courseId));
   const inProgress = [...byCourse.entries()]
     .filter(([id, s]) => !s.completedAt && !certified.has(id) && s.done > 0)
     .sort(
@@ -217,7 +222,7 @@ export default async function AcademyPage() {
               </h2>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {completedCourses.map((c) => {
-                  const cert = certificates.find((x) => x.courseId === c.id);
+                  const cert = myCertificates.find((x) => x.courseId === c.id);
                   return (
                     <Card key={c.id} className="flex flex-col gap-2 p-4">
                       <div className="flex items-start justify-between gap-2">

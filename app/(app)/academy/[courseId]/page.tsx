@@ -24,10 +24,15 @@ export default async function CoursePage({
     getQuestionSet(`academy_quiz:${courseId}`),
   ]);
   const quiz = quizRaw as unknown as CourseQuizQuestion[];
+  const isOwner = access.role === "owner_admin";
+  const mineOf = (learnerId: string) =>
+    learnerId === claims.sub || (isOwner && learnerId === "owner");
   const mine = progress.find(
-    (p) => p.courseId === courseId && p.learnerId === "owner",
+    (p) => p.courseId === courseId && mineOf(p.learnerId),
   );
-  const cert = certificates.find((c) => c.courseId === courseId) ?? null;
+  const cert =
+    certificates.find((c) => c.courseId === courseId && mineOf(c.learnerId)) ??
+    null;
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">

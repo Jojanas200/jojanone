@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 export function LoginForm() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,6 +46,7 @@ export function LoginForm() {
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: { full_name: fullName.trim() },
           },
         });
         if (error) throw error;
@@ -70,6 +72,21 @@ export function LoginForm() {
       onSubmit={onSubmit}
       className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
     >
+      {mode === "signup" && (
+        <div className="space-y-1.5">
+          <Label htmlFor="fullName">Full name</Label>
+          <Input
+            id="fullName"
+            required
+            minLength={2}
+            maxLength={200}
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            autoComplete="name"
+            placeholder="Shown on certificates and team lists"
+          />
+        </div>
+      )}
       <div className="space-y-1.5">
         <Label htmlFor="email">Email</Label>
         <Input
