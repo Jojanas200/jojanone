@@ -5,7 +5,11 @@
 // (user can continue but should review) and "critical" (must be resolved
 // before adoption).
 
-import { getPolicyTemplate } from "./templates";
+import {
+  getPolicyTemplate,
+  kindOf,
+  type PolicyDocumentKind,
+} from "./templates";
 
 export type CheckStatus = "pass" | "warning" | "critical";
 
@@ -41,12 +45,29 @@ const ADVICE_PATTERNS = [
   /we do not have enough information/i,
 ];
 
-// A required section is satisfied when its heading OR one of its synonyms
-// appears in the document.
-const UNIVERSAL_SECTIONS: { key: string; label: string; needles: string[] }[] =
-  [
-    { key: "purpose", label: "Purpose stated", needles: ["purpose"] },
-    { key: "scope", label: "Scope defined", needles: ["scope", "applies to"] },
+// A required topic is satisfied when one of its synonyms appears in the
+// document. Each document KIND has its own universal requirements - a
+// contract is not checked like a policy, a plan is not checked like a letter.
+interface UniversalCheck {
+  key: string;
+  label: string;
+  needles: string[];
+  critical?: boolean;
+}
+const UNIVERSAL_BY_KIND: Record<PolicyDocumentKind, UniversalCheck[]> = {
+  policy: [
+    {
+      key: "purpose",
+      label: "Purpose stated",
+      needles: ["purpose"],
+      critical: true,
+    },
+    {
+      key: "scope",
+      label: "Scope defined",
+      needles: ["scope", "applies to"],
+      critical: true,
+    },
     {
       key: "roles",
       label: "Responsibilities identified",
@@ -67,7 +88,160 @@ const UNIVERSAL_SECTIONS: { key: string; label: string; needles: string[] }[] =
       label: "Review frequency established",
       needles: ["review"],
     },
-  ];
+  ],
+  contract: [
+    {
+      key: "parties",
+      label: "Parties identified",
+      needles: ["between", "parties", "agreement is made"],
+      critical: true,
+    },
+    {
+      key: "services",
+      label: "Scope of supply described",
+      needles: ["service", "goods", "work", "deliver", "duties", "scope"],
+    },
+    {
+      key: "fees",
+      label: "Fees / payment addressed",
+      needles: ["fee", "payment", "price", "charge", "salary", "rate"],
+    },
+    {
+      key: "term",
+      label: "Term and dates addressed",
+      needles: ["term", "duration", "start", "commence", "date"],
+    },
+    {
+      key: "termination",
+      label: "Termination addressed",
+      needles: ["terminat", "notice", "end of"],
+    },
+    { key: "signatures", label: "Signature block present", needles: ["sign"] },
+  ],
+  procedure: [
+    {
+      key: "purpose",
+      label: "Purpose stated",
+      needles: ["purpose"],
+      critical: true,
+    },
+    {
+      key: "trigger",
+      label: "Trigger / when it applies stated",
+      needles: ["applies", "trigger", "when"],
+    },
+    {
+      key: "steps",
+      label: "Steps set out",
+      needles: ["step", "follow", "then", "procedure"],
+    },
+    {
+      key: "roles",
+      label: "Responsibilities identified",
+      needles: ["responsib"],
+    },
+    { key: "records", label: "Records addressed", needles: ["record"] },
+    {
+      key: "review",
+      label: "Review frequency established",
+      needles: ["review"],
+    },
+  ],
+  plan: [
+    {
+      key: "purpose",
+      label: "Purpose and scope stated",
+      needles: ["purpose", "plan sets out", "covers"],
+      critical: true,
+    },
+    {
+      key: "activation",
+      label: "Activation triggers stated",
+      needles: ["activat", "trigger", "invoke"],
+    },
+    {
+      key: "roles",
+      label: "Roles and responsibilities identified",
+      needles: ["responsib", "lead"],
+    },
+    {
+      key: "response",
+      label: "Response steps included",
+      needles: ["response", "respond", "contain", "make people safe"],
+    },
+    {
+      key: "communications",
+      label: "Communications addressed",
+      needles: ["communicat", "notify", "inform"],
+    },
+    {
+      key: "testing",
+      label: "Testing / review established",
+      needles: ["test", "exercise", "review"],
+    },
+  ],
+  handbook: [
+    {
+      key: "welcome",
+      label: "Purpose / welcome stated",
+      needles: ["welcome", "purpose", "handbook"],
+      critical: true,
+    },
+    {
+      key: "working",
+      label: "Working arrangements covered",
+      needles: ["hours", "working", "arrangement"],
+    },
+    {
+      key: "conduct",
+      label: "Conduct and standards covered",
+      needles: ["conduct", "expected", "standard"],
+    },
+    {
+      key: "acknowledgement",
+      label: "Acknowledgement included",
+      needles: ["acknowledg", "read and understood"],
+    },
+  ],
+  notice: [
+    {
+      key: "purpose",
+      label: "Purpose clear",
+      needles: [
+        "purpose",
+        "regarding",
+        "confirm",
+        "offer",
+        "notice",
+        "writing",
+      ],
+    },
+    {
+      key: "contact",
+      label: "Contact route included",
+      needles: ["contact", "questions"],
+    },
+  ],
+  statement: [
+    {
+      key: "background",
+      label: "Background / context stated",
+      needles: [
+        "record",
+        "meeting",
+        "statement",
+        "resolution",
+        "background",
+        "parties",
+      ],
+    },
+    {
+      key: "approval",
+      label: "Approval / sign-off included",
+      needles: ["approv", "sign", "resolved", "passed"],
+    },
+  ],
+};
 
 // Per-type requirements attached by template key (specific wins) or category.
 // One engine, many schemas - extend here rather than coding per-policy logic.
@@ -254,6 +428,9 @@ export function runPolicyCheck(
   const items: CheckItem[] = [];
   const hay = content.toLowerCase();
   const has = (needles: string[]) => needles.some((n) => hay.includes(n));
+  const kind: PolicyDocumentKind = meta.templateKey
+    ? kindOf(meta.templateKey)
+    : "policy";
 
   // 1. Unresolved placeholders - never adoptable with these in the text.
   const placeholders = findPlaceholders(content);
@@ -272,15 +449,23 @@ export function runPolicyCheck(
         },
   );
 
-  // 2. Responsible person: a named owner on the record, or role wording in the
-  // document body.
+  // 2. Responsible person: a named owner on the record, or role wording in
+  // the document body. Missing entirely is critical for operational documents
+  // (policies, procedures, plans, handbooks); for contracts, letters and
+  // records it is a recommendation.
   const ownerNamed = !!meta.owner?.trim();
   const roleWorded = has([
     "business owner",
     "designated",
     "responsible for this policy",
+    "responsible for this procedure",
     "accountable",
   ]);
+  const ownerCritical =
+    kind === "policy" ||
+    kind === "procedure" ||
+    kind === "plan" ||
+    kind === "handbook";
   items.push(
     ownerNamed
       ? { key: "owner", label: "Responsible person confirmed", status: "pass" }
@@ -290,28 +475,27 @@ export function runPolicyCheck(
             label: "Responsible person needs confirmation",
             status: "warning",
             detail:
-              "The document uses role wording but no named owner is set on the policy record. Set the owner in Properties.",
+              "The document uses role wording but no named owner is set on the record. Set the owner in Properties.",
           }
         : {
             key: "owner",
             label: "No responsible person or role identified",
-            status: "critical",
+            status: ownerCritical ? "critical" : "warning",
             detail:
-              "Name a policy owner in Properties or add responsibility wording to the document.",
+              "Name an owner in Properties or add responsibility wording to the document.",
           },
   );
 
-  // 3. Universal required sections.
-  for (const s of UNIVERSAL_SECTIONS) {
-    const critical = s.key === "purpose" || s.key === "scope";
+  // 3. Universal requirements for this document kind.
+  for (const c of UNIVERSAL_BY_KIND[kind]) {
     items.push(
-      has(s.needles)
-        ? { key: s.key, label: s.label, status: "pass" }
+      has(c.needles)
+        ? { key: c.key, label: c.label, status: "pass" }
         : {
-            key: s.key,
-            label: `${s.label.replace(/ (stated|defined|identified|included|addressed|established)$/, "")} missing`,
-            status: critical ? "critical" : "warning",
-            detail: `The document does not appear to cover this. Add a section on ${s.needles[0]}.`,
+            key: c.key,
+            label: `${c.label} - not found`,
+            status: c.critical ? "critical" : "warning",
+            detail: `The document does not appear to cover this. Add a section on ${c.needles[0]}.`,
           },
     );
   }

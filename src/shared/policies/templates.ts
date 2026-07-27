@@ -23,7 +23,13 @@ export interface PolicySection {
 }
 
 export type PolicyDocumentKind =
-  "policy" | "notice" | "procedure" | "plan" | "handbook" | "statement";
+  | "policy"
+  | "notice"
+  | "procedure"
+  | "plan"
+  | "handbook"
+  | "statement"
+  | "contract";
 
 export interface PolicyTemplate {
   key: string;
@@ -932,10 +938,1084 @@ export function getPolicyTemplate(key: string | null | undefined) {
   return key ? (POLICY_TEMPLATES.find((t) => t.key === key) ?? null) : null;
 }
 
-/** Questions for the guided wizard: the template's, or the base set for a blank. */
-export function questionsFor(key: string | null | undefined) {
-  return getPolicyTemplate(key)?.guidedQuestions ?? BASE_QUESTIONS;
-}
-
 export const sectionHeading = (key: string) =>
   POLICY_SECTIONS.find((s) => s.key === key)?.heading ?? key;
+
+// ---------------------------------------------------------------------------
+// Document-aware guided drafting.
+//
+// Category -> template -> question set -> Jova draft. Policies keep the
+// original questionnaire (BASE_QUESTIONS + per-template extras). Every other
+// document kind gets its own section skeleton and question set, with
+// template-specific sets for contracts, letters, procedures, plans, records
+// and handbooks - so Jova asks about the document actually being drafted.
+// ---------------------------------------------------------------------------
+
+// Kind refinements kept out of the literal library entries above so the data
+// stays compact: agreements are contracts, not policies; two originals are a
+// statement and a procedure respectively.
+const KIND_OVERRIDES: Record<string, PolicyDocumentKind> = {
+  tpl_employment_contract: "contract",
+  tpl_contractor_agreement: "contract",
+  tpl_consultancy_agreement: "contract",
+  tpl_customer_services_agreement: "contract",
+  tpl_supplier_agreement: "contract",
+  tpl_nda: "contract",
+  tpl_msa: "contract",
+  tpl_sow: "contract",
+  tpl_sla: "contract",
+  tpl_dpa: "contract",
+  tpl_modern_slavery: "statement",
+  tpl_rtw: "procedure",
+};
+for (const t of POLICY_TEMPLATES) {
+  const k = KIND_OVERRIDES[t.key];
+  if (k) t.kind = k;
+}
+
+export const kindOf = (key: string | null | undefined): PolicyDocumentKind =>
+  getPolicyTemplate(key)?.kind ?? "policy";
+
+// --- Section skeletons per document kind -----------------------------------
+
+export const CONTRACT_SECTIONS: PolicySection[] = [
+  { key: "parties", heading: "Parties" },
+  { key: "background", heading: "Background", optional: true },
+  { key: "services", heading: "Services and scope" },
+  { key: "deliverables", heading: "Deliverables", optional: true },
+  { key: "fees", heading: "Fees and payment" },
+  { key: "term", heading: "Term and dates" },
+  {
+    key: "obligations",
+    heading: "Obligations and responsibilities",
+    optional: true,
+  },
+  { key: "confidentiality", heading: "Confidentiality", optional: true },
+  { key: "ip", heading: "Intellectual property", optional: true },
+  { key: "data_protection", heading: "Data protection", optional: true },
+  { key: "liability", heading: "Liability", optional: true },
+  { key: "termination", heading: "Termination" },
+  { key: "general", heading: "Notices and general", optional: true },
+  { key: "signatures", heading: "Signatures" },
+];
+
+export const PROCEDURE_SECTIONS: PolicySection[] = [
+  { key: "purpose", heading: "Purpose" },
+  { key: "trigger", heading: "When this procedure applies" },
+  { key: "roles", heading: "Roles and responsibilities" },
+  { key: "steps", heading: "Procedure steps" },
+  { key: "escalation", heading: "Escalation", optional: true },
+  { key: "records", heading: "Records" },
+  { key: "review_schedule", heading: "Review schedule" },
+];
+
+export const PLAN_SECTIONS: PolicySection[] = [
+  { key: "purpose", heading: "Purpose and scope" },
+  { key: "scenarios", heading: "Scenarios covered" },
+  { key: "activation", heading: "Activation triggers" },
+  { key: "roles", heading: "Roles and responsibilities" },
+  { key: "response", heading: "Response steps" },
+  { key: "recovery", heading: "Recovery steps", optional: true },
+  { key: "communications", heading: "Communications", optional: true },
+  { key: "testing", heading: "Testing and review" },
+];
+
+export const HANDBOOK_SECTIONS: PolicySection[] = [
+  { key: "welcome", heading: "Welcome and purpose" },
+  { key: "working", heading: "Working arrangements" },
+  { key: "conduct", heading: "Conduct and standards" },
+  { key: "leave", heading: "Leave and absence", optional: true },
+  { key: "support", heading: "Support and contacts", optional: true },
+  { key: "related", heading: "Key policies referenced", optional: true },
+  { key: "acknowledgement", heading: "Acknowledgement" },
+];
+
+export const NOTICE_SECTIONS: PolicySection[] = [
+  { key: "purpose", heading: "Purpose" },
+  { key: "recipient", heading: "Recipient", optional: true },
+  { key: "background", heading: "Background", optional: true },
+  { key: "details", heading: "Details" },
+  { key: "next_steps", heading: "Next steps", optional: true },
+  { key: "contact", heading: "Contact" },
+];
+
+export const STATEMENT_SECTIONS: PolicySection[] = [
+  { key: "background", heading: "Background" },
+  { key: "details", heading: "Substance" },
+  { key: "decisions", heading: "Decisions and actions", optional: true },
+  { key: "approval", heading: "Approval and sign-off" },
+];
+
+const SECTIONS_BY_KIND: Record<PolicyDocumentKind, PolicySection[]> = {
+  policy: POLICY_SECTIONS,
+  contract: CONTRACT_SECTIONS,
+  procedure: PROCEDURE_SECTIONS,
+  plan: PLAN_SECTIONS,
+  handbook: HANDBOOK_SECTIONS,
+  notice: NOTICE_SECTIONS,
+  statement: STATEMENT_SECTIONS,
+};
+
+/** Section skeleton for a template (policy skeleton for blanks). */
+export function sectionsFor(key: string | null | undefined): PolicySection[] {
+  return SECTIONS_BY_KIND[kindOf(key)];
+}
+
+// --- Question sets ----------------------------------------------------------
+
+const q = (
+  key: string,
+  question: string,
+  sectionTarget: string,
+  answerType: AnswerType = "long",
+  optional = false,
+  hint?: string,
+): PolicyGuidedQuestion => ({
+  key,
+  question,
+  sectionTarget,
+  answerType,
+  ...(optional ? { optional: true } : {}),
+  ...(hint ? { hint } : {}),
+});
+
+// Kind-level fallbacks for any non-policy template without its own set.
+const CONTRACT_QUESTIONS: PolicyGuidedQuestion[] = [
+  q(
+    "counterparty",
+    "Who is the other party (name and role)?",
+    "parties",
+    "short",
+  ),
+  q(
+    "services",
+    "What is being provided or done under this agreement?",
+    "services",
+  ),
+  q("fees", "What are the fees and payment terms?", "fees", "short"),
+  q("term", "When does it start, and how long does it run?", "term", "short"),
+  q(
+    "obligations",
+    "Any specific obligations or service standards?",
+    "obligations",
+    "long",
+    true,
+  ),
+  q(
+    "confidentiality",
+    "Any confidentiality or IP terms to capture?",
+    "confidentiality",
+    "long",
+    true,
+  ),
+  q(
+    "termination",
+    "How can it be ended (notice, grounds)?",
+    "termination",
+    "short",
+  ),
+];
+
+const PROCEDURE_QUESTIONS: PolicyGuidedQuestion[] = [
+  q("trigger", "When does this procedure apply - what triggers it?", "trigger"),
+  q("responsible", "Who is responsible for carrying it out?", "roles", "short"),
+  q("steps", "Describe the steps, in order.", "steps"),
+  q(
+    "escalation",
+    "When and to whom should things be escalated?",
+    "escalation",
+    "short",
+    true,
+  ),
+  q("records", "What must be recorded, and where?", "records", "short"),
+  q(
+    "review",
+    "How often should this procedure be reviewed?",
+    "review_schedule",
+    "short",
+    true,
+  ),
+];
+
+const PLAN_QUESTIONS: PolicyGuidedQuestion[] = [
+  q("scenarios", "What risks or scenarios does this plan cover?", "scenarios"),
+  q(
+    "activation",
+    "What triggers activation, and who decides?",
+    "activation",
+    "short",
+  ),
+  q("responsible", "Who does what when the plan is activated?", "roles"),
+  q("response", "What are the immediate response steps?", "response"),
+  q(
+    "recovery",
+    "How do you recover back to normal operations?",
+    "recovery",
+    "long",
+    true,
+  ),
+  q(
+    "communications",
+    "Who must be informed, and how?",
+    "communications",
+    "short",
+    true,
+  ),
+  q(
+    "testing",
+    "How and how often will the plan be tested?",
+    "testing",
+    "short",
+    true,
+  ),
+];
+
+const HANDBOOK_QUESTIONS: PolicyGuidedQuestion[] = [
+  q(
+    "working",
+    "Describe your working arrangements (hours, location, flexibility).",
+    "working",
+  ),
+  q("conduct", "What conduct and standards do you expect?", "conduct"),
+  q(
+    "leave",
+    "How do holidays, sickness and other leave work?",
+    "leave",
+    "long",
+    true,
+  ),
+  q(
+    "support",
+    "Who do people go to for help, pay queries or concerns?",
+    "support",
+    "short",
+    true,
+  ),
+  q(
+    "related",
+    "Which policies should it point people to?",
+    "related",
+    "short",
+    true,
+  ),
+];
+
+const LETTER_QUESTIONS: PolicyGuidedQuestion[] = [
+  q("recipient", "Who is this for?", "recipient", "short"),
+  q("details", "What are the key details to include?", "details"),
+  q(
+    "next_steps",
+    "What should happen next (dates, actions, acceptance)?",
+    "next_steps",
+    "short",
+    true,
+  ),
+];
+
+const STATEMENT_QUESTIONS: PolicyGuidedQuestion[] = [
+  q(
+    "background",
+    "What is this record about (context, parties, date)?",
+    "background",
+  ),
+  q("details", "Set out the substance - the key points or terms.", "details"),
+  q(
+    "approval",
+    "Who approves or signs this, and when?",
+    "approval",
+    "short",
+    true,
+  ),
+];
+
+const KIND_QUESTIONS: Partial<
+  Record<PolicyDocumentKind, PolicyGuidedQuestion[]>
+> = {
+  contract: CONTRACT_QUESTIONS,
+  procedure: PROCEDURE_QUESTIONS,
+  plan: PLAN_QUESTIONS,
+  handbook: HANDBOOK_QUESTIONS,
+  notice: LETTER_QUESTIONS,
+  statement: STATEMENT_QUESTIONS,
+};
+
+// Template-specific sets. Company identity is never asked - Jova already
+// knows the business from the profile.
+const TEMPLATE_QUESTIONS: Record<string, PolicyGuidedQuestion[]> = {
+  // ---- Contracts: employment ----
+  tpl_employment_contract: [
+    q("employee", "Employee's full name?", "parties", "short"),
+    q("job_title", "Job title and main duties?", "services"),
+    q(
+      "start_date",
+      "Start date (and any continuous-service date)?",
+      "term",
+      "short",
+    ),
+    q("salary", "Salary and how it is paid?", "fees", "short"),
+    q(
+      "hours_place",
+      "Hours of work and place of work?",
+      "obligations",
+      "short",
+    ),
+    q("probation", "Probation period, if any?", "term", "short", true),
+    q(
+      "holiday_benefits",
+      "Holiday entitlement and any benefits?",
+      "obligations",
+      "short",
+      true,
+    ),
+    q("notice", "Notice period each side must give?", "termination", "short"),
+  ],
+  tpl_offer_letter: [
+    q("candidate", "Candidate's name?", "recipient", "short"),
+    q("role", "Role being offered?", "details", "short"),
+    q("salary", "Salary and key terms of the offer?", "details", "short"),
+    q("start_date", "Proposed start date?", "details", "short"),
+    q(
+      "conditions",
+      "Conditions of the offer (references, right to work, checks)?",
+      "next_steps",
+      "long",
+      true,
+    ),
+  ],
+  tpl_employment_confirmation_letter: [
+    q("employee", "Employee's name and job title?", "details", "short"),
+    q(
+      "dates_status",
+      "Employment start date and current status?",
+      "details",
+      "short",
+    ),
+    q("salary", "Include salary? If so, state it.", "details", "short", true),
+    q(
+      "recipient_purpose",
+      "Who is the letter for, and what is it needed for?",
+      "purpose",
+      "short",
+    ),
+  ],
+  // ---- Contracts: commercial ----
+  tpl_contractor_agreement: [
+    q("contractor", "Contractor's name or company?", "parties", "short"),
+    q("services", "What services will they provide?", "services"),
+    q(
+      "deliverables",
+      "Specific deliverables, if any?",
+      "deliverables",
+      "long",
+      true,
+    ),
+    q(
+      "fees",
+      "Fees and payment terms (rate, invoicing, expenses)?",
+      "fees",
+      "short",
+    ),
+    q("ip", "Who owns the work produced (IP)?", "ip", "short", true),
+    q(
+      "confidentiality",
+      "Confidentiality expectations?",
+      "confidentiality",
+      "short",
+      true,
+    ),
+    q("term", "Duration of the engagement?", "term", "short"),
+    q("termination", "How can either side end it?", "termination", "short"),
+  ],
+  tpl_consultancy_agreement: [
+    q("consultant", "Consultant's name or company?", "parties", "short"),
+    q("scope", "Scope of the consultancy?", "services"),
+    q("deliverables", "Deliverables expected?", "deliverables", "long", true),
+    q("fees", "Fees and payment terms?", "fees", "short"),
+    q("ip", "Who owns the outputs (IP)?", "ip", "short", true),
+    q(
+      "liability",
+      "Any liability caps or exclusions to record?",
+      "liability",
+      "short",
+      true,
+    ),
+    q("term", "Duration, and how it ends?", "term", "short"),
+  ],
+  tpl_customer_services_agreement: [
+    q("customer", "Customer's name or company?", "parties", "short"),
+    q("services", "What services are you supplying?", "services"),
+    q("fees", "Fees and payment terms?", "fees", "short"),
+    q(
+      "responsibilities",
+      "What must each side do (responsibilities)?",
+      "obligations",
+      "long",
+      true,
+    ),
+    q("term", "Service period (start, length, renewal)?", "term", "short"),
+    q("ip", "IP position on anything created?", "ip", "short", true),
+    q(
+      "liability",
+      "Liability position (caps, exclusions)?",
+      "liability",
+      "short",
+      true,
+    ),
+    q("termination", "Termination rights?", "termination", "short"),
+  ],
+  tpl_supplier_agreement: [
+    q("supplier", "Supplier's name or company?", "parties", "short"),
+    q(
+      "goods_services",
+      "What goods or services are they supplying?",
+      "services",
+    ),
+    q("pricing", "Pricing and payment terms?", "fees", "short"),
+    q(
+      "delivery",
+      "Delivery or service requirements and standards?",
+      "obligations",
+      "long",
+      true,
+    ),
+    q("liability", "Liability position?", "liability", "short", true),
+    q("termination", "Termination rights?", "termination", "short"),
+  ],
+  tpl_nda: [
+    q("other_party", "Who is the other party?", "parties", "short"),
+    q(
+      "direction",
+      "Mutual, or one-way? Who is disclosing?",
+      "background",
+      "short",
+    ),
+    q(
+      "purpose",
+      "What is the information being shared for?",
+      "services",
+      "short",
+    ),
+    q(
+      "confidential_info",
+      "What counts as confidential information here?",
+      "confidentiality",
+    ),
+    q(
+      "permitted",
+      "Any permitted disclosures (advisers, staff, regulators)?",
+      "confidentiality",
+      "short",
+      true,
+    ),
+    q("period", "How long must confidentiality last?", "term", "short"),
+  ],
+  tpl_msa: [
+    q("counterparty", "Who is the other party?", "parties", "short"),
+    q(
+      "relationship",
+      "Describe the overall relationship this umbrella covers.",
+      "background",
+    ),
+    q(
+      "services",
+      "What kinds of services will be provided under it?",
+      "services",
+    ),
+    q(
+      "payment",
+      "Payment structure (rates, invoicing, terms)?",
+      "fees",
+      "short",
+    ),
+    q(
+      "sows",
+      "How will individual Statements of Work be agreed?",
+      "deliverables",
+      "short",
+      true,
+    ),
+    q("ip", "IP position?", "ip", "short", true),
+    q("liability", "Liability position?", "liability", "short", true),
+    q("termination", "Termination rights?", "termination", "short"),
+  ],
+  tpl_sow: [
+    q(
+      "msa",
+      "Which Master Services Agreement does this sit under?",
+      "background",
+      "short",
+    ),
+    q("project", "Project and scope of this piece of work?", "services"),
+    q("deliverables", "Deliverables?", "deliverables"),
+    q("milestones", "Milestones and key dates?", "term", "short"),
+    q(
+      "responsibilities",
+      "Who is responsible for what?",
+      "obligations",
+      "short",
+      true,
+    ),
+    q("fees", "Fees for this work?", "fees", "short"),
+    q(
+      "acceptance",
+      "Acceptance criteria - when is it done?",
+      "deliverables",
+      "short",
+      true,
+    ),
+  ],
+  tpl_sla: [
+    q("service", "Which service does this SLA cover?", "services", "short"),
+    q("levels", "Service levels / KPIs (targets)?", "obligations"),
+    q(
+      "measurement",
+      "How are they measured and reported?",
+      "obligations",
+      "short",
+    ),
+    q(
+      "availability",
+      "Availability and response/fix times?",
+      "obligations",
+      "short",
+      true,
+    ),
+    q(
+      "escalation",
+      "Escalation route when levels are missed?",
+      "general",
+      "short",
+      true,
+    ),
+    q(
+      "remedies",
+      "Remedies (service credits, termination rights)?",
+      "liability",
+      "short",
+      true,
+    ),
+  ],
+  tpl_dpa: [
+    q(
+      "processor",
+      "Who is the processor (and who is controller)?",
+      "parties",
+      "short",
+    ),
+    q(
+      "purpose_duration",
+      "Purpose and duration of the processing?",
+      "background",
+      "short",
+    ),
+    q(
+      "data_types",
+      "Types of personal data and categories of data subjects?",
+      "data_protection",
+    ),
+    q(
+      "security",
+      "Security measures required?",
+      "data_protection",
+      "long",
+      true,
+    ),
+    q(
+      "subprocessors",
+      "Are sub-processors allowed, and on what terms?",
+      "data_protection",
+      "short",
+      true,
+    ),
+    q(
+      "transfers",
+      "Any international transfers, and safeguards?",
+      "data_protection",
+      "short",
+      true,
+    ),
+    q(
+      "deletion",
+      "What happens to data at the end (deletion/return)?",
+      "termination",
+      "short",
+    ),
+  ],
+  // ---- Contracts: letters ----
+  tpl_contract_variation: [
+    q(
+      "existing",
+      "Which existing contract is being varied (name, date)?",
+      "background",
+      "short",
+    ),
+    q("parties", "Who are the parties?", "recipient", "short"),
+    q(
+      "changes",
+      "Which clauses or terms are changing, and to what?",
+      "details",
+    ),
+    q("effective", "Effective date of the variation?", "details", "short"),
+    q(
+      "acceptance",
+      "How will the other party accept (signature, email)?",
+      "next_steps",
+      "short",
+      true,
+    ),
+  ],
+  tpl_renewal_letter: [
+    q("existing", "Which agreement is being renewed?", "background", "short"),
+    q("period", "Renewal period and new dates?", "details", "short"),
+    q("changes", "Any changes to terms or pricing?", "details", "long", true),
+    q(
+      "acceptance",
+      "How should they confirm acceptance?",
+      "next_steps",
+      "short",
+      true,
+    ),
+  ],
+  tpl_termination_notice: [
+    q(
+      "existing",
+      "Which agreement is being terminated?",
+      "background",
+      "short",
+    ),
+    q(
+      "clause",
+      "Which termination clause are you relying on?",
+      "details",
+      "short",
+    ),
+    q(
+      "reason",
+      "Reason for termination (where appropriate)?",
+      "details",
+      "long",
+      true,
+    ),
+    q(
+      "notice",
+      "Notice period being given and termination date?",
+      "details",
+      "short",
+    ),
+    q(
+      "next_steps",
+      "What must happen next (handover, final payment, returns)?",
+      "next_steps",
+      "long",
+      true,
+    ),
+  ],
+  tpl_heads_of_terms: [
+    q("parties", "Who are the parties?", "background", "short"),
+    q(
+      "transaction",
+      "What transaction or relationship is proposed?",
+      "details",
+    ),
+    q("commercial", "Principal commercial terms?", "details"),
+    q("price", "Price or fees proposed?", "details", "short", true),
+    q(
+      "conditions",
+      "Key conditions before it becomes binding?",
+      "details",
+      "short",
+      true,
+    ),
+    q(
+      "exclusivity",
+      "Any exclusivity or confidentiality terms?",
+      "details",
+      "short",
+      true,
+    ),
+    q("timetable", "Intended timetable?", "details", "short", true),
+  ],
+  tpl_mou: [
+    q("parties", "Who are the parties?", "background", "short"),
+    q("purpose", "Purpose of the understanding?", "details"),
+    q("collaboration", "What collaboration is proposed?", "details"),
+    q(
+      "responsibilities",
+      "Each party's responsibilities?",
+      "details",
+      "long",
+      true,
+    ),
+    q("duration", "Duration of the arrangement?", "details", "short", true),
+    q(
+      "binding",
+      "Which provisions (if any) are intended to be binding?",
+      "approval",
+      "short",
+    ),
+  ],
+  // ---- Data protection documents ----
+  tpl_employee_privacy: [
+    q("data", "What personal data do you hold about staff?", "details"),
+    q("purposes", "What do you use it for?", "details"),
+    q(
+      "lawful",
+      "Lawful bases you rely on (if known)?",
+      "details",
+      "short",
+      true,
+    ),
+    q(
+      "sharing",
+      "Who is it shared with (payroll, pension, HMRC)?",
+      "details",
+      "short",
+      true,
+    ),
+    q("retention", "How long is it kept?", "details", "short", true),
+    q("contact", "Who do staff contact about their data?", "contact", "short"),
+  ],
+  tpl_contractor_privacy: [
+    q("data", "What personal data do you hold about contractors?", "details"),
+    q("purposes", "What do you use it for?", "details"),
+    q("sharing", "Who is it shared with?", "details", "short", true),
+    q("retention", "How long is it kept?", "details", "short", true),
+    q(
+      "contact",
+      "Who do contractors contact about their data?",
+      "contact",
+      "short",
+    ),
+  ],
+  tpl_sar_procedure: [
+    q(
+      "channels",
+      "How can requests arrive (email, post, verbally)?",
+      "trigger",
+      "short",
+    ),
+    q("responsible", "Who owns and responds to requests?", "roles", "short"),
+    q(
+      "verification",
+      "How do you verify the requester's identity?",
+      "steps",
+      "short",
+    ),
+    q("steps", "Steps to gather, review and respond?", "steps"),
+    q(
+      "deadline",
+      "Response deadline and extension approach?",
+      "steps",
+      "short",
+      true,
+    ),
+    q(
+      "records",
+      "What is recorded about each request?",
+      "records",
+      "short",
+      true,
+    ),
+  ],
+  // ---- Governance documents ----
+  tpl_modern_slavery: [
+    q(
+      "business",
+      "Briefly describe your business and supply chains.",
+      "background",
+    ),
+    q(
+      "risks",
+      "Where are the modern-slavery risks in your operations?",
+      "details",
+    ),
+    q(
+      "due_diligence",
+      "What due diligence and controls do you have?",
+      "details",
+    ),
+    q(
+      "training",
+      "What training or awareness is in place?",
+      "details",
+      "short",
+      true,
+    ),
+    q(
+      "approval",
+      "Who approves this statement (name, role, date)?",
+      "approval",
+      "short",
+    ),
+  ],
+  tpl_code_of_conduct: withExtras([
+    q(
+      "values",
+      "What values should the code reflect?",
+      "policy_statements",
+      "short",
+      true,
+    ),
+    q(
+      "behaviours",
+      "What behaviours are expected day to day?",
+      "policy_statements",
+      "long",
+      true,
+    ),
+    q(
+      "unacceptable",
+      "What is unacceptable (examples)?",
+      "policy_statements",
+      "long",
+      true,
+    ),
+  ]),
+  tpl_board_minutes: [
+    q("meeting", "Meeting date, time and location?", "background", "short"),
+    q("attendees", "Who attended, and any apologies?", "background", "short"),
+    q("agenda", "What was on the agenda?", "details", "short"),
+    q("discussions", "Summarise the key discussions.", "details"),
+    q("decisions", "What decisions were made?", "decisions"),
+    q(
+      "actions",
+      "Actions agreed (who, what, by when)?",
+      "decisions",
+      "long",
+      true,
+    ),
+    q("next", "Date of the next meeting?", "approval", "short", true),
+  ],
+  tpl_written_resolution: [
+    q(
+      "type",
+      "Directors' or members' resolution, and what kind?",
+      "background",
+      "short",
+    ),
+    q("resolution", "Set out the resolution text.", "details"),
+    q(
+      "eligible",
+      "Who is eligible to sign or vote?",
+      "background",
+      "short",
+      true,
+    ),
+    q("passed", "Date passed (or circulation date)?", "approval", "short"),
+    q("signatories", "Who signs?", "approval", "short"),
+  ],
+  // ---- Health & safety procedures ----
+  tpl_accident_reporting: [
+    q(
+      "covers",
+      "What counts as a reportable accident, incident or near-miss here?",
+      "trigger",
+    ),
+    q("immediate", "Immediate steps when something happens?", "steps"),
+    q(
+      "reporting",
+      "Who is told, and how is RIDDOR handled?",
+      "escalation",
+      "short",
+    ),
+    q("recording", "How and where are incidents recorded?", "records", "short"),
+    q(
+      "investigation",
+      "How are incidents investigated?",
+      "steps",
+      "long",
+      true,
+    ),
+  ],
+  tpl_fire_safety: [
+    q("activation", "What happens when the alarm sounds?", "trigger", "short"),
+    q("evacuation", "Evacuation steps and routes?", "steps"),
+    q("assembly", "Assembly point?", "steps", "short"),
+    q("wardens", "Fire wardens / responsible people?", "roles", "short", true),
+    q(
+      "equipment",
+      "Checks on alarms, extinguishers and exits?",
+      "records",
+      "short",
+      true,
+    ),
+    q("drills", "How often are drills held?", "review_schedule", "short", true),
+  ],
+  tpl_hs_procedure: [
+    q(
+      "covers",
+      "Which task, activity or hazard does this cover?",
+      "trigger",
+      "short",
+    ),
+    q("precautions", "What precautions and controls apply?", "steps"),
+    q(
+      "safe_steps",
+      "Describe the safe way to do the work, step by step.",
+      "steps",
+    ),
+    q("ppe", "Any PPE or equipment required?", "steps", "short", true),
+    q(
+      "emergency",
+      "What to do if something goes wrong?",
+      "escalation",
+      "short",
+    ),
+  ],
+  // ---- Plans ----
+  tpl_disaster_recovery: [
+    q("systems", "Which systems and data does this plan cover?", "scenarios"),
+    q(
+      "activation",
+      "What triggers activation, and who decides?",
+      "activation",
+      "short",
+    ),
+    q("responsible", "Who does what during recovery?", "roles"),
+    q("recovery", "Recovery steps for the key systems?", "recovery"),
+    q(
+      "objectives",
+      "Recovery time / data-loss objectives, if set?",
+      "recovery",
+      "short",
+      true,
+    ),
+    q(
+      "communications",
+      "Who is informed, and how?",
+      "communications",
+      "short",
+      true,
+    ),
+    q("testing", "How is the plan tested?", "testing", "short", true),
+  ],
+  tpl_incident_response: [
+    q(
+      "types",
+      "What incident types does this cover (cyber, data, outage)?",
+      "scenarios",
+    ),
+    q(
+      "detection",
+      "How are incidents detected and reported?",
+      "activation",
+      "short",
+    ),
+    q("responsible", "Who leads and who supports during an incident?", "roles"),
+    q("containment", "Immediate containment steps?", "response"),
+    q("recovery", "Eradication and recovery steps?", "recovery", "long", true),
+    q(
+      "notification",
+      "Who might need notifying (ICO, customers, insurers)?",
+      "communications",
+      "short",
+      true,
+    ),
+    q(
+      "lessons",
+      "How are lessons captured afterwards?",
+      "testing",
+      "short",
+      true,
+    ),
+  ],
+  // ---- People documents ----
+  tpl_rtw: [
+    q(
+      "when",
+      "When are checks carried out (before start, repeat checks)?",
+      "trigger",
+      "short",
+    ),
+    q("responsible", "Who performs and signs off checks?", "roles", "short"),
+    q("documents", "Which documents or online checks do you accept?", "steps"),
+    q("verify", "How do you verify and copy documents?", "steps", "short"),
+    q(
+      "records",
+      "How are check records stored, and for how long?",
+      "records",
+      "short",
+    ),
+    q(
+      "followup",
+      "How do you handle expiring permissions?",
+      "review_schedule",
+      "short",
+      true,
+    ),
+  ],
+  tpl_onboarding: [
+    q(
+      "before",
+      "What happens before day one (contract, checks, kit)?",
+      "steps",
+    ),
+    q("first", "First day / first week essentials?", "steps"),
+    q(
+      "access",
+      "Which systems and access are set up (and by whom)?",
+      "steps",
+      "short",
+    ),
+    q("offboarding", "Offboarding steps when someone leaves?", "steps"),
+    q(
+      "leaver",
+      "Property return and access removal on exit?",
+      "steps",
+      "short",
+      true,
+    ),
+    q("responsible", "Who owns onboarding and offboarding?", "roles", "short"),
+  ],
+  tpl_probation_review: [
+    q("employee", "Employee and role under review?", "trigger", "short"),
+    q("period", "Probation period and review date?", "trigger", "short"),
+    q(
+      "performance",
+      "Performance summary - what went well, what needs work?",
+      "steps",
+    ),
+    q("objectives", "Objectives for the next period?", "steps", "long", true),
+    q(
+      "outcome",
+      "Outcome (pass, extend, or not confirmed) and rationale?",
+      "steps",
+      "short",
+    ),
+    q("reviewer", "Who conducted the review?", "roles", "short"),
+  ],
+  tpl_job_description: [
+    q("title", "Role title and reporting line?", "details", "short"),
+    q(
+      "purpose",
+      "Purpose of the role in one or two sentences?",
+      "purpose",
+      "short",
+    ),
+    q("responsibilities", "Main responsibilities?", "details"),
+    q("skills", "Skills, experience and qualifications needed?", "details"),
+    q(
+      "terms",
+      "Key terms worth stating (location, hours, salary band)?",
+      "details",
+      "short",
+      true,
+    ),
+  ],
+};
+
+/**
+ * Questions for the guided wizard, resolved document-first:
+ * template-specific set -> kind set (contracts, procedures, plans, handbooks,
+ * letters, records) -> the template's own policy questionnaire -> base set.
+ * Policies keep the original questionnaire unchanged.
+ */
+export function questionsFor(key: string | null | undefined) {
+  const t = getPolicyTemplate(key);
+  if (!t) return BASE_QUESTIONS;
+  return (
+    TEMPLATE_QUESTIONS[t.key] ??
+    KIND_QUESTIONS[t.kind ?? "policy"] ??
+    t.guidedQuestions
+  );
+}

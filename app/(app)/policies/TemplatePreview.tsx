@@ -4,7 +4,7 @@ import {
   composeFromTemplate,
   type ComposeProfile,
 } from "@/shared/policies/compose";
-import type { PolicyTemplate } from "@/shared/policies/templates";
+import { questionsFor, type PolicyTemplate } from "@/shared/policies/templates";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -61,10 +61,11 @@ export function TemplatePreview({
 
         <div>
           <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            What you will be asked ({template.guidedQuestions.length} questions)
+            What you will be asked ({questionsFor(template.key).length}{" "}
+            questions)
           </p>
           <ul className="max-h-40 space-y-1 overflow-y-auto text-sm text-foreground">
-            {template.guidedQuestions.map((q) => (
+            {questionsFor(template.key).map((q) => (
               <li key={q.key} className="flex gap-2">
                 <span className="text-primary">•</span>
                 <span className="min-w-0">

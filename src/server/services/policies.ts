@@ -5,10 +5,12 @@ import { recordActivity } from "./activity";
 import { getBusinessProfile } from "./settings";
 import { getActiveProvider, type LlmProvider } from "../ai/provider";
 import {
-  POLICY_SECTIONS,
   POLICY_TEMPLATES,
   getPolicyTemplate,
+  kindOf,
   questionsFor,
+  sectionsFor,
+  type PolicyDocumentKind,
   type PolicyTemplate,
 } from "../../shared/policies/templates";
 import {
@@ -185,16 +187,26 @@ type BusinessProfile = Awaited<ReturnType<typeof getBusinessProfile>>;
 
 const RECOMMENDATIONS_MARKER = "=== JOVA RECOMMENDATIONS ===";
 
-const POLICY_SYSTEM = `You are Jova, drafting a workplace policy for a UK small business inside Jojan One.
-Write a clear, practical, plain-English policy the business can adopt after review. Requirements:
+const KIND_LABEL: Record<PolicyDocumentKind, string> = {
+  policy: "policy",
+  procedure: "procedure",
+  plan: "plan",
+  handbook: "handbook",
+  notice: "letter or notice",
+  statement: "formal record",
+  contract: "contract template",
+};
+
+const POLICY_SYSTEM = `You are Jova, drafting a workplace document for a UK small business inside Jojan One. The document may be a policy, procedure, plan, handbook, letter, formal record or contract template - draft in the register that document type calls for.
+Write a clear, practical, plain-English document the business can adopt after review. Requirements:
 - Follow EXACTLY the numbered section headings you are given, in order. Do not add or drop sections.
-- Weave the owner's guided answers into the relevant sections; expand them into complete, professional prose. Where an answer is missing, write a sensible, proportionate best-practice default for a small UK business - defaults for POLICY WORDING are encouraged.
+- Weave the owner's guided answers into the relevant sections; expand them into complete, professional prose. Where an answer is missing, write a sensible, proportionate best-practice default for a small UK business - defaults for DRAFTING WORDING are encouraged (for contracts, use standard neutral drafting such as "as agreed in writing between the parties").
 - Company facts are different: use ONLY the facts in the business context provided. Never invent or infer company-specific facts (directors, company structure, systems, suppliers, appointments, headcount beyond what is given). If a company fact is unknown, use neutral role-based wording such as "the business owner" or "the designated data protection lead".
 - Never output bracketed placeholders such as [Business owner], [Name] or [Date]. Write real details from the context, or neutral role wording.
-- Do not put advice or recommendations addressed to the business inside the policy wording (nothing like "the business should assess whether..."). If there are points the business must confirm or consider before adopting, list them at the very end, one per line, after a line containing exactly: ${RECOMMENDATIONS_MARKER}
+- Do not put advice or recommendations addressed to the business inside the document wording (nothing like "the business should assess whether..."). If there are points the business must confirm or consider before adopting, list them at the very end, one per line, after a line containing exactly: ${RECOMMENDATIONS_MARKER}
 - Reference relevant UK frameworks only where genuinely applicable (for example UK GDPR and the Data Protection Act 2018 for data protection; ACAS guidance and the Employment Rights Act for HR; the Health and Safety at Work Act for health and safety). Do not make definitive legal determinations.
 - Plain text only. No markdown, no tables.
-- End the policy body (before any recommendations) with one line stating this is a starting draft that should be reviewed by a qualified professional before adoption.`;
+- End the document body (before any recommendations) with one line stating this is a starting draft that should be reviewed by a qualified professional before adoption.`;
 
 // Split a drafted document into policy wording and Jova's recommendations -
 // advice lives BESIDE the document, never inside adopted wording.
@@ -240,11 +252,12 @@ function buildPolicyPrompt(
     })
     .filter(Boolean)
     .join("\n");
-  const headings = POLICY_SECTIONS.map((s, i) => `${i + 1}. ${s.heading}`).join(
-    "\n",
-  );
+  const kind = template?.kind ?? kindOf(input.templateKey);
+  const headings = sectionsFor(input.templateKey)
+    .map((s, i) => `${i + 1}. ${s.heading}`)
+    .join("\n");
   return [
-    `Draft a "${input.policyName}" policy${
+    `Draft a "${input.policyName}" ${KIND_LABEL[kind]}${
       input.policyCategory ? ` (category: ${input.policyCategory})` : ""
     }${template ? ` for the audience: ${template.audience}` : ""}.`,
     "",
