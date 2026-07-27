@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, Sparkles } from "lucide-react";
+import { Eye, Search, Sparkles } from "lucide-react";
 import { POLICY_TEMPLATES } from "@/shared/policies/templates";
 import { POLICY_CATEGORIES } from "@/shared/schemas/policies";
 import { Card } from "@/components/ui/card";
@@ -25,7 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import type { ComposeProfile } from "@/shared/policies/compose";
 import { NewPolicy } from "./NewPolicy";
+import { TemplatePreview } from "./TemplatePreview";
 import { DraftWithJova } from "./DraftWithJova";
 import { RowActions } from "./RowActions";
 
@@ -75,9 +77,11 @@ const TEMPLATE_CATEGORIES = Array.from(
 export function PoliciesView({
   policies,
   canWrite,
+  profile,
 }: {
   policies: PolicyRow[];
   canWrite: boolean;
+  profile: ComposeProfile;
 }) {
   // Register filters
   const [query, setQuery] = useState("");
@@ -95,6 +99,11 @@ export function PoliciesView({
     setDraftTemplate(templateKey);
     setDraftOpen(true);
   }
+
+  // Template preview dialog.
+  const [previewKey, setPreviewKey] = useState<string | null>(null);
+  const previewTemplate =
+    POLICY_TEMPLATES.find((t) => t.key === previewKey) ?? null;
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -357,17 +366,30 @@ export function PoliciesView({
                         {t.category} · {t.audience}
                       </p>
                     </div>
-                    {t.requiresAcknowledgement && (
-                      <Badge variant="outline" className="shrink-0">
-                        sign-off
-                      </Badge>
-                    )}
+                    <div className="flex shrink-0 gap-1">
+                      {(t.kind ?? "policy") !== "policy" && (
+                        <Badge variant="secondary" className="capitalize">
+                          {t.kind}
+                        </Badge>
+                      )}
+                      {t.requiresAcknowledgement && (
+                        <Badge variant="outline">sign-off</Badge>
+                      )}
+                    </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     {t.description}
                   </p>
-                  {canWrite && (
-                    <div className="mt-auto pt-1">
+                  <div className="mt-auto flex gap-2 pt-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setPreviewKey(t.key)}
+                    >
+                      <Eye className="mr-1.5 h-3.5 w-3.5" />
+                      Preview
+                    </Button>
+                    {canWrite && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -376,14 +398,27 @@ export function PoliciesView({
                         <Sparkles className="mr-1.5 h-3.5 w-3.5" />
                         Draft with Jova
                       </Button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </Card>
               ))}
             </div>
           )}
         </TabsContent>
       </Tabs>
+
+      {previewTemplate && (
+        <TemplatePreview
+          template={previewTemplate}
+          profile={profile}
+          canWrite={canWrite}
+          onClose={() => setPreviewKey(null)}
+          onUse={() => {
+            setPreviewKey(null);
+            openDraft(previewTemplate.key);
+          }}
+        />
+      )}
 
       {canWrite && (
         <DraftWithJova

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getClaims } from "@/server/auth/session";
 import { requireModuleAccess } from "@/server/auth/guard";
 import { listPolicies } from "@/server/services/policies";
+import { getBusinessProfile } from "@/server/services/settings";
 import { PoliciesView, type PolicyRow } from "./PoliciesView";
 import { Card } from "@/components/ui/card";
 
@@ -11,9 +12,12 @@ const isOverdue = (d: string | null) =>
 export default async function PoliciesPage() {
   const claims = await getClaims();
   if (!claims) redirect("/login");
-  const { access } = await requireModuleAccess(claims, "policies");
+  const { workspaceId, access } = await requireModuleAccess(claims, "policies");
 
-  const rows = await listPolicies(claims);
+  const [rows, profile] = await Promise.all([
+    listPolicies(claims),
+    getBusinessProfile(claims, workspaceId),
+  ]);
 
   const active = rows.filter((r) => r.status === "active").length;
   const dueReview = rows.filter(
@@ -63,7 +67,15 @@ export default async function PoliciesPage() {
         ))}
       </div>
 
-      <PoliciesView policies={policyRows} canWrite={access.canWrite} />
+      <PoliciesView
+        policies={policyRows}
+        canWrite={access.canWrite}
+        profile={{
+          businessName: profile?.businessName ?? null,
+          industry: profile?.industry ?? null,
+          employeeCount: profile?.employeeCount ?? null,
+        }}
+      />
 
       <p className="mt-4 text-[11px] text-muted-foreground">
         Guidance to help you maintain your policies - not legal advice. Have
