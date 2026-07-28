@@ -230,6 +230,8 @@ function businessBits(profile: BusinessProfile): string[] {
     `Business name: ${profile?.businessName?.trim() || "the business"}`,
   ];
   if (profile?.industry) bits.push(`Sector: ${profile.industry}`);
+  if (profile?.registeredCountry)
+    bits.push(`Registered country: ${profile.registeredCountry}`);
   if (profile?.businessType) bits.push(`Type: ${profile.businessType}`);
   if (profile?.employeeCount) bits.push(`Employees: ${profile.employeeCount}`);
   if (profile?.contractorCount)

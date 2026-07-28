@@ -44,9 +44,9 @@ export async function retrieveContext(
   lines.push(
     `Name: ${profile?.businessName?.trim() || "Not set"}. Type: ${
       profile?.businessType ?? "unknown"
-    }. Industry: ${profile?.industry ?? "unknown"}. Profile completion: ${
-      profile?.profileCompletion ?? 0
-    }%.`,
+    }. Industry: ${profile?.industry ?? "unknown"}. Registered country: ${
+      profile?.registeredCountry?.trim() || "not set"
+    }. Profile completion: ${profile?.profileCompletion ?? 0}%.`,
   );
 
   lines.push(``);

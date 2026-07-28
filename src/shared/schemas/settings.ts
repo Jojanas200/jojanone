@@ -11,6 +11,7 @@ export const updateBusinessProfileSchema = z.object({
   industry: z.string().trim().max(120).nullish(),
   incorporationDate: isoDate.nullish(),
   registeredAddress: z.string().trim().max(500).nullish(),
+  registeredCountry: z.string().trim().max(100).nullish(),
   tradingAddress: z.string().trim().max(500).nullish(),
   financialYearEnd: z.string().trim().max(20).nullish(),
   employeeCount: z.number().int().min(0).max(1_000_000).optional(),

@@ -96,5 +96,21 @@ export async function PATCH(req: Request) {
     }
   }
 
+  // Jurisdiction flows into Business Memory: the registered country answered
+  // at onboarding lands on the business profile (when not already set) so
+  // Jova and future jurisdiction-aware features can use it.
+  const country = asName(body["company.registered_country"]);
+  if (country) {
+    try {
+      const profile = await getBusinessProfile(claims, ws);
+      if (profile && !profile.registeredCountry?.trim())
+        await updateBusinessProfile(claims, ws, {
+          registeredCountry: country,
+        });
+    } catch {
+      // profile fan-out is best-effort
+    }
+  }
+
   return NextResponse.json(state);
 }

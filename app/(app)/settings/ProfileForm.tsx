@@ -15,6 +15,7 @@ type Profile = {
   industry: string | null;
   incorporationDate: string | null;
   registeredAddress: string | null;
+  registeredCountry: string | null;
   tradingAddress: string | null;
   financialYearEnd: string | null;
   employeeCount: number;
@@ -51,6 +52,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
     industry: s(profile.industry),
     incorporationDate: s(profile.incorporationDate),
     registeredAddress: s(profile.registeredAddress),
+    registeredCountry: s(profile.registeredCountry),
     tradingAddress: s(profile.tradingAddress),
     financialYearEnd: s(profile.financialYearEnd),
     employeeCount: String(profile.employeeCount),
@@ -95,6 +97,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         industry: orNull(f.industry),
         incorporationDate: orNull(f.incorporationDate),
         registeredAddress: orNull(f.registeredAddress),
+        registeredCountry: orNull(f.registeredCountry),
         tradingAddress: orNull(f.tradingAddress),
         financialYearEnd: orNull(f.financialYearEnd),
         employeeCount: num(f.employeeCount),
@@ -175,6 +178,9 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           placeholder: "Private limited company",
         })}
         {text("Industry", "industry", { placeholder: "Professional services" })}
+        {text("Registered country", "registeredCountry", {
+          placeholder: "United Kingdom",
+        })}
         {text("Incorporation date", "incorporationDate", { type: "date" })}
         {text("Financial year end", "financialYearEnd", {
           placeholder: "31 March",

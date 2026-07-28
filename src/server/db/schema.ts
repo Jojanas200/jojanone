@@ -268,6 +268,7 @@ export const businessProfiles = pgTable("business_profiles", {
   industry: text("industry"),
   incorporationDate: date("incorporation_date"),
   registeredAddress: text("registered_address"),
+  registeredCountry: text("registered_country"),
   tradingAddress: text("trading_address"),
   financialYearEnd: text("financial_year_end"),
   employeeCount: integer("employee_count").notNull().default(0),
