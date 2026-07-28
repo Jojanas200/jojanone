@@ -242,7 +242,7 @@ const TEAM = [
     name: "Kwabena Osei-Tutu",
     role: "Chief Technology Officer",
     focus: "Technology, AI & Product Engineering",
-    photo: null,
+    photo: "/assets/cto.png",
   },
 ];
 
