@@ -284,6 +284,12 @@ export default async function LandingPage() {
   const claims = await getClaims();
   if (claims) redirect("/dashboard");
 
+  const assessed = new Date().toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
   return (
     <div className="jo-page">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -314,8 +320,11 @@ export default async function LandingPage() {
 
       {/* --------------------------------------------------------------- Hero */}
       <section className="jo-hero">
-        <span className="jo-hero__corner">JO / 2026</span>
-        <div className="jo-shell">
+        <div className="jo-hero__grid" aria-hidden="true">
+          <span />
+        </div>
+        <div className="jo-shell jo-hero__shell">
+          <span className="jo-hero__corner">JO / 2026</span>
           <div
             className="jo-rise"
             style={{ "--d": "60ms" } as React.CSSProperties}
@@ -336,34 +345,64 @@ export default async function LandingPage() {
               Prove it<i>.</i>
             </em>
           </h1>
-          <p
-            className="jo-lede jo-rise"
-            style={{ "--d": "260ms" } as React.CSSProperties}
-          >
-            Jojan One brings compliance, risk, contracts, people, governance and
-            business intelligence together in one intelligent platform - so you
-            can understand what matters, take action and prove you&apos;re
-            ready.
-          </p>
-          <div
-            className="jo-hero__cta jo-rise"
-            style={{ "--d": "340ms" } as React.CSSProperties}
-          >
-            <Link href="/login" className="jo-btn jo-btn--primary">
-              Get started
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
-            <a href="#how-it-works" className="jo-btn jo-btn--ghost">
-              See how it works
-            </a>
-          </div>
-          <div
-            className="jo-hero__foot jo-rise"
-            style={{ "--d": "420ms" } as React.CSSProperties}
-          >
-            <span>No credit card to start</span>
-            <span>Grounded answers with citations</span>
-            <span>Workspace isolation by design</span>
+          <div className="jo-hero__lower">
+            <div>
+              <p
+                className="jo-lede jo-rise"
+                style={{ "--d": "260ms" } as React.CSSProperties}
+              >
+                Jojan One brings compliance, risk, contracts, people, governance
+                and business intelligence together in one intelligent platform -
+                so you can understand what matters, take action and prove
+                you&apos;re ready.
+              </p>
+              <div
+                className="jo-hero__cta jo-rise"
+                style={{ "--d": "340ms" } as React.CSSProperties}
+              >
+                <Link href="/login" className="jo-btn jo-btn--primary">
+                  Get started
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+                <a href="#how-it-works" className="jo-btn jo-btn--ghost">
+                  See how it works
+                </a>
+              </div>
+              <div
+                className="jo-hero__foot jo-rise"
+                style={{ "--d": "420ms" } as React.CSSProperties}
+              >
+                <span>No credit card to start</span>
+                <span>Grounded answers with citations</span>
+                <span>Workspace isolation by design</span>
+              </div>
+            </div>
+
+            <aside
+              className="jo-cover jo-rise"
+              style={{ "--d": "480ms" } as React.CSSProperties}
+              aria-label="Example protection file"
+            >
+              <div className="jo-cover__bar">
+                <span>Protection file</span>
+                <span>JO-WS-0142</span>
+              </div>
+              <dl className="jo-cover__rows">
+                {[
+                  ["Business", "Anastasia & Co Ltd"],
+                  ["Jurisdiction", "United Kingdom"],
+                  ["Obligations tracked", "23"],
+                  ["Open risks", "6"],
+                  ["Documents adopted", "11"],
+                  ["Last assessed", assessed],
+                ].map(([k, v]) => (
+                  <div key={k} className="jo-cover__row">
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </aside>
           </div>
         </div>
       </section>
@@ -548,7 +587,7 @@ export default async function LandingPage() {
                 Strong
               </span>
               <p className="jo-score__stamp">
-                Assessed 29 July 2026
+                Assessed {assessed}
                 <br />
                 Reference JO-BCS-4417 · 7 areas · 41 indicators
               </p>

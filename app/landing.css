@@ -25,6 +25,7 @@
   --jo-muted: #667085;
 
   --jo-line: rgba(7, 26, 51, 0.1);
+  --jo-rule: rgba(7, 26, 51, 0.055);
   --jo-line-strong: rgba(7, 26, 51, 0.18);
   --jo-line-invert: rgba(255, 255, 255, 0.14);
 
@@ -371,15 +372,45 @@
   padding-block: 84px 0;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    #f7f9fc 0%,
+    #fcfdfe 46%,
+    var(--jo-paper) 100%
+  );
 }
 @media (min-width: 900px) {
   .jo-hero {
     padding-block: 132px 0;
   }
 }
+
+/* Two hairlines on the content edges - the sheet's ruled margins. The eyebrow's
+   own tick begins exactly on the left rule, so the label grows out of it. */
+.jo-hero__grid {
+  position: absolute;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  pointer-events: none;
+}
+@media (min-width: 1100px) {
+  .jo-hero__grid {
+    display: flex;
+  }
+}
+.jo-hero__grid > span {
+  width: calc(100% - 48px);
+  max-width: 1132px;
+  border-left: 1px solid var(--jo-rule);
+  border-right: 1px solid var(--jo-rule);
+}
+.jo-hero__shell {
+  position: relative;
+}
 .jo-hero__corner {
   position: absolute;
-  top: 28px;
+  top: -96px;
   right: 24px;
   font-family: var(--jo-mono);
   font-size: 10px;
@@ -387,7 +418,7 @@
   color: var(--jo-muted);
   display: none;
 }
-@media (min-width: 900px) {
+@media (min-width: 1100px) {
   .jo-hero__corner {
     display: block;
   }
@@ -398,12 +429,77 @@
   gap: 12px;
   margin-top: 34px;
 }
+.jo-hero__lower {
+  display: grid;
+  gap: 40px;
+  padding-bottom: 40px;
+}
+@media (min-width: 1100px) {
+  .jo-hero__lower {
+    grid-template-columns: minmax(0, 1fr) 330px;
+    gap: 56px;
+    align-items: end;
+    padding-bottom: 56px;
+  }
+}
 .jo-hero__foot {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 26px;
   margin-top: 30px;
-  padding-bottom: 34px;
+}
+
+/* The file cover: flat sheet, hairline only. The hero's paper tone is what
+   gives it definition, so it needs no shadow. */
+.jo-cover {
+  background: var(--jo-paper);
+  border: 1px solid var(--jo-line);
+  border-radius: var(--jo-r);
+}
+@media (min-width: 1100px) {
+  .jo-cover {
+    border-left-color: var(--jo-line-strong);
+  }
+}
+.jo-cover__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--jo-line);
+  font-family: var(--jo-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--jo-muted);
+}
+.jo-cover__rows {
+  padding: 4px 14px 10px;
+}
+.jo-cover__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--jo-line);
+}
+.jo-cover__row:last-child {
+  border-bottom: 0;
+}
+.jo-cover__row dt {
+  font-size: 0.8125rem;
+  color: var(--jo-muted);
+  margin: 0;
+}
+.jo-cover__row dd {
+  font-family: var(--jo-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--jo-navy);
+  margin: 0;
+  text-align: right;
 }
 .jo-hero__foot span {
   font-family: var(--jo-mono);
