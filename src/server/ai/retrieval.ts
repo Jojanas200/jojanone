@@ -21,7 +21,8 @@ export interface RetrievedSource {
 export interface RetrievedContext {
   contextText: string;
   sources: RetrievedSource[];
-  score: number;
+  /** null while the Business Confidence assessment is pending. */
+  score: number | null;
   findingCount: number;
 }
 
@@ -51,7 +52,9 @@ export async function retrieveContext(
 
   lines.push(``);
   lines.push(
-    `## Business Confidence Score: ${snapshot.score}/100 (${snapshot.statusLabel})`,
+    snapshot.score === null
+      ? `## Business Confidence Score: assessment pending - onboarding is ${snapshot.onboarding.percent}% complete and there is not yet enough information to score this business. Do not invent or estimate a score.`
+      : `## Business Confidence Score: ${snapshot.score}/100 (${snapshot.statusLabel})`,
   );
   for (const a of snapshot.areas) {
     lines.push(`- ${a.label}: ${a.score}/100 - ${a.note}`);

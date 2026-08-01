@@ -42,9 +42,13 @@ export interface ScoreTrend {
 export function getScoreTrend(
   claims: UserClaims,
   workspaceId: string,
-  currentScore: number,
-  statusLabel: string,
+  currentScore: number | null,
+  statusLabel: string | null,
 ): Promise<ScoreTrend> {
+  // While assessment is pending there is no score to snapshot or compare -
+  // recording a placeholder would corrupt the history and the deltas.
+  if (currentScore === null)
+    return Promise.resolve({ delta: null, since: null });
   return withUser(claims, async (tx) => {
     try {
       await tx
@@ -52,7 +56,7 @@ export function getScoreTrend(
         .values({
           workspaceId,
           score: currentScore,
-          statusLabel,
+          statusLabel: statusLabel ?? "Unassessed",
           recordedOn: sql`current_date`,
         })
         .onConflictDoNothing({

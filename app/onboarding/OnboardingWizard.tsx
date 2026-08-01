@@ -7,6 +7,7 @@ import {
   isVisible,
   isRequiredNow,
   missingInitialFields,
+  resumeSectionIndex,
 } from "@/shared/onboarding/logic";
 import type { JsonValue, OnboardingAnswers } from "@/shared/onboarding/types";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,9 @@ export function OnboardingWizard({
 }) {
   const router = useRouter();
   const [answers, setAnswers] = useState<OnboardingAnswers>(initialAnswers);
-  const [step, setStep] = useState(0);
+  // Resume where they stopped: the first section still holding an unanswered
+  // required field. A fresh account starts at the beginning.
+  const [step, setStep] = useState(() => resumeSectionIndex(initialAnswers));
   const [busy, setBusy] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 

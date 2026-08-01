@@ -20,15 +20,17 @@ import { WriteGate } from "../WriteGate";
 import { GenerateExecutiveReport } from "./GenerateExecutiveReport";
 import { DecisionList } from "./DecisionList";
 
-const scoreTone = (n: number) =>
-  n >= 80
-    ? "text-emerald-600"
-    : n >= 60
-      ? "text-amber-600"
-      : "text-destructive";
+const scoreTone = (n: number | null) =>
+  n === null
+    ? "text-muted-foreground"
+    : n >= 80
+      ? "text-emerald-600"
+      : n >= 60
+        ? "text-amber-600"
+        : "text-destructive";
 const barTone = (n: number) =>
   n >= 80 ? "bg-emerald-500" : n >= 60 ? "bg-amber-500" : "bg-destructive";
-const statusBadge = (label: string) =>
+const statusBadge = (label: string | null) =>
   label === "Good"
     ? "secondary"
     : label === "Needs Attention"
@@ -87,14 +89,21 @@ export default async function ExecutivePage() {
   const businessName = profile?.businessName?.trim() || "your business";
   const openPriorities = s.priorities.length;
   const complianceScore =
-    s.areas.find((a) => a.key === "compliance")?.score ?? s.score;
+    s.areas.find((a) => a.key === "compliance")?.score ?? 0;
 
   // "Prepared by Jova" position statement - composed from real metrics.
-  const prepared = `Overall position is ${s.statusLabel.toLowerCase()} at ${s.score}/100. ${
-    s.metrics.overdueObligations
-  } item${s.metrics.overdueObligations === 1 ? "" : "s"} overdue and ${openPriorities} open priorit${
-    openPriorities === 1 ? "y" : "ies"
-  }; ${decisions.length} decision${decisions.length === 1 ? "" : "s"} awaiting review.`;
+  const prepared =
+    s.score === null
+      ? `Business Confidence assessment is pending - onboarding is ${s.onboarding.percent}% complete, so there is not yet enough information to score the business. ${
+          s.metrics.overdueObligations
+        } item${s.metrics.overdueObligations === 1 ? "" : "s"} overdue and ${openPriorities} open priorit${
+          openPriorities === 1 ? "y" : "ies"
+        }; ${decisions.length} decision${decisions.length === 1 ? "" : "s"} awaiting review.`
+      : `Overall position is ${s.statusLabel?.toLowerCase()} at ${s.score}/100. ${
+          s.metrics.overdueObligations
+        } item${s.metrics.overdueObligations === 1 ? "" : "s"} overdue and ${openPriorities} open priorit${
+          openPriorities === 1 ? "y" : "ies"
+        }; ${decisions.length} decision${decisions.length === 1 ? "" : "s"} awaiting review.`;
 
   const highFindings = briefing.findings.filter(
     (f) => f.severity === "critical" || f.severity === "high",
@@ -130,7 +139,10 @@ export default async function ExecutivePage() {
   ];
 
   const metrics = [
-    { label: "Confidence Score", value: `${s.score}/100` },
+    {
+      label: "Confidence Score",
+      value: s.score === null ? "Assessment pending" : `${s.score}/100`,
+    },
     { label: "Open priorities", value: String(openPriorities) },
     {
       label: "High/critical risks",
@@ -198,7 +210,9 @@ export default async function ExecutivePage() {
               readiness - drawn from live activity across every module.
             </p>
           </div>
-          <Badge variant={statusBadge(s.statusLabel)}>{s.statusLabel}</Badge>
+          <Badge variant={statusBadge(s.statusLabel)}>
+            {s.statusLabel ?? "Assessment pending"}
+          </Badge>
         </div>
         <WriteGate>
           <div className="mt-4">
@@ -221,11 +235,23 @@ export default async function ExecutivePage() {
           <span className="text-[11px] font-semibold uppercase tracking-wider text-primary">
             Management summary
           </span>
-          <Badge variant={statusBadge(s.statusLabel)}>{s.statusLabel}</Badge>
+          <Badge variant={statusBadge(s.statusLabel)}>
+            {s.statusLabel ?? "Assessment pending"}
+          </Badge>
         </div>
         <p className="mt-2 text-sm text-foreground">
-          Overall position is <strong>{s.statusLabel.toLowerCase()}</strong>{" "}
-          with a Business Confidence Score of {s.score}.
+          {s.score === null ? (
+            <>
+              Business Confidence cannot be assessed yet - onboarding is{" "}
+              {s.onboarding.percent}% complete.
+            </>
+          ) : (
+            <>
+              Overall position is{" "}
+              <strong>{s.statusLabel?.toLowerCase()}</strong> with a Business
+              Confidence Score of {s.score}.
+            </>
+          )}
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {summary.map((b) => (
@@ -268,7 +294,7 @@ export default async function ExecutivePage() {
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           <div className="shrink-0 text-center sm:w-40">
             <p className={`text-5xl font-bold ${scoreTone(s.score)}`}>
-              {s.score}
+              {s.score ?? "-"}
             </p>
             {trend.delta !== null && trend.delta !== 0 && (
               <p

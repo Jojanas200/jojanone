@@ -233,8 +233,13 @@ async function main() {
       r3.safetyDecision === "refused",
     );
     check(
-      "deterministic answer is grounded (mentions the score)",
-      /\/100/.test(r3.answer),
+      "deterministic answer is grounded, and says so when unassessed",
+      /\/100/.test(r3.answer) ||
+        /don't have enough information/i.test(r3.answer),
+    );
+    check(
+      "an unassessed workspace never has a score invented for it",
+      !/\b\d{1,3}\/100/.test(r3.answer),
     );
 
     // --- Escalation ----------------------------------------------------------

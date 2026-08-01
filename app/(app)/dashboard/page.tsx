@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
 import { getClaims, getSessionUser } from "@/server/auth/session";
 import { requireModuleAccess } from "@/server/auth/guard";
 import { getSnapshot } from "@/server/services/dashboard";
@@ -14,6 +15,7 @@ import {
   getOnboardingStatus,
 } from "@/server/services/onboarding";
 import { FinishSetupBanner } from "../FinishSetupBanner";
+import { WriteGate } from "../WriteGate";
 import { DashboardGreeting } from "./DashboardGreeting";
 import { RefreshBriefing } from "./RefreshBriefing";
 import {
@@ -23,6 +25,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 // A friendly first name for the greeting, sourced from the onboarding owner
 // answer, falling back to the business name, then the email, then "there".
@@ -75,12 +78,14 @@ const scoreTone = (n: number) =>
       : "text-destructive";
 const barTone = (n: number) =>
   n >= 80 ? "bg-emerald-500" : n >= 60 ? "bg-amber-500" : "bg-destructive";
-const statusBadge = (label: string) =>
+const statusBadge = (label: string | null) =>
   label === "Good"
     ? "secondary"
     : label === "Needs Attention"
       ? "outline"
-      : "destructive";
+      : label === null
+        ? "outline"
+        : "destructive";
 
 function Tile({
   label,
@@ -174,60 +179,187 @@ export default async function DashboardPage() {
         <FinishSetupBanner missing={setup.missing} />
       )}
 
-      {/* Business Confidence Score */}
+      {/* Business Confidence Score. Never defaulted: until there is enough
+          information the card shows the pending state and the onboarding
+          progress, which is a separate measure from protection. */}
       <Card className="mb-6 p-6">
-        <div className="grid gap-6 md:grid-cols-[minmax(0,220px)_1fr] md:items-center">
-          <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">
-              Business Confidence Score
-            </p>
-            <div className="mt-1 flex items-end gap-2">
-              <span
-                className={`text-5xl font-bold tabular-nums ${scoreTone(s.score)}`}
-              >
-                {s.score}
-              </span>
-              <span className="mb-1 text-lg text-muted-foreground">/100</span>
-              {trend.delta !== null && trend.delta !== 0 && (
-                <span
-                  className={`mb-1.5 text-sm font-medium ${trend.delta > 0 ? "text-emerald-600" : "text-destructive"}`}
-                  title={trend.since ? `since ${trend.since}` : undefined}
-                >
-                  {trend.delta > 0 ? "▲" : "▼"} {Math.abs(trend.delta)} pts
+        {s.score === null ? (
+          <div className="grid gap-6 md:grid-cols-[minmax(0,320px)_1fr] md:items-center">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                Business Confidence
+              </p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight text-foreground">
+                Assessment pending
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                We don&apos;t yet have enough information to calculate your
+                Business Confidence Score.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-border p-4">
+              <div className="flex items-center justify-between gap-3 text-sm">
+                <span className="text-muted-foreground">
+                  Onboarding progress
                 </span>
+                <span className="font-medium tabular-nums text-foreground">
+                  {s.onboarding.percent}%
+                </span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${s.onboarding.percent}%` }}
+                />
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {s.onboarding.total > 0
+                  ? `${s.onboarding.answered} of ${s.onboarding.total} required questions answered.`
+                  : "Tell Jojan One about your business to begin."}
+              </p>
+              <WriteGate>
+                <Button asChild size="sm" className="mt-4">
+                  <Link href="/onboarding">
+                    {s.onboarding.started
+                      ? "Continue onboarding"
+                      : "Start onboarding"}
+                  </Link>
+                </Button>
+              </WriteGate>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-6 md:grid-cols-[minmax(0,220px)_1fr] md:items-center">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                  Business Confidence Score
+                </p>
+                <div className="mt-1 flex items-end gap-2">
+                  <span
+                    className={`text-5xl font-bold tabular-nums ${scoreTone(s.score)}`}
+                  >
+                    {s.score}
+                  </span>
+                  <span className="mb-1 text-lg text-muted-foreground">
+                    /100
+                  </span>
+                  {trend.delta !== null && trend.delta !== 0 && (
+                    <span
+                      className={`mb-1.5 text-sm font-medium ${trend.delta > 0 ? "text-emerald-600" : "text-destructive"}`}
+                      title={trend.since ? `since ${trend.since}` : undefined}
+                    >
+                      {trend.delta > 0 ? "▲" : "▼"} {Math.abs(trend.delta)} pts
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <Badge variant={statusBadge(s.statusLabel)}>
+                    {s.statusLabel}
+                  </Badge>
+                </div>
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                  {scoreExplanation(s.metrics)}
+                </p>
+              </div>
+
+              <div className="space-y-2.5">
+                {s.areas.map((a) => (
+                  <Link key={a.key} href={a.href} className="block">
+                    <div className="flex items-center gap-3 text-sm">
+                      <span className="w-32 shrink-0 text-muted-foreground">
+                        {a.label}
+                      </span>
+                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full ${a.applicable ? barTone(a.score) : "bg-muted-foreground/30"}`}
+                          style={{
+                            width: `${a.applicable ? a.score : 100}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="w-12 shrink-0 text-right tabular-nums text-foreground">
+                        {a.applicable ? a.score : "n/a"}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Why this score? */}
+            <div className="mt-6 border-t border-border pt-5">
+              <p className="text-xs font-semibold uppercase tracking-wider text-foreground">
+                Why this score?
+              </p>
+              <div className="mt-3 grid gap-5 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Strengths
+                  </p>
+                  {s.strengths.length === 0 ? (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Nothing scoring well yet - the steps below will change
+                      that.
+                    </p>
+                  ) : (
+                    <ul className="mt-2 space-y-1.5">
+                      {s.strengths.map((x) => (
+                        <li key={x} className="flex gap-2 text-sm">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                          <span className="text-foreground">{x}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Needs attention
+                  </p>
+                  {s.needsAttention.length === 0 ? (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Nothing outstanding across the scored areas.
+                    </p>
+                  ) : (
+                    <ul className="mt-2 space-y-1.5">
+                      {s.needsAttention.map((x) => (
+                        <li key={x} className="flex gap-2 text-sm">
+                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                          <span className="text-foreground">{x}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+
+              {s.nextStep && (
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-muted/50 px-4 py-3">
+                  <p className="text-sm text-foreground">
+                    <span className="font-medium">Recommended next step:</span>{" "}
+                    {s.nextStep.label}
+                  </p>
+                  <Button asChild size="sm" variant="outline">
+                    <Link href={s.nextStep.href}>Open</Link>
+                  </Button>
+                </div>
+              )}
+
+              {!s.onboarding.completed && (
+                <p className="mt-4 text-xs text-muted-foreground">
+                  Onboarding is {s.onboarding.percent}% complete.{" "}
+                  <Link href="/onboarding" className="text-primary underline">
+                    Continue onboarding
+                  </Link>{" "}
+                  so the assessment reflects your whole business. Completing it
+                  records information - it does not by itself raise your score.
+                </p>
               )}
             </div>
-            <div className="mt-2">
-              <Badge variant={statusBadge(s.statusLabel)}>
-                {s.statusLabel}
-              </Badge>
-            </div>
-            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-              {scoreExplanation(s.metrics)}
-            </p>
-          </div>
-
-          <div className="space-y-2.5">
-            {s.areas.map((a) => (
-              <Link key={a.key} href={a.href} className="block">
-                <div className="flex items-center gap-3 text-sm">
-                  <span className="w-28 shrink-0 text-muted-foreground">
-                    {a.label}
-                  </span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className={`h-full ${barTone(a.score)}`}
-                      style={{ width: `${a.score}%` }}
-                    />
-                  </div>
-                  <span className="w-8 shrink-0 text-right tabular-nums text-foreground">
-                    {a.score}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+          </>
+        )}
       </Card>
 
       {/* Jova morning brief */}

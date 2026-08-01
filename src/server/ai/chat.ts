@@ -51,6 +51,9 @@ export interface AskInput {
 // Deterministic answer from retrieved context - the launch engine. Grounded,
 // reproducible, no model. Used when AI is unconfigured, refuses, or errors.
 function deterministicAnswer(ctx: RetrievedContext): string {
+  if (ctx.score === null) {
+    return `I don't have enough information about your business yet to give you a Business Confidence Score. Finish onboarding and add your first records, and the assessment will appear on your dashboard. This is guidance based on your data, not professional advice.`;
+  }
   if (ctx.findingCount === 0) {
     return `Your Business Confidence Score is ${ctx.score}/100 and nothing needs your attention right now - all areas are in good standing. This is guidance based on your data, not professional advice.`;
   }

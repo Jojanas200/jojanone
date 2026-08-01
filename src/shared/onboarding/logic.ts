@@ -104,6 +104,47 @@ export function missingInitialFields(answers: OnboardingAnswers): FieldDef[] {
   );
 }
 
+// --- Progress + resume -------------------------------------------------------
+
+/**
+ * How far through first-time onboarding the answers are, measured over the
+ * fields that actually gate completion (visible + required now, excluding
+ * secrets handled outside the answer blob). Kept deliberately separate from
+ * the Business Confidence Score: this measures how much we have been TOLD,
+ * not how protected the business is.
+ */
+export function onboardingProgress(answers: OnboardingAnswers): {
+  answered: number;
+  total: number;
+  percent: number;
+} {
+  const required = ALL_FIELDS.filter(
+    (f) => !f.neverStore && isRequiredNow(f, answers),
+  );
+  const answered = required.filter((f) => isAnswered(f, answers[f.id])).length;
+  const total = required.length;
+  return {
+    answered,
+    total,
+    percent: total === 0 ? 0 : Math.round((answered / total) * 100),
+  };
+}
+
+/**
+ * The section to drop the user back into: the first one still holding an
+ * unanswered required field, so "Continue onboarding" returns them to exactly
+ * where they stopped. Falls back to the first section for an untouched
+ * account, and to the last when nothing is outstanding.
+ */
+export function resumeSectionIndex(answers: OnboardingAnswers): number {
+  const missing = new Set(missingInitialFields(answers).map((f) => f.id));
+  if (missing.size === 0) return Math.max(0, SECTIONS.length - 1);
+  const ix = SECTIONS.findIndex((sec) =>
+    sec.fields.some((f) => missing.has(f.id)),
+  );
+  return ix === -1 ? 0 : ix;
+}
+
 // --- Per-value validation ----------------------------------------------------
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

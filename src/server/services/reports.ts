@@ -489,9 +489,15 @@ export async function composeReport(
       return {
         ...base,
         title: `Executive Summary - ${period}`,
-        summary: `Overall position is ${s.statusLabel.toLowerCase()} at ${s.score}/100, with ${s.metrics.overdueObligations} overdue and ${s.priorities.length} open priorities.`,
+        summary:
+          s.score === null
+            ? `Business Confidence assessment is pending - onboarding is ${s.onboarding.percent}% complete. There are ${s.metrics.overdueObligations} overdue items and ${s.priorities.length} open priorities.`
+            : `Overall position is ${s.statusLabel?.toLowerCase()} at ${s.score}/100, with ${s.metrics.overdueObligations} overdue and ${s.priorities.length} open priorities.`,
         metrics: [
-          metric("Confidence Score", `${s.score}/100`),
+          metric(
+            "Confidence Score",
+            s.score === null ? "Assessment pending" : `${s.score}/100`,
+          ),
           metric("Open priorities", s.priorities.length),
           metric("Overdue", s.metrics.overdueObligations),
           metric("High/critical risks", s.metrics.criticalHighRisks),

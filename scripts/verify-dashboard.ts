@@ -9,6 +9,10 @@ import { inArray } from "drizzle-orm";
 import { adminDb } from "../src/server/db";
 import { organisations, workspaces } from "../src/server/db/schema";
 import { getSnapshot } from "../src/server/services/dashboard";
+import {
+  onboardingProgress,
+  resumeSectionIndex,
+} from "../src/shared/onboarding/logic";
 import { createObligation } from "../src/server/services/compliance";
 import { createRisk } from "../src/server/services/risk";
 import { createEmployee } from "../src/server/services/hr";
@@ -85,10 +89,23 @@ async function main() {
       { orgName: "VD B", workspaceName: "VD B" },
     );
 
+    // A brand-new workspace must NOT be scored: no default 100, no default 0.
     const base = await getSnapshot({ sub: userA });
     check(
-      "clean baseline = 100 / Good",
-      base.score === 100 && base.statusLabel === "Good",
+      "empty workspace is not assessed and has no score",
+      base.assessed === false &&
+        base.score === null &&
+        base.statusLabel === null,
+    );
+    check(
+      "onboarding reported separately, at 0% and not started",
+      base.onboarding.started === false &&
+        base.onboarding.percent === 0 &&
+        base.onboarding.resumeStep === 0,
+    );
+    check(
+      "no next step is invented while assessment is pending",
+      base.nextStep === null,
     );
 
     // Add issues to A: 2 overdue obligations, 3 critical risks, 1 RTW gap.
@@ -117,7 +134,11 @@ async function main() {
     });
 
     const s = await getSnapshot({ sub: userA });
-    check("score dropped below baseline", s.score < base.score);
+    const complianceArea = s.areas.find((a) => a.key === "compliance");
+    check(
+      "open issues pull the compliance area down from its coverage",
+      !!complianceArea && complianceArea.covered && complianceArea.score < 100,
+    );
     check("overdue obligations metric = 2", s.metrics.overdueObligations === 2);
     check("critical/high risks metric = 3", s.metrics.criticalHighRisks === 3);
     check("people gaps metric >= 1", s.metrics.peopleGaps >= 1);
@@ -131,6 +152,58 @@ async function main() {
     check(
       "A's snapshot excludes B's data (isolation)",
       s2.metrics.criticalHighRisks === 3,
+    );
+
+    // --- The score model itself ---------------------------------------------
+    check(
+      "enough records now assessed, with a real number",
+      s2.assessed === true &&
+        typeof s2.score === "number" &&
+        s2.statusLabel !== null,
+    );
+    check("score is never a default 100", s2.score !== 100);
+    const empties = s2.areas.filter((a) => a.applicable && !a.covered);
+    check(
+      "untouched modules score 0 rather than a free 100",
+      empties.length > 0 && empties.every((a) => a.score === 0),
+    );
+    const contractsArea = s2.areas.find((a) => a.key === "contracts");
+    check(
+      "an empty contracts register reads as not started",
+      !!contractsArea &&
+        contractsArea.covered === false &&
+        contractsArea.score === 0 &&
+        contractsArea.note.toLowerCase().includes("no contracts"),
+    );
+    check(
+      "documents & evidence is scored as its own area",
+      s2.areas.some((a) => a.key === "documents"),
+    );
+    check(
+      "why-this-score explains itself",
+      s2.needsAttention.length > 0 &&
+        s2.nextStep !== null &&
+        s2.nextStep.label.length > 0,
+    );
+    check(
+      "onboarding progress stays separate from confidence",
+      s2.onboarding.completed === false && s2.onboarding.percent < 100,
+    );
+
+    // --- Onboarding progress + resume (pure) --------------------------------
+    const empty = onboardingProgress({});
+    check(
+      "progress over an empty questionnaire is 0% of a real total",
+      empty.percent === 0 && empty.total > 0 && empty.answered === 0,
+    );
+    check(
+      "resume starts at the first section for an untouched account",
+      resumeSectionIndex({}) === 0,
+    );
+    const partial = onboardingProgress({ "owner.full_name": "Jordan Blake" });
+    check(
+      "answering a question moves progress off zero",
+      partial.answered >= 1 && partial.percent > 0 && partial.percent < 100,
     );
   } finally {
     console.log("Cleanup…");
