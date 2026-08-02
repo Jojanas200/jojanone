@@ -767,13 +767,24 @@ export const activities = pgTable("activities", {
 export const plans = pgTable("plans", {
   key: text("key").primaryKey(),
   name: text("name").notNull(),
+  description: text("description"),
   priceMinor: bigint("price_minor", { mode: "number" }),
   currency: text("currency").notNull().default("GBP"),
+  billingInterval: text("billing_interval").notNull().default("month"),
   seatLimit: integer("seat_limit"),
+  /** Optional module keys this package unlocks; core modules are always on. */
+  features: text("features").array().notNull().default([]),
+  trialDays: integer("trial_days").notNull().default(0),
   isSellable: boolean("is_sellable").notNull().default(false),
+  isHighlighted: boolean("is_highlighted").notNull().default(false),
+  /** Published packages appear on the public pricing page. */
+  published: boolean("published").notNull().default(false),
+  stripeProductId: text("stripe_product_id"),
   stripePriceId: text("stripe_price_id"),
   sortOrder: integer("sort_order").notNull().default(0),
+  archivedAt: ts("archived_at"),
   createdAt: ts("created_at").notNull().defaultNow(),
+  updatedAt: ts("updated_at").notNull().defaultNow(),
 });
 
 // --- subscriptions (one canonical row per workspace) -------------------------

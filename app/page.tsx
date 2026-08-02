@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { Fragment } from "react";
 import { ArrowRight, Check, ChevronRight, Sparkles } from "lucide-react";
 import { getClaims } from "@/server/auth/session";
+import { listPublishedPlans } from "@/server/services/platform-plans";
+import { MODULES } from "@/config/modules.config";
 import { BrandLogo } from "./BrandLogo";
 import "./landing.css";
 
@@ -203,49 +205,69 @@ const TRUST = [
   ],
 ];
 
-const PLANS = [
-  {
-    name: "Starter",
-    price: "£39",
-    seats: "1 seat",
-    blurb: "For founders getting the essentials protected and provable.",
-    bullets: [
-      "Every protection module",
-      "Jova guidance, grounded in your data",
-      "Guided document drafting with Jova Policy Check",
-      "Business Confidence Score",
-    ],
-    best: false,
-    cta: "Get started",
-  },
-  {
-    name: "Growth",
-    price: "£99",
-    seats: "Up to 5 seats",
-    blurb: "For teams that share the load and need to show their working.",
-    bullets: [
-      "Everything in Starter",
-      "Staff sign-off and training records",
-      "Team roles, including read-only",
-      "Invite your accountant or adviser",
-    ],
-    best: true,
-    cta: "Get started",
-  },
-  {
-    name: "Executive",
-    price: "Talk to us",
-    seats: "Custom",
-    blurb: "For larger organisations and advisers with bigger footprints.",
-    bullets: [
-      "Everything in Growth",
-      "Custom seats and onboarding support",
-      "Feature allocation being finalised",
-    ],
-    best: false,
-    cta: "Talk to us",
-  },
-];
+// Pricing comes from the package catalogue an operator publishes in Admin >
+// Settings, so the public page can never drift from what is actually sold.
+const MODULE_TITLE = new Map(MODULES.map((m) => [m.key, m.title]));
+
+const money = (minor: number | null, currency: string) =>
+  minor === null
+    ? "Talk to us"
+    : minor === 0
+      ? "Free"
+      : new Intl.NumberFormat("en-GB", {
+          style: "currency",
+          currency,
+          maximumFractionDigits: minor % 100 === 0 ? 0 : 2,
+        }).format(minor / 100);
+
+interface PricingCard {
+  key: string;
+  name: string;
+  price: string;
+  suffix: string | null;
+  seats: string;
+  blurb: string;
+  bullets: string[];
+  best: boolean;
+  cta: string;
+}
+
+function toCard(p: {
+  key: string;
+  name: string;
+  description: string | null;
+  priceMinor: number | null;
+  currency: string;
+  billingInterval: string;
+  seatLimit: number | null;
+  features: string[];
+  trialDays: number;
+  isHighlighted: boolean;
+}): PricingCard {
+  const bullets: string[] = [];
+  if (p.trialDays > 0) bullets.push(`${p.trialDays}-day free trial`);
+  bullets.push("Compliance, risk, contracts, people, GDPR and governance");
+  bullets.push("Policies, evidence and the Business Confidence Score");
+  for (const f of p.features.slice(0, 6)) {
+    const title = MODULE_TITLE.get(f);
+    if (title) bullets.push(title);
+  }
+  return {
+    key: p.key,
+    name: p.name,
+    price: money(p.priceMinor, p.currency),
+    suffix:
+      p.priceMinor !== null && p.priceMinor > 0
+        ? `/${p.billingInterval}`
+        : null,
+    seats:
+      p.seatLimit === null ? "Unlimited seats" : `Up to ${p.seatLimit} seats`,
+    blurb: p.description ?? "",
+    bullets,
+    best: p.isHighlighted,
+    cta: p.priceMinor === null ? "Talk to us" : "Get started",
+  };
+}
 
 const FLOW = [
   "Ask Jova",
@@ -283,6 +305,8 @@ export default async function LandingPage() {
   // Signed-in visitors go straight to the app.
   const claims = await getClaims();
   if (claims) redirect("/dashboard");
+
+  const plans = (await listPublishedPlans()).map(toCard);
 
   const assessed = new Date().toLocaleDateString("en-GB", {
     day: "numeric",
@@ -1069,9 +1093,9 @@ export default async function LandingPage() {
           </p>
 
           <div className="jo-plans">
-            {PLANS.map((p) => (
+            {plans.map((p) => (
               <div
-                key={p.name}
+                key={p.key}
                 className={`jo-plan${p.best ? " jo-plan--best" : ""}`}
               >
                 <div
@@ -1087,7 +1111,7 @@ export default async function LandingPage() {
                 </div>
                 <p className="jo-plan__price">
                   {p.price}
-                  {p.price.startsWith("£") && <small> /mo</small>}
+                  {p.suffix && <small> {p.suffix}</small>}
                 </p>
                 <p className="jo-plan__seats">{p.seats}</p>
                 <p className="jo-plan__blurb">{p.blurb}</p>
@@ -1109,9 +1133,19 @@ export default async function LandingPage() {
               </div>
             ))}
           </div>
+          {plans.length === 0 && (
+            <p className="jo-copy jo-copy--ink" style={{ marginTop: "24px" }}>
+              Packages are being finalised.{" "}
+              <a href="mailto:hello@jojan.one" className="jo-link">
+                Talk to us
+              </a>{" "}
+              and we will size one around your business.
+            </p>
+          )}
           <p className="jo-note" style={{ marginTop: "20px" }}>
-            Plan feature allocation is configurable and being finalised.
-            Early-access workspaces include the full platform.
+            Every package includes the modules the Business Confidence Score is
+            derived from. Prices are set by Jojan One and billed securely
+            through Stripe.
           </p>
         </div>
       </section>

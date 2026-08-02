@@ -1,6 +1,28 @@
 import { and, desc, eq } from "drizzle-orm";
 import { withUser, type UserClaims } from "../db";
-import { memberships, workspaces } from "../db/schema";
+import { adminDb } from "../db/admin";
+import { memberships, plans, subscriptions, workspaces } from "../db/schema";
+
+/**
+ * The optional modules the workspace's package unlocks, or null when it is on
+ * no package at all. null means unrestricted: trials, imported and legacy
+ * workspaces keep full access rather than being silently locked out.
+ *
+ * Reads the catalogue with the service role - the plans table is a global
+ * catalogue, not tenant data, and the workspace id is resolved from the
+ * caller's own session before this is called.
+ */
+export async function planFeaturesFor(
+  workspaceId: string,
+): Promise<string[] | null> {
+  const rows = await adminDb
+    .select({ features: plans.features })
+    .from(subscriptions)
+    .innerJoin(plans, eq(plans.key, subscriptions.planKey))
+    .where(eq(subscriptions.workspaceId, workspaceId))
+    .limit(1);
+  return rows[0]?.features ?? null;
+}
 
 /** Workspaces the current user belongs to (RLS-scoped), with their role. */
 export function listMyWorkspaces(claims: UserClaims) {

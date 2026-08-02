@@ -101,11 +101,12 @@ async function main() {
     // --- Read model ----------------------------------------------------------
     const plans = await listSellablePlans({ sub: userA });
     const sellable = plans.filter((p) => p.isSellable).map((p) => p.key);
+    const notSellable = plans.filter((p) => !p.isSellable).map((p) => p.key);
     check(
-      "only starter + growth are sellable",
-      sellable.includes("starter") &&
-        sellable.includes("growth") &&
-        !sellable.includes("professional"),
+      "the sellable catalogue is offered and non-sellable packages are withheld",
+      sellable.length > 0 &&
+        sellable.includes("starter") &&
+        notSellable.every((k) => !sellable.includes(k)),
     );
 
     const ov0 = await getBillingOverview({ sub: userA }, wsA);

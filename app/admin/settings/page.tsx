@@ -16,7 +16,7 @@ import { PlatformSettingsForm } from "./PlatformSettingsForm";
 import { AnnouncementForm } from "./AnnouncementForm";
 import { ModuleFlags } from "./ModuleFlags";
 import { WebSearchToggle } from "./WebSearchToggle";
-import { PlanEditor } from "./PlanEditor";
+import { PlanDesigner } from "./PlanDesigner";
 
 type Provider = "anthropic" | "openrouter" | "deterministic";
 
@@ -146,15 +146,16 @@ export default async function AdminSettingsPage() {
           </Card>
 
           {/* Plan catalogue */}
-          <Card className="mt-4 max-w-2xl p-6">
+          <Card className="mt-4 p-6">
             <h2 className="mb-1 text-base font-semibold text-foreground">
-              Plans
+              Packages &amp; pricing
             </h2>
             <p className="mb-4 text-sm text-muted-foreground">
-              Edit plan names, prices and seat limits. Stripe price IDs stay in
-              the environment.
+              Design a package, choose the modules it unlocks, set a price and
+              an optional free trial, then publish it to the public pricing
+              page. Saving a price publishes it to Stripe.
             </p>
-            <PlanEditor plans={plans} />
+            <PlanDesigner plans={plans} canWrite={isOperator} />
           </Card>
         </>
       )}

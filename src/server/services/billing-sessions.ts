@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { adminDb } from "../db/admin";
-import { subscriptions } from "../db/schema";
+import { plans, subscriptions } from "../db/schema";
 import {
   appUrl,
   getStripe,
@@ -23,7 +23,28 @@ export async function createCheckoutSession(
   if (!isStripeConfigured())
     return { ok: false, code: 503, error: "Billing is not connected yet." };
 
-  const price = priceIdForPlan(planKey);
+  // The package's own Stripe price wins; the env-var mapping stays as a
+  // fallback for the plans that predate the designer.
+  const plan = (
+    await adminDb
+      .select({
+        stripePriceId: plans.stripePriceId,
+        trialDays: plans.trialDays,
+        priceMinor: plans.priceMinor,
+      })
+      .from(plans)
+      .where(eq(plans.key, planKey))
+      .limit(1)
+  )[0];
+
+  if (plan && plan.priceMinor === 0)
+    return {
+      ok: false,
+      code: 400,
+      error: "This package is free - no checkout is needed.",
+    };
+
+  const price = plan?.stripePriceId ?? priceIdForPlan(planKey);
   if (!price)
     return {
       ok: false,
@@ -49,7 +70,10 @@ export async function createCheckoutSession(
       : userEmail
         ? { customer_email: userEmail }
         : {}),
-    subscription_data: { metadata: { workspace_id: workspaceId } },
+    subscription_data: {
+      metadata: { workspace_id: workspaceId },
+      ...(plan?.trialDays ? { trial_period_days: plan.trialDays } : {}),
+    },
     metadata: { workspace_id: workspaceId, plan_key: planKey },
     success_url: `${appUrl()}/billing?status=success`,
     cancel_url: `${appUrl()}/billing?status=cancelled`,

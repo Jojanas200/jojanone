@@ -4,8 +4,10 @@ import {
   getActiveWorkspaceId,
   getWorkspaceAccess,
   isModuleAllowed,
+  planFeaturesFor,
 } from "@/server/services/workspaces";
 import { getDisabledModules } from "@/server/services/platform-settings";
+import { planAllowsModule } from "@/shared/plans/entitlements";
 
 // Modules any member (including a scoped adviser) may always reach.
 const ALWAYS_ALLOWED = new Set(["settings"]);
@@ -31,6 +33,14 @@ export async function requireModuleAccess(
   if (!ALWAYS_ALLOWED.has(moduleKey)) {
     const disabled = await getDisabledModules();
     if (disabled.includes(moduleKey)) redirect("/dashboard");
+  }
+
+  // Package entitlements: core modules are always granted (the Business
+  // Confidence Score is derived from them), optional ones only where the
+  // workspace's package includes them.
+  if (!ALWAYS_ALLOWED.has(moduleKey)) {
+    const features = await planFeaturesFor(ws);
+    if (!planAllowsModule(features, moduleKey)) redirect("/billing");
   }
 
   const access = await getWorkspaceAccess(claims, ws);
