@@ -112,6 +112,43 @@ async function main() {
     );
     check("new packages start as drafts, never live", row?.published === false);
 
+    // --- The sidebar shows exactly what the package allows -------------------
+    // Mirrors AppShell's inScope(): adviser scope AND kill-switches AND the
+    // package. A module the server would refuse must never be listed.
+    const navShows = (
+      key: string,
+      features: string[] | null,
+      scoped: string[] | null = null,
+      disabled: string[] = [],
+    ) =>
+      (!scoped || scoped.includes(key) || key === "settings") &&
+      (key === "settings" || !disabled.includes(key)) &&
+      (key === "settings" || planAllowsModule(features, key));
+
+    const lean = ["academy"];
+    check(
+      "the sidebar hides optional modules the package excludes",
+      navShows("academy", lean) &&
+        !navShows("jova", lean) &&
+        !navShows("reports", lean),
+    );
+    check(
+      "core modules stay in the sidebar on every package",
+      navShows("compliance", lean) &&
+        navShows("risk", lean) &&
+        navShows("policies", lean) &&
+        navShows("settings", []),
+    );
+    check(
+      "a workspace on no package still sees everything",
+      navShows("jova", null) && navShows("reports", null),
+    );
+    check(
+      "package entitlement does not override adviser scope or kill-switches",
+      !navShows("academy", lean, ["compliance"]) &&
+        !navShows("academy", lean, null, ["academy"]),
+    );
+
     // --- Publish guards ------------------------------------------------------
     const priced = await getPlan(KEY);
     const blocked = await setPlanPublished(actor, KEY, true);

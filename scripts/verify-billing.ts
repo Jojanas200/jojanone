@@ -131,11 +131,14 @@ async function main() {
       "checkout without a key returns 503",
       !noKey.ok && noKey.code === 503,
     );
+    // Use a key that does not exist rather than a real package: operators now
+    // manage the real catalogue, and once a package syncs to Stripe it HAS a
+    // price - asserting the opposite would break the moment billing works.
     process.env.STRIPE_SECRET_KEY = "sk_test_dummy";
     delete process.env.STRIPE_PRICE_GROWTH;
     const noPrice = await createCheckoutSession(
       wsA,
-      "growth",
+      "no-such-package",
       "a@example.test",
     );
     check(

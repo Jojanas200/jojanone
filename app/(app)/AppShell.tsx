@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { MODULES_BY_SECTION } from "@/config/modules.config";
+import { planAllowsModule } from "@/shared/plans/entitlements";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -58,12 +59,15 @@ function Nav({
   onNavigate,
   allowedModules,
   disabledModules = [],
+  planFeatures = null,
   collapsed = false,
 }: {
   pathname: string;
   onNavigate?: () => void;
   allowedModules: string[] | null;
   disabledModules?: string[];
+  /** Optional modules the workspace's package includes; null = unrestricted. */
+  planFeatures?: string[] | null;
   collapsed?: boolean;
 }) {
   const base =
@@ -71,11 +75,15 @@ function Nav({
   const item = collapsed
     ? `${base} justify-center px-0 py-2`
     : `${base} gap-2.5 px-3 py-2`;
+  // A module is listed only when the adviser's scope, the platform
+  // kill-switches AND the workspace's package all allow it - so the nav never
+  // advertises something the server would refuse.
   const inScope = (key: string) =>
     (!allowedModules ||
       allowedModules.includes(key) ||
       ALWAYS_ALLOWED.has(key)) &&
-    (ALWAYS_ALLOWED.has(key) || !disabledModules.includes(key));
+    (ALWAYS_ALLOWED.has(key) || !disabledModules.includes(key)) &&
+    (ALWAYS_ALLOWED.has(key) || planAllowsModule(planFeatures, key));
   return (
     <nav
       aria-label="Quick Navigation"
@@ -172,6 +180,7 @@ function MobileNav({
   pathname,
   allowedModules,
   disabledModules,
+  planFeatures,
   brandLogoSrc,
   brandColor,
   workspaceName,
@@ -179,6 +188,7 @@ function MobileNav({
   pathname: string;
   allowedModules: string[] | null;
   disabledModules?: string[];
+  planFeatures?: string[] | null;
   brandLogoSrc?: string | null;
   brandColor?: string | null;
   workspaceName: string;
@@ -210,6 +220,7 @@ function MobileNav({
           onNavigate={() => setOpen(false)}
           allowedModules={allowedModules}
           disabledModules={disabledModules}
+          planFeatures={planFeatures}
         />
       </SheetContent>
     </Sheet>
@@ -236,6 +247,7 @@ export function AppShell({
   canWrite,
   allowedModules,
   disabledModules,
+  planFeatures = null,
   isPlatformAdmin = false,
   brandLogoSrc = null,
   brandColor = null,
@@ -247,6 +259,8 @@ export function AppShell({
   canWrite: boolean;
   allowedModules: string[] | null;
   disabledModules?: string[];
+  /** Optional modules the package includes; null = unrestricted. */
+  planFeatures?: string[] | null;
   isPlatformAdmin?: boolean;
   brandLogoSrc?: string | null;
   brandColor?: string | null;
@@ -323,6 +337,7 @@ export function AppShell({
               pathname={pathname}
               allowedModules={allowedModules}
               disabledModules={disabledModules}
+              planFeatures={planFeatures}
               collapsed={collapsed}
             />
           </aside>
@@ -334,6 +349,7 @@ export function AppShell({
                   pathname={pathname}
                   allowedModules={allowedModules}
                   disabledModules={disabledModules}
+                  planFeatures={planFeatures}
                   brandLogoSrc={brandLogoSrc}
                   brandColor={brandColor}
                   workspaceName={workspaceName}

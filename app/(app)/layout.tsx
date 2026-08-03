@@ -4,6 +4,7 @@ import { getSessionUser } from "@/server/auth/session";
 import {
   getWorkspaceAccess,
   listMyWorkspaces,
+  planFeaturesFor,
 } from "@/server/services/workspaces";
 import { isPlatformAdmin } from "@/server/services/platform-admin";
 import { getUserTheme } from "@/server/services/prefs";
@@ -57,10 +58,11 @@ export default async function AppLayout({
   const cookieStore = await cookies();
   const impersonating = cookieStore.get("jj_impersonating")?.value ?? null;
   const sidebarCollapsed = cookieStore.get("jj_sidebar")?.value === "collapsed";
-  const [savedTheme, disabledModules, logo] = await Promise.all([
+  const [savedTheme, disabledModules, logo, planFeatures] = await Promise.all([
     getUserTheme(claims),
     getDisabledModules(),
     getCurrentLogo(claims),
+    planFeaturesFor(active.id),
   ]);
   const brandLogoSrc = logo ? `/api/branding/logo?v=${logo.id}` : null;
 
@@ -79,6 +81,7 @@ export default async function AppLayout({
         canWrite={access.canWrite}
         allowedModules={access.scopedModules}
         disabledModules={disabledModules}
+        planFeatures={planFeatures}
         isPlatformAdmin={platformAdmin && !impersonating}
         brandLogoSrc={brandLogoSrc}
         brandColor={active.brandColor}
