@@ -4,7 +4,6 @@ import {
   Brain,
   CheckCircle2,
   ChevronRight,
-  CircleAlert,
   FileText,
   Quote,
   TriangleAlert,
@@ -88,6 +87,13 @@ function Dial({
 }) {
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
+
+  // The same dial is drawn at 200px, 86px and 54px. Its type has to be a
+  // fraction of the ring rather than a fixed size, or the number overflows
+  // the smaller two.
+  const numSize = Math.round(size * 0.29);
+  const labelSize = Math.max(7, Math.round(size * 0.08));
+
   return (
     <div className="s-dial" style={{ width: size, height: size }}>
       <svg viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
@@ -112,8 +118,21 @@ function Dial({
         />
       </svg>
       <div className="s-dial-value">
-        <span className="s-dial-num">{score}</span>
-        <span className="s-dial-label">{label}</span>
+        <span className="s-dial-num" style={{ fontSize: numSize }}>
+          {score}
+        </span>
+        {label ? (
+          <span
+            className="s-dial-label"
+            style={{
+              fontSize: labelSize,
+              marginTop: Math.round(size * 0.03),
+              letterSpacing: size < 120 ? "0.08em" : undefined,
+            }}
+          >
+            {label}
+          </span>
+        ) : null}
       </div>
     </div>
   );
@@ -706,7 +725,7 @@ export default function HomePage() {
                     <h4>Recommended Actions</h4>
                     {MOCK.actions.map((action) => (
                       <div key={action.id} className="s-exec-item">
-                        <CircleAlert size={13} style={{ color: "#0866f5" }} />
+                        <span className="s-exec-tick" />
                         {action.name}
                         <span className="s-exec-due">{action.due}</span>
                       </div>

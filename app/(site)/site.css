@@ -1227,16 +1227,37 @@
 .s-exec-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
   font-size: 12px;
   color: var(--s-dim);
   padding: 5px 0;
 }
 
+/* The label keeps the room; only the reading on the right is fixed width. */
 .s-exec-item > b {
   margin-left: auto;
   font-weight: 400;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.s-exec-tick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+  background: rgba(8, 102, 245, 0.12);
+  flex-shrink: 0;
+}
+
+.s-exec-tick::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--s-blue);
 }
 
 .s-exec-due {
