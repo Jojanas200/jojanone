@@ -164,6 +164,11 @@ export function capabilityHrefByName(name: string): string | null {
   return match ? `/capabilities/${match.slug}` : null;
 }
 
+/** The icon a capability declares, looked up by the name the home page uses. */
+export function capabilityIconByName(name: string): string {
+  return capabilities.find((c) => c.name === name)?.icon ?? "Sparkles";
+}
+
 /**
  * The exported copy links to a few slugs this site does not use. Rewriting
  * them here keeps the content faithful to what the owner wrote while making

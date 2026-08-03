@@ -11,6 +11,18 @@
 export const SIGN_IN_HREF = "/login";
 export const GET_STARTED_HREF = "/login";
 
+/**
+ * Only accounts we can point at are listed. The design shows LinkedIn,
+ * Facebook and Instagram; add the other two here once their handles exist,
+ * rather than shipping icons that link nowhere.
+ */
+export const SOCIAL_LINKS = [
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/anastasia-ayivor-",
+  },
+] as const;
+
 export const PRIMARY_NAV = [
   { label: "Capabilities", href: "/capabilities" },
   { label: "How It Works", href: "/how-it-works" },

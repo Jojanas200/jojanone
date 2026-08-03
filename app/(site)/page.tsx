@@ -1,7 +1,22 @@
 import Link from "next/link";
-import { ArrowRight, Check, ChevronRight } from "lucide-react";
-import { capabilityHrefByName, home, siteHref } from "@/content/site";
+import {
+  ArrowRight,
+  Brain,
+  CheckCircle2,
+  ChevronRight,
+  CircleAlert,
+  FileText,
+  Quote,
+  TriangleAlert,
+} from "lucide-react";
+import {
+  capabilityHrefByName,
+  capabilityIconByName,
+  home,
+  siteHref,
+} from "@/content/site";
 import { Reveal } from "./Reveal";
+import { iconFor } from "./icons";
 import { GET_STARTED_HREF } from "./nav";
 
 export const metadata = {
@@ -9,7 +24,100 @@ export const metadata = {
   description: home.hero.body,
 };
 
-const CIRCUMFERENCE = 2 * Math.PI * 110;
+/**
+ * The product mockups are a drawing of the interface, not a screenshot: they
+ * stay sharp, need no image pipeline, and the figures below are the same
+ * illustrative set the rest of the page uses. Nothing here is customer data.
+ */
+const MOCK = {
+  status: [
+    { label: "2 Critical", colour: "#f87171" },
+    { label: "5 Actions", colour: "#fbbf24" },
+    { label: "12 Compliant", colour: "#14b8a6" },
+  ],
+  delta: "4 points this month",
+  evidenceReadiness: 83,
+  risks: [
+    {
+      id: "r1",
+      name: "Employment contract gap",
+      level: "Critical",
+      cls: "s-crit",
+      dot: "#dc2626",
+    },
+    {
+      id: "r2",
+      name: "GDPR review overdue",
+      level: "High",
+      cls: "s-high",
+      dot: "#d97706",
+    },
+    {
+      id: "r3",
+      name: "Supplier agreement expiry",
+      level: "Medium",
+      cls: "s-med",
+      dot: "#0866f5",
+    },
+  ],
+  compliance: [
+    { id: "c1", name: "Employment Law", score: 88, colour: "#0866f5" },
+    { id: "c2", name: "Data Protection", score: 74, colour: "#d97706" },
+    { id: "c3", name: "Health & Safety", score: 95, colour: "#14b8a6" },
+    { id: "c4", name: "Financial Conduct", score: 82, colour: "#0866f5" },
+  ],
+  actions: [
+    { id: "a1", name: "Update employment contract template", due: "Today" },
+    { id: "a2", name: "Complete GDPR data mapping review", due: "3 days" },
+    { id: "a3", name: "Renew supplier agreement, Acme Ltd", due: "21 days" },
+  ],
+};
+
+function Dial({
+  score,
+  label,
+  size,
+  stroke,
+  track,
+}: {
+  score: number;
+  label: string;
+  size: number;
+  stroke: number;
+  track: string;
+}) {
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  return (
+    <div className="s-dial" style={{ width: size, height: size }}>
+      <svg viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={track}
+          strokeWidth={stroke}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="#0866F5"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference - (score / 100) * circumference}
+        />
+      </svg>
+      <div className="s-dial-value">
+        <span className="s-dial-num">{score}</span>
+        <span className="s-dial-label">{label}</span>
+      </div>
+    </div>
+  );
+}
 
 export default function HomePage() {
   const {
@@ -25,104 +133,167 @@ export default function HomePage() {
     finalCta,
   } = home;
 
-  const dash = CIRCUMFERENCE - (businessConfidence.score / 100) * CIRCUMFERENCE;
-
   return (
     <>
       {/* ---- Hero ---------------------------------------------------- */}
       <section className="s-hero">
         <div className="s-wrap">
-          <Reveal>
-            <p className="s-eyebrow">{hero.eyebrow}</p>
-            <h1 className="s-h1" style={{ maxWidth: 860 }}>
-              {hero.headline}
-            </h1>
-            <p className="s-lead" style={{ maxWidth: 640 }}>
-              {hero.body}
-            </p>
-            <div className="s-actions">
-              <Link href={GET_STARTED_HREF} className="s-btn s-btn-primary">
-                {hero.ctaPrimary}
-                <ArrowRight size={16} />
-              </Link>
-              <Link href="/how-it-works" className="s-btn s-btn-ghost">
-                {hero.ctaSecondary}
-              </Link>
-            </div>
-            <p className="s-hero-note">{hero.ctaSupporting}</p>
-          </Reveal>
+          <div className="s-hero-grid">
+            <Reveal>
+              <p className="s-pill">{hero.eyebrow}</p>
+              <h1 className="s-h1">{hero.headline}</h1>
+              <p className="s-lead" style={{ maxWidth: 520 }}>
+                {hero.body}
+              </p>
+              <div className="s-actions">
+                <Link href={GET_STARTED_HREF} className="s-btn s-btn-primary">
+                  {hero.ctaPrimary}
+                  <ArrowRight size={16} />
+                </Link>
+                <Link href="/how-it-works" className="s-btn s-btn-ghost">
+                  {hero.ctaSecondary}
+                </Link>
+              </div>
+              <p className="s-hero-note">{hero.ctaSupporting}</p>
+            </Reveal>
+
+            <Reveal delay={120}>
+              <div className="s-window">
+                <div className="s-window-bar">
+                  <span
+                    className="s-window-dot"
+                    style={{ background: "#f87171" }}
+                  />
+                  <span
+                    className="s-window-dot"
+                    style={{ background: "#fbbf24" }}
+                  />
+                  <span
+                    className="s-window-dot"
+                    style={{ background: "#14b8a6" }}
+                  />
+                  <span className="s-window-title">
+                    Jojan One &ndash; Business Protection
+                  </span>
+                </div>
+
+                <div className="s-window-body">
+                  <div className="s-window-top">
+                    <div className="s-window-dial">
+                      <Dial
+                        score={businessConfidence.score}
+                        label={businessConfidence.scoreLabel.toUpperCase()}
+                        size={86}
+                        stroke={6}
+                        track="rgba(255,255,255,0.1)"
+                      />
+                      <p className="s-window-caption">Business Confidence</p>
+                    </div>
+
+                    <div style={{ display: "grid", gap: 9 }}>
+                      {businessConfidence.modules.slice(0, 6).map((module) => (
+                        <div key={module.id} className="s-mini-bar">
+                          <span>{module.name}</span>
+                          <span className="s-mini-track">
+                            <span
+                              className={`s-mini-fill ${module.score >= 90 ? "s-mini-fill-teal" : ""}`}
+                              style={{
+                                width: `${module.score}%`,
+                                display: "block",
+                              }}
+                            />
+                          </span>
+                          <b>{module.score}</b>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="s-window-alert">
+                    <Brain
+                      size={15}
+                      style={{ color: "#14b8a6", flexShrink: 0, marginTop: 2 }}
+                    />
+                    <span>
+                      <span style={{ display: "block", marginBottom: 5 }}>
+                        <b style={{ color: "#14b8a6", fontWeight: 500 }}>
+                          Jova
+                        </b>{" "}
+                        <span
+                          className="s-sev s-sev-high"
+                          style={{ marginLeft: 6 }}
+                        >
+                          Action required
+                        </span>
+                      </span>
+                      <span style={{ color: "var(--s-dim)" }}>
+                        {jova.alerts[0].title}
+                      </span>
+                    </span>
+                  </div>
+
+                  <div className="s-window-status">
+                    {MOCK.status.map((item) => (
+                      <span key={item.label}>
+                        <span
+                          className="s-window-dot"
+                          style={{
+                            background: item.colour,
+                            width: 7,
+                            height: 7,
+                          }}
+                        />
+                        {item.label}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
         </div>
       </section>
 
       {/* ---- Business Confidence Score ------------------------------- */}
-      <section className="s-section s-section-lift">
+      <section className="s-section s-light">
         <div className="s-wrap">
-          <Reveal className="s-head">
-            <h2 className="s-h2">{businessConfidence.headline}</h2>
-            <p className="s-lead">{businessConfidence.body}</p>
-          </Reveal>
-
           <div className="s-score">
             <Reveal>
-              <div className="s-dial">
-                <svg viewBox="0 0 240 240" aria-hidden="true">
-                  <circle
-                    cx="120"
-                    cy="120"
-                    r="110"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.08)"
-                    strokeWidth="10"
-                  />
-                  <circle
-                    cx="120"
-                    cy="120"
-                    r="110"
-                    fill="none"
-                    stroke="url(#scoreArc)"
-                    strokeWidth="10"
-                    strokeLinecap="round"
-                    strokeDasharray={CIRCUMFERENCE}
-                    strokeDashoffset={dash}
-                  />
-                  <defs>
-                    <linearGradient id="scoreArc" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#0866F5" />
-                      <stop offset="100%" stopColor="#14B8A6" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="s-dial-value">
-                  <span className="s-dial-num">{businessConfidence.score}</span>
-                  <span className="s-dial-label">
-                    {businessConfidence.scoreLabel}
-                  </span>
-                </div>
-              </div>
+              <Dial
+                score={businessConfidence.score}
+                label={businessConfidence.scoreLabel}
+                size={200}
+                stroke={12}
+                track="#E2E8F0"
+              />
+              <p className="s-dial-caption">Business Confidence Score</p>
               <p
                 className="s-small"
-                style={{ textAlign: "center", marginTop: 12 }}
+                style={{ textAlign: "center", marginTop: 6 }}
               >
-                Illustrative score. Yours is calculated from your own records.
+                Illustrative. Yours is calculated from your own records.
               </p>
             </Reveal>
 
-            <div className="s-meters">
-              {businessConfidence.modules.map((module, i) => (
-                <Reveal key={module.id} delay={i * 60}>
-                  <div className="s-meter-top">
+            <Reveal delay={100}>
+              <h2 className="s-h2">{businessConfidence.headline}</h2>
+              <p className="s-lead">{businessConfidence.body}</p>
+
+              <div className="s-meters">
+                {businessConfidence.modules.map((module) => (
+                  <div key={module.id} className="s-meter-row">
                     <span>{module.name}</span>
-                    <span>{module.score}</span>
+                    <span className="s-meter-track">
+                      <span
+                        className="s-meter-fill"
+                        style={{ width: `${module.score}%`, display: "block" }}
+                      />
+                    </span>
+                    <b>{module.score}</b>
                   </div>
-                  <div className="s-meter-track">
-                    <div
-                      className="s-meter-fill"
-                      style={{ width: `${module.score}%` }}
-                    />
-                  </div>
-                </Reveal>
-              ))}
-            </div>
+                ))}
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -130,52 +301,106 @@ export default function HomePage() {
       {/* ---- Jova ---------------------------------------------------- */}
       <section className="s-section">
         <div className="s-wrap">
-          <Reveal className="s-head">
+          <Reveal className="s-head s-head-center">
+            <span className="s-pill s-pill-teal">
+              <Brain size={14} />
+              Jova
+            </span>
             <h2 className="s-h2">{jova.headline}</h2>
             <p className="s-lead">{jova.subheadline}</p>
           </Reveal>
 
           <div className="s-jova">
             <Reveal>
-              <div className="s-list">
-                {jova.alerts.map((alert) => (
-                  <div key={alert.id} className="s-alert">
-                    <span className={`s-dot s-dot-${alert.severity}`} />
-                    <span>
-                      <span style={{ display: "block", marginBottom: 6 }}>
-                        {alert.title}
+              <div className="s-panel" style={{ height: "100%" }}>
+                <div className="s-panel-head">
+                  <span>
+                    <span
+                      className="s-window-dot"
+                      style={{ background: "#14b8a6", width: 8, height: 8 }}
+                    />
+                    Jova Intelligence
+                  </span>
+                  <span className="s-panel-count">
+                    {jova.alerts.length} items
+                  </span>
+                </div>
+                <div className="s-panel-body">
+                  {jova.alerts.map((alert) => (
+                    <div
+                      key={alert.id}
+                      className={`s-alert s-alert-${alert.severity}`}
+                    >
+                      <span className="s-alert-top">
+                        <span>{alert.title}</span>
+                        <span className={`s-sev s-sev-${alert.severity}`}>
+                          {alert.severity === "high"
+                            ? "High"
+                            : alert.severity === "medium"
+                              ? "Medium"
+                              : "Low"}
+                        </span>
                       </span>
-                      <span className="s-small">{alert.tag}</span>
-                    </span>
-                  </div>
-                ))}
+                      <span className="s-alert-tag">{alert.tag}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </Reveal>
 
             <Reveal delay={100}>
-              <div className="s-chat">
-                <p className="s-chat-q">&ldquo;{jova.userQuery}&rdquo;</p>
-                <dl className="s-chat-a">
-                  <div>
-                    <dt>What</dt>
-                    <dd>{jova.jovaResponse.what}</dd>
+              <div className="s-panel" style={{ height: "100%" }}>
+                <div className="s-panel-head">
+                  <span>
+                    <Brain size={15} style={{ color: "#14b8a6" }} />
+                    Jova Analysis
+                  </span>
+                </div>
+                <div className="s-panel-body">
+                  <div className="s-ask">
+                    <p className="s-ask-label">Your question</p>
+                    <p className="s-ask-q">{jova.userQuery}</p>
                   </div>
-                  <div>
-                    <dt>Why it matters</dt>
-                    <dd>{jova.jovaResponse.why}</dd>
-                  </div>
-                  <div>
-                    <dt>What to do</dt>
-                    <dd>{jova.jovaResponse.action}</dd>
-                  </div>
-                </dl>
-                <p className="s-chat-src">{jova.jovaResponse.source}</p>
+
+                  <dl className="s-answer">
+                    <div>
+                      <FileText size={16} />
+                      <div>
+                        <dt>What happened</dt>
+                        <dd>{jova.jovaResponse.what}</dd>
+                      </div>
+                    </div>
+                    <div>
+                      <TriangleAlert size={16} />
+                      <div>
+                        <dt>Why it matters</dt>
+                        <dd>{jova.jovaResponse.why}</dd>
+                      </div>
+                    </div>
+                    <div>
+                      <CheckCircle2 size={16} />
+                      <div>
+                        <dt>What to do</dt>
+                        <dd>{jova.jovaResponse.action}</dd>
+                      </div>
+                    </div>
+                    <div>
+                      <Quote size={16} />
+                      <div>
+                        <dt>Source</dt>
+                        <dd className="s-answer-src">
+                          {jova.jovaResponse.source}
+                        </dd>
+                      </div>
+                    </div>
+                  </dl>
+                </div>
               </div>
             </Reveal>
           </div>
 
           <Reveal>
-            <div className="s-actions">
+            <div className="s-actions" style={{ justifyContent: "center" }}>
               <Link href="/capabilities/jova" className="s-btn s-btn-ghost">
                 More about Jova
                 <ChevronRight size={16} />
@@ -186,29 +411,29 @@ export default function HomePage() {
       </section>
 
       {/* ---- How it works -------------------------------------------- */}
-      <section className="s-section s-section-lift">
+      <section className="s-section s-light">
         <div className="s-wrap">
-          <Reveal className="s-head">
+          <Reveal className="s-head s-head-center">
             <h2 className="s-h2">{howItWorks.headline}</h2>
             <p className="s-lead">{howItWorks.body}</p>
           </Reveal>
 
-          <div className="s-steps">
+          <div className="s-stepper">
             {howItWorks.steps.map((step, i) => (
-              <Reveal key={step.id} delay={i * 70}>
-                <div className="s-card" style={{ height: "100%" }}>
-                  <div className="s-step-num">{step.number}</div>
-                  <h3 className="s-h4" style={{ marginBottom: 10 }}>
-                    {step.name}
-                  </h3>
-                  <p className="s-small">{step.description}</p>
-                </div>
+              <Reveal
+                key={step.id}
+                delay={i * 80}
+                className={`s-step ${i === 0 ? "s-step-first" : ""}`}
+              >
+                <div className="s-step-num">{step.number}</div>
+                <h3>{step.name}</h3>
+                <p className="s-small">{step.description}</p>
               </Reveal>
             ))}
           </div>
 
           <Reveal>
-            <div className="s-actions">
+            <div className="s-actions" style={{ justifyContent: "center" }}>
               <Link href="/how-it-works" className="s-btn s-btn-ghost">
                 See how it works in detail
                 <ChevronRight size={16} />
@@ -219,148 +444,305 @@ export default function HomePage() {
       </section>
 
       {/* ---- Capabilities -------------------------------------------- */}
-      <section className="s-section">
+      <section className="s-section s-light s-light-plain">
         <div className="s-wrap">
           <Reveal className="s-head">
             <h2 className="s-h2">{capabilities.headline}</h2>
           </Reveal>
 
-          <div className="s-grid s-grid-3">
+          <div className="s-bento">
             {capabilities.items.map((item, i) => {
               const href = capabilityHrefByName(item.name);
-              const body = (
-                <>
-                  <h3 className="s-h4" style={{ marginBottom: 10 }}>
-                    {item.name}
-                  </h3>
-                  <p className="s-small">{item.description}</p>
-                </>
-              );
+              const Icon = iconFor(capabilityIconByName(item.name));
+              const dark = item.name === "Jova";
+              const classes = [
+                "s-card",
+                "s-card-link",
+                item.size === "large" ? "s-bento-wide" : "",
+                dark ? "s-bento-dark" : "",
+              ]
+                .filter(Boolean)
+                .join(" ");
               return (
-                <Reveal key={item.id} delay={(i % 3) * 70}>
-                  {href ? (
-                    <Link
-                      href={href}
-                      className="s-card s-card-link"
-                      style={{ height: "100%" }}
+                <Reveal key={item.id} delay={(i % 4) * 60}>
+                  <Link
+                    href={href ?? "/capabilities"}
+                    className={classes}
+                    style={{ height: "100%" }}
+                  >
+                    <span
+                      className="s-icon"
+                      style={
+                        dark
+                          ? {
+                              background: "rgba(20,184,166,0.12)",
+                              color: "#14b8a6",
+                              marginBottom: 14,
+                            }
+                          : { marginBottom: 14 }
+                      }
                     >
-                      {body}
-                    </Link>
-                  ) : (
-                    <div className="s-card" style={{ height: "100%" }}>
-                      {body}
-                    </div>
-                  )}
+                      <Icon size={18} />
+                    </span>
+                    <h3 className="s-h4" style={{ marginBottom: 10 }}>
+                      {item.name}
+                    </h3>
+                    <p className="s-small">{item.description}</p>
+                  </Link>
                 </Reveal>
               );
             })}
           </div>
-
-          <Reveal>
-            <div className="s-actions">
-              <Link href="/capabilities" className="s-btn s-btn-ghost">
-                Explore all capabilities
-                <ChevronRight size={16} />
-              </Link>
-            </div>
-          </Reveal>
         </div>
       </section>
 
       {/* ---- Document generation ------------------------------------- */}
-      <section className="s-section s-section-lift">
+      <section className="s-section">
         <div className="s-wrap">
-          <Reveal className="s-head">
-            <h2 className="s-h2">{documentGeneration.headline}</h2>
-            <p className="s-lead">{documentGeneration.body}</p>
-          </Reveal>
+          <div className="s-hero-grid">
+            <Reveal>
+              <h2 className="s-h2">{documentGeneration.headline}</h2>
+              <p className="s-lead" style={{ maxWidth: 520 }}>
+                {documentGeneration.body}
+              </p>
 
-          <Reveal>
-            <div className="s-chain">
-              {documentGeneration.workflow.map((step, i) => (
-                <span
-                  key={step.id}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 10,
-                  }}
+              <div className="s-chain">
+                {documentGeneration.workflow.map((step, i) => (
+                  <span
+                    key={step.id}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <span className="s-chain-step">{step.step}</span>
+                    {i < documentGeneration.workflow.length - 1 ? (
+                      <ChevronRight size={14} />
+                    ) : null}
+                  </span>
+                ))}
+              </div>
+
+              <div className="s-actions">
+                <Link
+                  href="/capabilities/document-generation"
+                  className="s-btn s-btn-ghost"
                 >
-                  <span className="s-chain-step">{step.step}</span>
-                  {i < documentGeneration.workflow.length - 1 ? (
-                    <ChevronRight size={16} />
-                  ) : null}
-                </span>
-              ))}
-            </div>
-          </Reveal>
+                  More about document generation
+                  <ChevronRight size={16} />
+                </Link>
+              </div>
+            </Reveal>
 
-          <Reveal>
-            <div className="s-chips">
-              {documentGeneration.documentTypes.map((doc) => (
-                <span key={doc.id} className="s-chip">
-                  {doc.name}
-                </span>
-              ))}
-            </div>
-          </Reveal>
-
-          <Reveal>
-            <div className="s-actions">
-              <Link
-                href="/capabilities/document-generation"
-                className="s-btn s-btn-ghost"
-              >
-                More about document generation
-                <ChevronRight size={16} />
-              </Link>
-            </div>
-          </Reveal>
+            <Reveal delay={110}>
+              <div className="s-window">
+                <div
+                  className="s-window-bar"
+                  style={{ justifyContent: "space-between" }}
+                >
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 9,
+                      fontSize: 13,
+                      color: "#fff",
+                      fontWeight: 500,
+                    }}
+                  >
+                    <FileText size={15} style={{ color: "#0866f5" }} />
+                    Document Library
+                  </span>
+                  <span className="s-window-title" style={{ marginLeft: 0 }}>
+                    Jurisdiction-aware
+                  </span>
+                </div>
+                <div className="s-doclib">
+                  {documentGeneration.documentTypes.map((doc) => (
+                    <div key={doc.id} className="s-doclib-row">
+                      <FileText size={15} />
+                      <span>{doc.name}</span>
+                      <span className="s-ready">Ready</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Reveal>
+          </div>
         </div>
       </section>
 
       {/* ---- Executive intelligence ---------------------------------- */}
-      <section className="s-section">
+      <section className="s-section s-light">
         <div className="s-wrap">
-          <Reveal className="s-head">
-            <h2 className="s-h2">{executiveIntelligence.headline}</h2>
-            <p className="s-lead">{executiveIntelligence.body}</p>
-            <div className="s-actions">
-              <Link
-                href="/capabilities/executive-intelligence"
-                className="s-btn s-btn-ghost"
-              >
-                See Executive Intelligence
-                <ChevronRight size={16} />
-              </Link>
-            </div>
-          </Reveal>
+          <div className="s-hero-grid">
+            <Reveal>
+              <h2 className="s-h2">{executiveIntelligence.headline}</h2>
+              <p className="s-lead" style={{ maxWidth: 520 }}>
+                {executiveIntelligence.body}
+              </p>
+              <p style={{ marginTop: 32 }}>
+                <Link
+                  href="/capabilities/executive-intelligence"
+                  className="s-link-blue"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  Explore Executive Intelligence
+                  <ArrowRight size={15} />
+                </Link>
+              </p>
+            </Reveal>
+
+            <Reveal delay={110}>
+              <div className="s-exec">
+                <div className="s-exec-bar">
+                  <span>
+                    <span
+                      className="s-window-dot"
+                      style={{ background: "#14b8a6", width: 8, height: 8 }}
+                    />
+                    Executive Intelligence
+                  </span>
+                  <em>Live &middot; Updated now</em>
+                </div>
+
+                <div className="s-exec-body">
+                  <div className="s-exec-summary">
+                    <Dial
+                      score={businessConfidence.score}
+                      label=""
+                      size={54}
+                      stroke={5}
+                      track="#E2E8F0"
+                    />
+                    <div>
+                      <p className="s-small" style={{ marginBottom: 2 }}>
+                        Business Confidence
+                      </p>
+                      <p style={{ margin: 0, fontSize: 19, fontWeight: 500 }}>
+                        {businessConfidence.scoreLabel}
+                      </p>
+                      <p
+                        style={{
+                          margin: "2px 0 0",
+                          fontSize: 12,
+                          color: "#14b8a6",
+                        }}
+                      >
+                        &uarr; {MOCK.delta}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="s-small" style={{ marginBottom: 2 }}>
+                        Evidence readiness
+                      </p>
+                      <p style={{ margin: 0, fontSize: 19, fontWeight: 500 }}>
+                        {MOCK.evidenceReadiness}%
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="s-exec-split">
+                    <div className="s-exec-box">
+                      <h4>Critical Risks</h4>
+                      {MOCK.risks.map((risk) => (
+                        <div key={risk.id} className="s-exec-item">
+                          <span
+                            className="s-window-dot"
+                            style={{
+                              background: risk.dot,
+                              width: 6,
+                              height: 6,
+                            }}
+                          />
+                          {risk.name}
+                          <b className={risk.cls}>{risk.level}</b>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="s-exec-box">
+                      <h4>Compliance Status</h4>
+                      {MOCK.compliance.map((row) => (
+                        <div key={row.id} className="s-exec-item">
+                          {row.name}
+                          <span
+                            className="s-mini-track"
+                            style={{
+                              marginLeft: "auto",
+                              width: 56,
+                              background: "#E2E8F0",
+                            }}
+                          >
+                            <span
+                              className="s-mini-fill"
+                              style={{
+                                width: `${row.score}%`,
+                                background: row.colour,
+                                display: "block",
+                              }}
+                            />
+                          </span>
+                          <b
+                            style={{
+                              marginLeft: 0,
+                              width: 30,
+                              textAlign: "right",
+                            }}
+                          >
+                            {row.score}%
+                          </b>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="s-exec-box">
+                    <h4>Recommended Actions</h4>
+                    {MOCK.actions.map((action) => (
+                      <div key={action.id} className="s-exec-item">
+                        <CircleAlert size={13} style={{ color: "#0866f5" }} />
+                        {action.name}
+                        <span className="s-exec-due">{action.due}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+          </div>
         </div>
       </section>
 
       {/* ---- Built for ----------------------------------------------- */}
-      <section className="s-section s-section-lift">
+      <section className="s-section s-light s-light-plain">
         <div className="s-wrap">
-          <Reveal className="s-head">
+          <Reveal className="s-head s-head-wide">
             <h2 className="s-h2">{builtFor.headline}</h2>
           </Reveal>
 
-          <div className="s-grid s-grid-4">
+          <div className="s-segments">
             {builtFor.segments.map((segment, i) => (
-              <Reveal key={segment.id} delay={i * 70}>
-                <div className="s-card" style={{ height: "100%" }}>
-                  <h3 className="s-h4" style={{ marginBottom: 10 }}>
-                    {segment.name}
-                  </h3>
-                  <p className="s-small">{segment.description}</p>
-                </div>
+              <Reveal
+                key={segment.id}
+                delay={(i % 2) * 70}
+                className="s-segment"
+              >
+                <h3>{segment.name}</h3>
+                <p className="s-body">{segment.description}</p>
               </Reveal>
             ))}
           </div>
 
           <Reveal>
-            <p className="s-small" style={{ marginTop: 32, maxWidth: 720 }}>
-              {builtFor.jurisdictionNote}
+            <p className="s-note">
+              <span />
+              <span>{builtFor.jurisdictionNote}</span>
             </p>
           </Reveal>
         </div>
@@ -369,32 +751,34 @@ export default function HomePage() {
       {/* ---- Trust --------------------------------------------------- */}
       <section className="s-section">
         <div className="s-wrap">
-          <Reveal className="s-head">
-            <h2 className="s-h2">{trust.headline}</h2>
-            <p className="s-lead">{trust.body}</p>
-          </Reveal>
+          <div className="s-hero-grid" style={{ alignItems: "start" }}>
+            <Reveal>
+              <h2 className="s-h2">{trust.headline}</h2>
+              <p className="s-lead" style={{ maxWidth: 480 }}>
+                {trust.body}
+              </p>
+            </Reveal>
 
-          <div className="s-grid s-grid-3">
-            {trust.pillars.map((pillar, i) => (
-              <Reveal key={pillar.id} delay={(i % 3) * 70}>
-                <Link
-                  href={siteHref(pillar.href)}
-                  className="s-card s-card-link"
-                  style={{ height: "100%" }}
-                >
-                  <span className="s-check">
-                    <Check size={16} />
-                    <span style={{ color: "#fff" }}>{pillar.name}</span>
-                  </span>
-                </Link>
-              </Reveal>
-            ))}
+            <Reveal delay={100}>
+              <div className="s-trustlist">
+                {trust.pillars.map((pillar) => (
+                  <Link
+                    key={pillar.id}
+                    href={siteHref(pillar.href)}
+                    className="s-trustrow"
+                  >
+                    {pillar.name}
+                    <ArrowRight size={15} />
+                  </Link>
+                ))}
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* ---- Final CTA ----------------------------------------------- */}
-      <section className="s-cta">
+      <section className="s-cta s-deep">
         <div className="s-wrap s-wrap-narrow">
           <Reveal>
             <h2 className="s-h2">{finalCta.headline}</h2>
