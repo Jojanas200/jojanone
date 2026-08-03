@@ -455,9 +455,15 @@
   transition: color 0.18s ease;
 }
 
-.s-nav a:hover,
+.s-nav a:hover {
+  color: #fff;
+}
+
 .s-nav a[aria-current="page"] {
   color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 7px;
+  text-decoration-thickness: 1px;
 }
 
 .s-header-cta {
@@ -1692,6 +1698,288 @@
   z-index: 1;
 }
 
+/* ---- Capability pages ----------------------------------------------------
+   Every capability carries its own accent (--accent, set per page from the
+   content). Jova is teal, the rest blue, and the whole page follows it. */
+
+.s-cap {
+  --accent: var(--s-blue);
+}
+
+.s-cap-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 96px 0 104px;
+}
+
+/* The grid takes the accent's tint, so a Jova page reads teal throughout. */
+.s-cap-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--accent) 6%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--accent) 6%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 64px 64px;
+  pointer-events: none;
+}
+
+.s-cap-hero::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 50%;
+  height: 80%;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--accent) 8%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.s-cap-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.s-crumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 40px;
+  font-size: 14px;
+  color: var(--s-muted);
+}
+
+.s-crumb a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--s-muted);
+  text-decoration: none;
+}
+
+.s-crumb a:hover {
+  color: var(--s-dim);
+}
+
+.s-crumb-sep {
+  color: var(--s-line);
+}
+
+.s-crumb-here {
+  color: var(--s-dim);
+}
+
+.s-cap-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 32px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--accent);
+}
+
+.s-cap-tagline {
+  margin: 20px 0 16px;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.s-btn-accent {
+  background: var(--accent);
+  color: #fff;
+}
+
+.s-btn-accent:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.s-cap-feature {
+  height: 100%;
+  padding: 24px;
+  border: 1px solid var(--s-line);
+  border-radius: 12px;
+  background: var(--s-card);
+}
+
+.s-cap-feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--accent);
+}
+
+.s-benefits {
+  display: grid;
+  gap: 16px;
+}
+
+.s-benefit {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.s-benefit-mark {
+  display: grid;
+  place-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  flex-shrink: 0;
+}
+
+.s-benefit-mark::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.s-prevnext {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 40px 0;
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.s-prevnext a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #667085;
+  text-decoration: none;
+}
+
+.s-prevnext a:hover {
+  color: #071a33;
+}
+
+/* ---- Capability library grid --------------------------------------------- */
+
+.s-cap-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.s-cap-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 26px;
+  border: 1px solid var(--s-line);
+  border-radius: 12px;
+  background: #f8fafc;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.s-cap-card:hover {
+  border-color: var(--s-blue);
+  background: #fff;
+  transform: translateY(-2px);
+}
+
+.s-cap-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  background: rgba(8, 102, 245, 0.1);
+  color: var(--s-blue);
+}
+
+.s-cap-card h2 {
+  font-family: var(--s-serif);
+  font-size: 17px;
+  font-weight: 400;
+  margin: 0 0 10px;
+}
+
+.s-cap-card p {
+  flex: 1;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--s-dim);
+}
+
+.s-cap-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+  font-size: 14px;
+  color: var(--s-blue);
+}
+
+/* Jova is the assistant that ties the rest together, so it is the one card
+   that inverts. */
+.s-cap-card-dark {
+  background: #0a1e38;
+  border-color: #0a1e38;
+  color: #fff;
+  --s-dim: #94a3b8;
+}
+
+.s-cap-card-dark:hover {
+  background: #0d2647;
+  border-color: var(--s-teal);
+}
+
+.s-cap-card-dark .s-cap-card-icon {
+  background: rgba(20, 184, 166, 0.12);
+  color: var(--s-teal);
+}
+
+.s-cap-card-dark .s-cap-more {
+  color: var(--s-teal);
+}
+
 /* ---- People -------------------------------------------------------------- */
 
 .s-people {
@@ -1872,6 +2160,9 @@
   .s-people {
     grid-template-columns: 1fr;
   }
+  .s-cap-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .s-follow {
     flex-direction: column;
     gap: 20px;
@@ -1889,6 +2180,7 @@
   .s-grid-3,
   .s-grid-4,
   .s-bento,
+  .s-cap-grid,
   .s-stepper,
   .s-exec-split {
     grid-template-columns: 1fr;

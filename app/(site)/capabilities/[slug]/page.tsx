@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { capabilities, capabilityBySlug } from "@/content/site";
 import { Reveal } from "../../Reveal";
 import { iconFor } from "../../icons";
@@ -20,7 +20,7 @@ export async function generateMetadata({
   if (!capability) return { title: "Capability - Jojan One" };
   return {
     title: `${capability.name} - Jojan One`,
-    description: capability.tagline,
+    description: capability.description,
   };
 }
 
@@ -34,56 +34,73 @@ export default async function CapabilityPage({
   if (!capability) notFound();
 
   const Icon = iconFor(capability.icon);
-  const others = capabilities
-    .filter((c) => c.slug !== capability.slug)
-    .slice(0, 3);
+
+  // The library reads as an ordered sequence, so each page offers its
+  // neighbours rather than an arbitrary "related" selection.
+  const index = capabilities.findIndex((c) => c.slug === capability.slug);
+  const prev = index > 0 ? capabilities[index - 1] : null;
+  const next = index < capabilities.length - 1 ? capabilities[index + 1] : null;
+
+  // Each capability declares its own accent; the page follows it throughout.
+  const accent = { "--accent": capability.color } as React.CSSProperties;
 
   return (
-    <>
-      <section className="s-page-hero">
+    <div className="s-cap" style={accent}>
+      <section className="s-cap-hero">
         <div className="s-wrap">
-          <Link href="/capabilities" className="s-back">
-            <ArrowLeft size={14} />
-            All capabilities
-          </Link>
+          <nav className="s-crumb" aria-label="Breadcrumb">
+            <Link href="/capabilities">
+              <ArrowLeft size={14} />
+              Capabilities
+            </Link>
+            <span className="s-crumb-sep">/</span>
+            <span className="s-crumb-here">{capability.name}</span>
+          </nav>
+
           <Reveal className="s-head">
-            <span
-              className="s-icon"
-              style={{
-                background: `${capability.color}1f`,
-                color: capability.color,
-              }}
-            >
-              <Icon size={22} />
+            <span className="s-cap-icon">
+              <Icon size={26} />
             </span>
             <h1 className="s-h1">{capability.name}</h1>
-            <p className="s-lead">{capability.tagline}</p>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="s-section">
-        <div className="s-wrap s-wrap-narrow">
-          <Reveal>
-            <p className="s-body" style={{ fontSize: 18 }}>
+            <p className="s-cap-tagline">{capability.tagline}</p>
+            <p className="s-lead" style={{ marginTop: 0 }}>
               {capability.description}
             </p>
+            <div className="s-actions">
+              <Link href={GET_STARTED_HREF} className="s-btn s-btn-accent">
+                Get Started
+                <ArrowRight size={15} />
+              </Link>
+              <Link href="/capabilities" className="s-btn s-btn-ghost">
+                All Capabilities
+              </Link>
+            </div>
           </Reveal>
         </div>
       </section>
 
-      <section className="s-section s-section-lift">
+      <section className="s-section s-light">
         <div className="s-wrap">
-          <Reveal className="s-head">
-            <p className="s-eyebrow">What it does</p>
-            <h2 className="s-h2">Built around the work, not the checklist.</h2>
+          <Reveal>
+            <h2 className="s-h2">What&rsquo;s included</h2>
           </Reveal>
 
           <div className="s-grid s-grid-2">
             {capability.features.map((feature, i) => (
               <Reveal key={feature.id} delay={(i % 2) * 70}>
-                <div className="s-card" style={{ height: "100%" }}>
-                  <h3 className="s-h4" style={{ marginBottom: 10 }}>
+                <div className="s-cap-feature">
+                  <span className="s-cap-feature-icon">
+                    <Icon size={16} />
+                  </span>
+                  <h3
+                    className="s-h4"
+                    style={{
+                      fontFamily: "var(--s-sans)",
+                      fontSize: 16,
+                      fontWeight: 500,
+                      marginBottom: 8,
+                    }}
+                  >
                     {feature.title}
                   </h3>
                   <p className="s-small">{feature.description}</p>
@@ -95,62 +112,76 @@ export default async function CapabilityPage({
       </section>
 
       <section className="s-section">
-        <div className="s-wrap s-wrap-narrow">
-          <Reveal>
-            <p className="s-eyebrow">What you get</p>
-            <h2 className="s-h2">Why it matters</h2>
-            <ul className="s-list" style={{ marginTop: 32 }}>
-              {capability.benefits.map((benefit) => (
-                <li key={benefit.id} className="s-check">
-                  <Check size={16} />
-                  <span>{benefit.text}</span>
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="s-section s-section-lift">
         <div className="s-wrap">
-          <Reveal className="s-head">
-            <h2 className="s-h3">Explore more</h2>
-          </Reveal>
-          <div className="s-grid s-grid-3" style={{ marginTop: 32 }}>
-            {others.map((other, i) => (
-              <Reveal key={other.id} delay={i * 70}>
-                <Link
-                  href={`/capabilities/${other.slug}`}
-                  className="s-card s-card-link"
-                  style={{ height: "100%" }}
-                >
-                  <h3 className="s-h4" style={{ marginBottom: 10 }}>
-                    {other.name}
-                  </h3>
-                  <p className="s-small">{other.tagline}</p>
-                </Link>
-              </Reveal>
-            ))}
+          <div className="s-hero-grid">
+            <Reveal>
+              <h2 className="s-h2">Why it matters</h2>
+              <p className="s-body" style={{ marginTop: 16 }}>
+                {capability.name} is part of the Jojan One Business Protection
+                Operating System, working alongside every other capability to
+                give you a complete picture of where your business stands.
+              </p>
+            </Reveal>
+
+            <Reveal delay={100}>
+              <div className="s-benefits">
+                {capability.benefits.map((benefit) => (
+                  <div key={benefit.id} className="s-benefit">
+                    <span className="s-benefit-mark" />
+                    <span>{benefit.text}</span>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
-      <section className="s-cta">
-        <div className="s-wrap s-wrap-narrow">
+      <section className="s-section s-light">
+        <div className="s-wrap s-wrap-narrow" style={{ textAlign: "center" }}>
           <Reveal>
-            <h2 className="s-h2">Know where your business stands.</h2>
-            <div className="s-actions">
+            <h2 className="s-h2">Ready to protect your business?</h2>
+            <p className="s-body" style={{ marginTop: 16 }}>
+              {capability.name} is available as part of Jojan One, the complete
+              Business Protection Operating System for SMEs.
+            </p>
+            <div className="s-actions" style={{ justifyContent: "center" }}>
               <Link href={GET_STARTED_HREF} className="s-btn s-btn-primary">
-                Start Your 14-Day Free Trial
-                <ArrowRight size={16} />
+                Get Started
+                <ArrowRight size={15} />
               </Link>
-              <Link href="/how-it-works" className="s-btn s-btn-ghost">
-                See How It Works
+              <Link href="/pricing" className="s-btn s-btn-ghost">
+                View Pricing
               </Link>
             </div>
           </Reveal>
         </div>
       </section>
-    </>
+
+      {prev || next ? (
+        <section className="s-light s-light-plain">
+          <div className="s-wrap">
+            <div className="s-prevnext">
+              {prev ? (
+                <Link href={`/capabilities/${prev.slug}`}>
+                  <ArrowLeft size={14} />
+                  {prev.name}
+                </Link>
+              ) : (
+                <span />
+              )}
+              {next ? (
+                <Link href={`/capabilities/${next.slug}`}>
+                  {next.name}
+                  <ArrowRight size={14} />
+                </Link>
+              ) : (
+                <span />
+              )}
+            </div>
+          </div>
+        </section>
+      ) : null}
+    </div>
   );
 }
