@@ -1667,9 +1667,125 @@
   color: #fff;
 }
 
+/* Page heroes carry the same faint grid as the home hero, so a dark band
+   always reads as a surface rather than an empty rectangle. */
 .s-page-hero {
-  padding: 88px 0 56px;
-  border-bottom: 1px solid var(--s-line);
+  position: relative;
+  overflow: hidden;
+  padding: 96px 0 88px;
+}
+
+.s-page-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at 50% 40%, #000 0%, transparent 78%);
+  pointer-events: none;
+}
+
+.s-page-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---- People -------------------------------------------------------------- */
+
+.s-people {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 36px;
+}
+
+.s-person {
+  height: 100%;
+  padding: 26px;
+  border: 1px solid var(--s-line);
+  border-radius: 12px;
+  background: var(--s-card);
+  box-shadow: 0 2px 16px rgba(10, 22, 40, 0.05);
+}
+
+.s-person-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.s-person-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.s-person-name {
+  font-family: var(--s-serif);
+  font-size: 17px;
+  font-weight: 400;
+  margin: 0 0 4px;
+}
+
+.s-person-role {
+  margin: 0;
+  font-size: 15px;
+  color: var(--s-blue);
+}
+
+.s-person-li {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  border-radius: 8px;
+  background: rgba(8, 102, 245, 0.1);
+  color: var(--s-blue);
+  flex-shrink: 0;
+  align-self: flex-start;
+  transition: background-color 0.18s ease;
+}
+
+.s-person-li:hover {
+  background: rgba(8, 102, 245, 0.2);
+}
+
+.s-person-area {
+  margin: 26px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--s-dim);
+}
+
+/* ---- Pull quote ---------------------------------------------------------- */
+
+.s-quote-rule {
+  display: block;
+  width: 44px;
+  height: 0;
+  margin: 0 auto 40px;
+  border-top: 2px solid var(--s-blue);
+}
+
+.s-quote {
+  margin: 0;
+  font-family: var(--s-serif);
+  font-size: clamp(23px, 3vw, 33px);
+  line-height: 1.35;
+  text-align: center;
+}
+
+.s-quote-by {
+  margin: 28px 0 0;
+  text-align: center;
+  font-size: 15px;
+  color: #4f9bff;
 }
 
 /* Wide content scrolls inside its own box; the page never scrolls sideways. */
@@ -1752,6 +1868,9 @@
   }
   .s-grid-3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .s-people {
+    grid-template-columns: 1fr;
   }
   .s-follow {
     flex-direction: column;

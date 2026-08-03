@@ -15,6 +15,7 @@ import {
   siteHref,
 } from "@/content/site";
 import { Reveal } from "./Reveal";
+import { BadgeStrip } from "./BadgeStrip";
 import { iconFor } from "./icons";
 import { GET_STARTED_HREF } from "./nav";
 
@@ -814,6 +815,8 @@ export default function HomePage() {
           </Reveal>
         </div>
       </section>
+
+      <BadgeStrip />
     </>
   );
 }
