@@ -214,26 +214,33 @@ export async function updatePlan(
     billingInterval: patch.billingInterval ?? current.billingInterval,
   };
 
-  // Republish to Stripe whenever the commercial terms move.
+  // Republish to Stripe whenever the commercial terms move, AND whenever a
+  // priced package still has no Stripe price behind it. Without the second
+  // case a package that failed to sync (Stripe not yet connected, or an
+  // outage) could never recover: re-saving it unchanged would skip the sync
+  // and it would stay unsellable for ever.
   const pricingChanged =
     next.priceMinor !== current.priceMinor ||
     next.currency !== current.currency ||
     next.billingInterval !== current.billingInterval ||
     next.name !== current.name;
-  const sync = pricingChanged
-    ? await syncPlanToStripe(
-        {
-          key,
-          ...next,
-          stripeProductId: current.stripeProductId,
-          stripePriceId: current.stripePriceId,
-        },
-        {
-          previousPriceMinor: current.priceMinor,
-          previousInterval: current.billingInterval,
-        },
-      )
-    : null;
+  const awaitingFirstSync =
+    next.priceMinor !== null && next.priceMinor > 0 && !current.stripePriceId;
+  const sync =
+    pricingChanged || awaitingFirstSync
+      ? await syncPlanToStripe(
+          {
+            key,
+            ...next,
+            stripeProductId: current.stripeProductId,
+            stripePriceId: current.stripePriceId,
+          },
+          {
+            previousPriceMinor: current.priceMinor,
+            previousInterval: current.billingInterval,
+          },
+        )
+      : null;
 
   const set: Record<string, unknown> = { updatedAt: new Date() };
   if (patch.name !== undefined) set.name = next.name;

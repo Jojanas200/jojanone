@@ -10,21 +10,22 @@ from its current Lovable/TanStack prototype to a production, multi-tenant SaaS.
 
 ## Document index
 
-| #        | Document                                                                   | What it covers                                                        |
-| -------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| —        | [Jojan_One_Production_Handover.docx](./Jojan_One_Production_Handover.docx) | The founder's original handover brief (source of truth for intent)    |
-| 00       | [00-Stack-Decision.md](./00-Stack-Decision.md)                             | Recommended stack (Next.js + Supabase) and the trade-offs             |
-| ADR-0001 | [ADR-0001-data-access.md](./ADR-0001-data-access.md)                       | Drizzle data layer + RLS wrapper; Edge Functions + pg_cron scheduling |
-| 01       | [01-PRD.md](./01-PRD.md)                                                   | Product requirements — users, modules, scope, plans, success metrics  |
-| 02       | [02-TRD.md](./02-TRD.md)                                                   | Technical requirements — architecture, security, integrations, NFRs   |
-| 03       | [03-UI-UX-Design.md](./03-UI-UX-Design.md)                                 | Design system, layout, components, accessibility, brand rules         |
-| 04       | [04-App-Flow.md](./04-App-Flow.md)                                         | End-to-end user journeys and navigation flows                         |
-| 05       | [05-Backend-Schema.md](./05-Backend-Schema.md)                             | Postgres schema, RLS/tenant model, storage buckets                    |
-| 06       | [06-Implementation-Plan.md](./06-Implementation-Plan.md)                   | Phased roadmap, milestones, exit criteria, estimates, **live progress** |
+| #        | Document                                                                   | What it covers                                                           |
+| -------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| —        | [Jojan_One_Production_Handover.docx](./Jojan_One_Production_Handover.docx) | The founder's original handover brief (source of truth for intent)       |
+| 00       | [00-Stack-Decision.md](./00-Stack-Decision.md)                             | Recommended stack (Next.js + Supabase) and the trade-offs                |
+| ADR-0001 | [ADR-0001-data-access.md](./ADR-0001-data-access.md)                       | Drizzle data layer + RLS wrapper; Edge Functions + pg_cron scheduling    |
+| 01       | [01-PRD.md](./01-PRD.md)                                                   | Product requirements — users, modules, scope, plans, success metrics     |
+| 02       | [02-TRD.md](./02-TRD.md)                                                   | Technical requirements — architecture, security, integrations, NFRs      |
+| 03       | [03-UI-UX-Design.md](./03-UI-UX-Design.md)                                 | Design system, layout, components, accessibility, brand rules            |
+| 04       | [04-App-Flow.md](./04-App-Flow.md)                                         | End-to-end user journeys and navigation flows                            |
+| 05       | [05-Backend-Schema.md](./05-Backend-Schema.md)                             | Postgres schema, RLS/tenant model, storage buckets                       |
+| 06       | [06-Implementation-Plan.md](./06-Implementation-Plan.md)                   | Phased roadmap, milestones, exit criteria, estimates, **live progress**  |
 | 07       | [07-Security-Threat-Model.md](./07-Security-Threat-Model.md)               | Threat model, trust boundaries, controls, launch-blocking security items |
-| 08       | [08-Privacy-and-DPIA.md](./08-Privacy-and-DPIA.md)                         | Privacy analysis + DPIA screening (UK GDPR)                           |
-| 09       | [09-Runbooks-and-Go-Live.md](./09-Runbooks-and-Go-Live.md)                 | Operational runbooks and the go-live checklist                        |
-| 10       | [10-Go-Live-Signoff-Register.md](./10-Go-Live-Signoff-Register.md)         | Go-live sign-off register                                             |
+| 08       | [08-Privacy-and-DPIA.md](./08-Privacy-and-DPIA.md)                         | Privacy analysis + DPIA screening (UK GDPR)                              |
+| 09       | [09-Runbooks-and-Go-Live.md](./09-Runbooks-and-Go-Live.md)                 | Operational runbooks and the go-live checklist                           |
+| 10       | [10-Go-Live-Signoff-Register.md](./10-Go-Live-Signoff-Register.md)         | Go-live sign-off register                                                |
+| 11       | [11-Stripe-Setup.md](./11-Stripe-Setup.md)                                 | Connecting Stripe: env vars, event destination, package sync, testing    |
 
 ## Production build status
 

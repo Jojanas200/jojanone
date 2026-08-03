@@ -121,6 +121,20 @@ async function main() {
       stripeless ? blocked.ok === false : blocked.ok === true,
     );
 
+    // --- An unsynced priced package must be able to recover -----------------
+    // Re-saving a package whose commercial terms have not changed must still
+    // attempt the Stripe sync when it has no price yet, otherwise a package
+    // that missed its first sync could never become sellable.
+    const resave = await updatePlan(actor, KEY, { seatLimit: 3 });
+    check(
+      "re-saving an unsynced priced package retries the Stripe sync",
+      resave.ok === true &&
+        typeof (resave as { warning?: string | null }).warning === "string" &&
+        ((resave as { warning?: string | null }).warning ?? "").includes(
+          "Stripe is not connected",
+        ),
+    );
+
     // --- A free, time-bound trial package publishes cleanly -----------------
     const free = await createPlan(actor, {
       key: FREE_KEY,
