@@ -1,0 +1,53 @@
+{
+  "hero": {
+    "eyebrow": "Trust Centre – Cookies",
+    "title": "Cookie Policy",
+    "subtitle": "Last updated: July 2026"
+  },
+  "intro": "This Cookie Policy explains how Jojan One uses cookies and similar technologies on our platform. We use cookies to make the platform work, to understand how it is used, and to improve your experience.",
+  "sections": [
+    {
+      "id": "ck1",
+      "title": "What are cookies?",
+      "body": [
+        {
+          "id": "b1",
+          "text": "Cookies are small text files placed on your device when you visit a website or use a web application. They allow the site to remember your preferences and actions over time."
+        }
+      ]
+    },
+    {
+      "id": "ck2",
+      "title": "Cookies we use",
+      "body": [
+        {
+          "id": "ck2a",
+          "text": "Essential cookies: required for the platform to work. These are the session cookies that keep you signed in and the security cookies that protect against cross-site request forgery. They cannot be disabled while you are using the platform."
+        },
+        {
+          "id": "ck2b",
+          "text": "Functional cookies: one cookie remembers the interface theme you chose, so the platform looks the same the next time you sign in."
+        },
+        {
+          "id": "ck2c",
+          "text": "We do not use analytics cookies, advertising cookies or third-party trackers. No cookie set by Jojan One is used to profile you or shared with an advertising network."
+        }
+      ]
+    },
+    {
+      "id": "ck3",
+      "title": "Managing cookies",
+      "body": [
+        {
+          "id": "ck3a",
+          "text": "Because we set only essential and functional cookies, the platform does not show a consent banner. If that changes we will ask for your consent before setting anything beyond the cookies described above."
+        },
+        {
+          "id": "ck3b",
+          "text": "You can clear or block cookies through your browser settings at any time. Blocking essential cookies will prevent you from staying signed in."
+        }
+      ]
+    }
+  ],
+  "lastUpdated": "August 2026"
+}

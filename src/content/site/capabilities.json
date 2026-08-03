@@ -1,0 +1,705 @@
+[
+  {
+    "id": "business-confidence-score",
+    "slug": "business-confidence-score",
+    "name": "Business Confidence Score",
+    "tagline": "A single number that tells you how protected your business really is.",
+    "description": "The Business Confidence Score is Jojan One's proprietary measure of your business's overall protection health. It aggregates data across seven pillars: compliance, risk, governance, people, data, contracts and finance, and translates them into a single, actionable score from 0 to 100. Know where you stand. Know what to fix.",
+    "icon": "Gauge",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Seven-pillar assessment",
+        "description": "Your score is built from seven distinct business protection pillars: compliance, risk, governance, people, data, contracts and finance. Each pillar is assessed independently and contributes to your overall score."
+      },
+      {
+        "id": "f2",
+        "title": "Real-time scoring",
+        "description": "Your score updates automatically as you complete actions, generate documents, resolve risks and meet compliance obligations – so it always reflects your current protection status."
+      },
+      {
+        "id": "f3",
+        "title": "Pillar-level breakdown",
+        "description": "Drill into any of the seven pillars to see exactly which factors are driving your score up or holding it back, with clear guidance on what to prioritise."
+      },
+      {
+        "id": "f4",
+        "title": "Score history and trends",
+        "description": "Track how your Business Confidence Score has changed over time. See the impact of the actions you've taken and demonstrate continuous improvement to stakeholders."
+      },
+      {
+        "id": "f5",
+        "title": "Benchmarking",
+        "description": "Understand how your score compares to businesses of a similar size and sector, so you can set realistic targets and identify where you're ahead or behind."
+      },
+      {
+        "id": "f6",
+        "title": "Recommended actions",
+        "description": "Jova surfaces the highest-impact actions you can take right now to improve your score, ranked by effort and potential uplift so you always know where to focus."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Instant clarity on your business's overall protection health"
+      },
+      {
+        "id": "b2",
+        "text": "Prioritise the actions that move the needle most"
+      },
+      {
+        "id": "b3",
+        "text": "Demonstrate business readiness to investors, lenders and partners"
+      },
+      {
+        "id": "b4",
+        "text": "Track improvement over time with a clear, auditable record"
+      }
+    ]
+  },
+  {
+    "id": "document-generation",
+    "slug": "document-generation",
+    "name": "Document Generation",
+    "tagline": "Legally sound documents, generated in minutes.",
+    "description": "Jojan One's Document Generation module creates compliant, customised business documents on demand. From employment contracts and GDPR policies to shareholder agreements and health and safety procedures, every document is built to reflect your business, your sector and current UK law.",
+    "icon": "FileCheck",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Smart document builder",
+        "description": "Answer a short set of questions about your business and Jojan One generates a fully tailored document – no legal jargon, no blank templates to fill in yourself."
+      },
+      {
+        "id": "f2",
+        "title": "100+ document types",
+        "description": "Employment contracts, privacy policies, data processing agreements, board minutes, shareholder agreements, health and safety policies, supplier contracts and more – all in one place."
+      },
+      {
+        "id": "f3",
+        "title": "Always up to date",
+        "description": "Documents are kept current with UK legislation. When the law changes, Jojan One flags which of your documents need reviewing and helps you update them."
+      },
+      {
+        "id": "f4",
+        "title": "Version control and audit trail",
+        "description": "Every document is versioned and timestamped. See who created it, when it was last updated, and maintain a complete history for audit and due diligence purposes."
+      },
+      {
+        "id": "f5",
+        "title": "Jova-assisted drafting",
+        "description": "Ask Jova to explain any clause, suggest amendments, or generate a first draft from a plain-English description of what you need."
+      },
+      {
+        "id": "f6",
+        "title": "Secure storage and sharing",
+        "description": "All documents are stored securely within your Jojan One workspace. Share with team members, advisers or counterparties with controlled access permissions."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Eliminate the cost and delay of instructing a solicitor for routine documents"
+      },
+      {
+        "id": "b2",
+        "text": "Ensure every document reflects current UK law"
+      },
+      {
+        "id": "b3",
+        "text": "Build a complete, auditable document library for due diligence"
+      },
+      {
+        "id": "b4",
+        "text": "Protect your business with the right paperwork in place from day one"
+      }
+    ]
+  },
+  {
+    "id": "compliance-monitor",
+    "slug": "compliance-monitor",
+    "name": "Compliance Monitor",
+    "tagline": "Stay ahead of your obligations, automatically.",
+    "description": "Jojan One continuously monitors your regulatory obligations, tracks changes in legislation and flags what your business needs to act on. No more missed deadlines or surprise compliance gaps.",
+    "icon": "Shield",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Obligation tracking",
+        "description": "Automatically identifies and tracks the compliance obligations relevant to your business sector and structure."
+      },
+      {
+        "id": "f2",
+        "title": "Legislative change alerts",
+        "description": "Jova monitors regulatory updates and alerts you when changes affect your obligations."
+      },
+      {
+        "id": "f3",
+        "title": "Compliance calendar",
+        "description": "A clear view of upcoming deadlines, review dates and renewal requirements."
+      },
+      {
+        "id": "f4",
+        "title": "Evidence logging",
+        "description": "Every compliance action is logged with timestamps and documentation for audit purposes."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Never miss a compliance deadline"
+      },
+      {
+        "id": "b2",
+        "text": "Reduce the cost of compliance management"
+      },
+      {
+        "id": "b3",
+        "text": "Build an auditable compliance record"
+      }
+    ]
+  },
+  {
+    "id": "risk-management",
+    "slug": "risk-management",
+    "name": "Risk Management",
+    "tagline": "Identify, assess and manage business risks in one place.",
+    "description": "Jojan One gives you a structured approach to business risk, from identification and assessment through to mitigation and monitoring. Understand your risk exposure and take action before problems escalate.",
+    "icon": "AlertTriangle",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Risk register",
+        "description": "A centralised register of all identified business risks, with severity ratings and ownership."
+      },
+      {
+        "id": "f2",
+        "title": "Risk assessment tools",
+        "description": "Structured templates for assessing likelihood, impact and mitigation options."
+      },
+      {
+        "id": "f3",
+        "title": "Mitigation tracking",
+        "description": "Track the status of risk mitigation actions and monitor progress over time."
+      },
+      {
+        "id": "f4",
+        "title": "Risk reporting",
+        "description": "Generate risk reports for leadership, investors or regulatory purposes."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Proactive risk identification before problems arise"
+      },
+      {
+        "id": "b2",
+        "text": "Clear ownership and accountability for risk actions"
+      },
+      {
+        "id": "b3",
+        "text": "Investor-ready risk documentation"
+      }
+    ]
+  },
+  {
+    "id": "contracts",
+    "slug": "contracts",
+    "name": "Contracts",
+    "tagline": "Manage, track and review all your business agreements.",
+    "description": "Keep every contract organised, monitored and up to date. Jojan One tracks expiry dates, renewal windows and key obligations, so nothing slips through the gaps.",
+    "icon": "FileText",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Contract repository",
+        "description": "A secure, searchable store for all your business contracts and agreements."
+      },
+      {
+        "id": "f2",
+        "title": "Expiry and renewal alerts",
+        "description": "Automated alerts when contracts approach expiry or renewal windows."
+      },
+      {
+        "id": "f3",
+        "title": "Obligation extraction",
+        "description": "Jova identifies key obligations, payment terms and conditions within contracts."
+      },
+      {
+        "id": "f4",
+        "title": "Contract generation",
+        "description": "Generate jurisdiction-aware contract templates tailored to your business."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "No more missed contract renewals or expiry dates"
+      },
+      {
+        "id": "b2",
+        "text": "Clear visibility of all contractual obligations"
+      },
+      {
+        "id": "b3",
+        "text": "Reduce legal risk from outdated agreements"
+      }
+    ]
+  },
+  {
+    "id": "policies-documents",
+    "slug": "policies-documents",
+    "name": "Policies & Documents",
+    "tagline": "Create, store and maintain business-critical documents.",
+    "description": "From employee handbooks to data protection policies, Jojan One helps you create, manage and keep current all the documents your business needs to operate compliantly.",
+    "icon": "FileCheck",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Document library",
+        "description": "A structured library for all business policies, procedures and documents."
+      },
+      {
+        "id": "f2",
+        "title": "AI document generation",
+        "description": "Generate professional, jurisdiction-aware documents using Jova and your business information."
+      },
+      {
+        "id": "f3",
+        "title": "Review and version control",
+        "description": "Track document versions, review dates and approval history."
+      },
+      {
+        "id": "f4",
+        "title": "Export and distribution",
+        "description": "Export documents as PDF or DOCX for distribution, signing or filing."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Always have current, compliant business documents"
+      },
+      {
+        "id": "b2",
+        "text": "Reduce time spent creating and updating policies"
+      },
+      {
+        "id": "b3",
+        "text": "Maintain a clear document audit trail"
+      }
+    ]
+  },
+  {
+    "id": "people-hr",
+    "slug": "people-hr",
+    "name": "People & HR",
+    "tagline": "Employment compliance, contracts and people management.",
+    "description": "Manage your employment obligations with confidence. Jojan One covers employment contracts, HR policies, onboarding documentation and ongoing people compliance, keeping your business protected as it grows.",
+    "icon": "Users",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Employment contract management",
+        "description": "Create, store and track employment contracts for all team members."
+      },
+      {
+        "id": "f2",
+        "title": "HR policy library",
+        "description": "Maintain a complete set of HR policies aligned to current employment law."
+      },
+      {
+        "id": "f3",
+        "title": "Onboarding documentation",
+        "description": "Generate and manage the documentation required for new employee onboarding."
+      },
+      {
+        "id": "f4",
+        "title": "Employment compliance monitoring",
+        "description": "Track employment law obligations and receive alerts when action is required."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Reduce employment law risk as your team grows"
+      },
+      {
+        "id": "b2",
+        "text": "Consistent, compliant onboarding for every new hire"
+      },
+      {
+        "id": "b3",
+        "text": "Clear documentation if employment disputes arise"
+      }
+    ]
+  },
+  {
+    "id": "gdpr-data-protection",
+    "slug": "gdpr-data-protection",
+    "name": "GDPR & Data Protection",
+    "tagline": "Full data protection compliance and obligation management.",
+    "description": "Jojan One provides a structured approach to GDPR and data protection compliance, from data mapping and privacy notices to subject access requests and breach management.",
+    "icon": "Lock",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Data mapping",
+        "description": "Document what personal data you hold, where it comes from and how it is used."
+      },
+      {
+        "id": "f2",
+        "title": "Privacy notice management",
+        "description": "Create and maintain privacy notices and cookie policies for your business."
+      },
+      {
+        "id": "f3",
+        "title": "Subject access request tracking",
+        "description": "Manage and respond to data subject access requests within required timeframes."
+      },
+      {
+        "id": "f4",
+        "title": "Breach management",
+        "description": "Document and manage data breaches with the evidence required for regulatory reporting."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Demonstrate GDPR compliance with clear evidence"
+      },
+      {
+        "id": "b2",
+        "text": "Reduce the risk of regulatory fines and enforcement"
+      },
+      {
+        "id": "b3",
+        "text": "Build customer trust through transparent data practices"
+      }
+    ]
+  },
+  {
+    "id": "governance",
+    "slug": "governance",
+    "name": "Governance",
+    "tagline": "Board governance, decisions and accountability records.",
+    "description": "Maintain clear governance records for your business, from board decisions and meeting minutes to director responsibilities and accountability documentation.",
+    "icon": "BarChart3",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Board and meeting records",
+        "description": "Document board meetings, decisions and resolutions with a clear audit trail."
+      },
+      {
+        "id": "f2",
+        "title": "Director responsibilities",
+        "description": "Track director duties, obligations and accountability across the business."
+      },
+      {
+        "id": "f3",
+        "title": "Governance documentation",
+        "description": "Generate and maintain governance documents including articles, resolutions and policies."
+      },
+      {
+        "id": "f4",
+        "title": "Accountability framework",
+        "description": "Establish clear ownership and accountability for governance obligations."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Investor-ready governance documentation"
+      },
+      {
+        "id": "b2",
+        "text": "Clear accountability for director obligations"
+      },
+      {
+        "id": "b3",
+        "text": "Reduce governance risk as the business scales"
+      }
+    ]
+  },
+  {
+    "id": "executive-intelligence",
+    "slug": "executive-intelligence",
+    "name": "Executive Intelligence",
+    "tagline": "Real-time executive insight across your entire business.",
+    "description": "The Executive Intelligence dashboard gives leadership a single, real-time view of business protection status across risks, compliance, actions and evidence, so you can make informed decisions with confidence.",
+    "icon": "TrendingUp",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Business Confidence dashboard",
+        "description": "A real-time view of your Business Confidence score and the factors driving it."
+      },
+      {
+        "id": "f2",
+        "title": "Critical risk summary",
+        "description": "Immediate visibility of the highest-priority risks requiring leadership attention."
+      },
+      {
+        "id": "f3",
+        "title": "Compliance status overview",
+        "description": "A clear picture of compliance status across all business areas."
+      },
+      {
+        "id": "f4",
+        "title": "Recommended actions",
+        "description": "Prioritised actions for leadership, with context and evidence links."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Make informed decisions with real-time business intelligence"
+      },
+      {
+        "id": "b2",
+        "text": "Demonstrate business readiness to investors and boards"
+      },
+      {
+        "id": "b3",
+        "text": "Identify problems before they become crises"
+      }
+    ]
+  },
+  {
+    "id": "business-timeline",
+    "slug": "business-timeline",
+    "name": "Business Timeline",
+    "tagline": "A chronological record of every business protection event.",
+    "description": "The Business Timeline gives you a complete, searchable history of every action, decision, document and compliance event, creating an unbroken audit trail for your business.",
+    "icon": "Clock",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Complete event history",
+        "description": "Every action, document and compliance event recorded chronologically."
+      },
+      {
+        "id": "f2",
+        "title": "Searchable and filterable",
+        "description": "Find any event, document or action quickly with powerful search and filters."
+      },
+      {
+        "id": "f3",
+        "title": "Evidence linking",
+        "description": "Each timeline entry links to the relevant documents and evidence."
+      },
+      {
+        "id": "f4",
+        "title": "Export for audit",
+        "description": "Export timeline sections for due diligence, audit or regulatory purposes."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "An unbroken audit trail for your entire business"
+      },
+      {
+        "id": "b2",
+        "text": "Demonstrate due diligence with confidence"
+      },
+      {
+        "id": "b3",
+        "text": "Reduce time spent preparing for audits and due diligence"
+      }
+    ]
+  },
+  {
+    "id": "reports-evidence",
+    "slug": "reports-evidence",
+    "name": "Reports & Evidence",
+    "tagline": "Generate audit-ready reports and evidence packs on demand.",
+    "description": "Jojan One maintains the evidence of everything your business has done and lets you generate professional reports and evidence packs for investors, auditors, regulators or procurement teams.",
+    "icon": "FileCheck",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Evidence packs",
+        "description": "Generate comprehensive evidence packs demonstrating business protection readiness."
+      },
+      {
+        "id": "f2",
+        "title": "Compliance reports",
+        "description": "Produce detailed compliance reports across any business area or time period."
+      },
+      {
+        "id": "f3",
+        "title": "Investor readiness reports",
+        "description": "Generate reports tailored to investor due diligence and tender requirements."
+      },
+      {
+        "id": "f4",
+        "title": "Custom report builder",
+        "description": "Build custom reports selecting the areas, time periods and evidence you need."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Reduce due diligence preparation time from weeks to hours"
+      },
+      {
+        "id": "b2",
+        "text": "Demonstrate business readiness with professional evidence"
+      },
+      {
+        "id": "b3",
+        "text": "Always have current reports ready when needed"
+      }
+    ]
+  },
+  {
+    "id": "business-map",
+    "slug": "business-map",
+    "name": "Business Map",
+    "tagline": "Visualise your business structure, obligations and relationships.",
+    "description": "The Business Map gives you a visual overview of your business, its structure, key relationships, obligations and protection status, so you can see the full picture at a glance.",
+    "icon": "Map",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Business structure visualisation",
+        "description": "A clear visual map of your business structure, entities and relationships."
+      },
+      {
+        "id": "f2",
+        "title": "Obligation mapping",
+        "description": "See where obligations sit across your business and who owns them."
+      },
+      {
+        "id": "f3",
+        "title": "Relationship tracking",
+        "description": "Track key supplier, customer and partner relationships and their associated obligations."
+      },
+      {
+        "id": "f4",
+        "title": "Protection status overlay",
+        "description": "Overlay protection status on your business map to identify gaps at a glance."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Understand your business obligations at a glance"
+      },
+      {
+        "id": "b2",
+        "text": "Identify protection gaps before they become problems"
+      },
+      {
+        "id": "b3",
+        "text": "Communicate business structure clearly to investors and advisors"
+      }
+    ]
+  },
+  {
+    "id": "academy",
+    "slug": "academy",
+    "name": "Academy",
+    "tagline": "Guided learning to build business protection knowledge.",
+    "description": "The Jojan One Academy helps business owners and their teams understand the obligations, risks and best practices that matter to their business, through practical, actionable learning.",
+    "icon": "BookOpen",
+    "color": "#0866F5",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Guided learning paths",
+        "description": "Structured learning paths covering compliance, risk, governance and data protection."
+      },
+      {
+        "id": "f2",
+        "title": "Business-specific content",
+        "description": "Content tailored to your business sector, size and jurisdiction."
+      },
+      {
+        "id": "f3",
+        "title": "Practical guides",
+        "description": "Step-by-step guides for completing key business protection tasks."
+      },
+      {
+        "id": "f4",
+        "title": "Progress tracking",
+        "description": "Track learning progress across your team and identify knowledge gaps."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Build business protection knowledge across your team"
+      },
+      {
+        "id": "b2",
+        "text": "Reduce reliance on expensive external advisors"
+      },
+      {
+        "id": "b3",
+        "text": "Make informed decisions with confidence"
+      }
+    ]
+  },
+  {
+    "id": "jova",
+    "slug": "jova",
+    "name": "Jova",
+    "tagline": "Your intelligent business protection assistant.",
+    "description": "Jova is the intelligence layer that runs through everything in Jojan One. She monitors your business, identifies what needs attention, guides you through actions and maintains the evidence – so you always know where you stand.",
+    "icon": "Brain",
+    "color": "#14B8A6",
+    "features": [
+      {
+        "id": "f1",
+        "title": "Continuous monitoring",
+        "description": "Jova monitors your business across every area – compliance, risk, contracts, people and more – around the clock."
+      },
+      {
+        "id": "f2",
+        "title": "Intelligent prioritisation",
+        "description": "Jova analyses what matters most and presents prioritised actions with clear context."
+      },
+      {
+        "id": "f3",
+        "title": "Guided action",
+        "description": "For every alert, Jova explains what happened, why it matters and exactly what to do."
+      },
+      {
+        "id": "f4",
+        "title": "Document generation",
+        "description": "Ask Jova to generate any business document – she uses your Business Memory to create accurate, tailored output."
+      }
+    ],
+    "benefits": [
+      {
+        "id": "b1",
+        "text": "Always know what needs attention and why"
+      },
+      {
+        "id": "b2",
+        "text": "Act with confidence – Jova provides the context you need"
+      },
+      {
+        "id": "b3",
+        "text": "Save hours every week on business protection tasks"
+      }
+    ]
+  }
+]

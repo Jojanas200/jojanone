@@ -1,0 +1,58 @@
+{
+  "hero": {
+    "eyebrow": "About Jojan One",
+    "title": "Business protection shouldn't require ten different systems.",
+    "subtitle": "Jojan One is an intelligent business protection platform designed to bring the essential layers of running a protected, compliant and business-ready organisation together in one place."
+  },
+  "mission": {
+    "eyebrow": "Our mission",
+    "title": "To give businesses the intelligence, tools and confidence to understand their obligations, manage their risks and demonstrate their readiness.",
+    "body": [
+      {
+        "id": "m1",
+        "text": "From compliance and risk to contracts, people, governance and data protection, Jojan One helps businesses understand their obligations, identify what needs attention, take action and maintain the evidence to demonstrate readiness."
+      },
+      {
+        "id": "m2",
+        "text": "At the centre of the platform is Jova, Jojan One's intelligent business protection assistant, designed to use business context, regulatory intelligence and trusted sources to help organisations understand what matters and what to consider doing next."
+      }
+    ]
+  },
+  "vision": {
+    "eyebrow": "Our vision",
+    "title": "A world where business protection is continuous, intelligent and built into the way organisations operate.",
+    "body": "Rather than something businesses think about only when something goes wrong, our vision is to make business protection understandable, actionable and accessible as organisations grow."
+  },
+  "values": {
+    "eyebrow": "What we believe",
+    "title": "Our values",
+    "items": [
+      {
+        "id": "v1",
+        "name": "Clarity over complexity",
+        "description": "Business protection should be understandable. We translate legal and compliance obligations into plain language that any business owner can act on."
+      },
+      {
+        "id": "v2",
+        "name": "Evidence over assumption",
+        "description": "Saying you're compliant isn't enough. We help businesses build the evidence that proves it – to investors, regulators and customers alike."
+      },
+      {
+        "id": "v3",
+        "name": "Action over anxiety",
+        "description": "Knowing what's wrong is only useful if you can fix it. Every issue Jojan One surfaces comes with a clear, guided path to resolution."
+      },
+      {
+        "id": "v4",
+        "name": "Built for the long term",
+        "description": "Business protection isn't a one-time exercise. We build tools that grow with your business and adapt as your obligations change."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Ready to protect your business?",
+    "subtitle": "Start your 14-day free trial. No credit card required.",
+    "primaryCta": "Start Your 14-Day Free Trial",
+    "secondaryCta": "Talk to us"
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "hero": {
+    "eyebrow": "Trust Centre – Legal",
+    "title": "Terms of Service",
+    "subtitle": "Last updated: July 2026"
+  },
+  "intro": "These Terms of Service ('Terms') govern your access to and use of the Jojan One platform and services. By creating an account or using our services, you agree to be bound by these Terms.",
+  "sections": [
+    {
+      "id": "t1",
+      "title": "1. The service",
+      "body": [
+        {
+          "id": "b1",
+          "text": "Jojan One provides a business protection platform that helps businesses manage compliance, risk, contracts, policies and governance. The platform includes AI-powered features delivered through our Jova assistant."
+        },
+        {
+          "id": "b2",
+          "text": "The platform is provided as a software-as-a-service (SaaS) product. We reserve the right to update, modify or discontinue features with reasonable notice."
+        }
+      ]
+    },
+    {
+      "id": "t2",
+      "title": "2. Accounts and access",
+      "body": [
+        {
+          "id": "b3",
+          "text": "You must be at least 18 years old and have authority to enter into contracts on behalf of your organisation to create an account."
+        },
+        {
+          "id": "b4",
+          "text": "You are responsible for maintaining the security of your account credentials and for all activity that occurs under your account."
+        },
+        {
+          "id": "b5",
+          "text": "You must notify us immediately at support@jojanone.com if you suspect unauthorised access to your account."
+        }
+      ]
+    },
+    {
+      "id": "t3",
+      "title": "3. Acceptable use",
+      "body": [
+        {
+          "id": "b6",
+          "text": "You may use the platform only for lawful business purposes. You must not use the platform to store, process or transmit unlawful content or to violate the rights of any third party."
+        },
+        {
+          "id": "b7",
+          "text": "You must not attempt to reverse engineer, copy, or create derivative works from the platform or its underlying technology."
+        },
+        {
+          "id": "b8",
+          "text": "You must not use the platform in a way that could damage, disable or impair our systems or interfere with other users."
+        }
+      ]
+    },
+    {
+      "id": "t4",
+      "title": "4. AI-generated content",
+      "body": [
+        {
+          "id": "b9",
+          "text": "The platform includes AI-powered features that generate guidance, documents and recommendations. This content is provided for informational purposes only and does not constitute legal advice."
+        },
+        {
+          "id": "b10",
+          "text": "You are responsible for reviewing all AI-generated content before relying on it. Jojan One does not accept liability for decisions made solely on the basis of AI-generated output."
+        }
+      ]
+    },
+    {
+      "id": "t5",
+      "title": "5. Payment and cancellation",
+      "body": [
+        {
+          "id": "b11",
+          "text": "Subscription fees are charged monthly or annually in advance. All fees are exclusive of VAT, which will be added at the applicable rate."
+        },
+        {
+          "id": "b12",
+          "text": "You may cancel your subscription at any time. Cancellation takes effect at the end of the current billing period. We do not provide refunds for unused portions of a billing period."
+        }
+      ]
+    },
+    {
+      "id": "t6",
+      "title": "6. Limitation of liability",
+      "body": [
+        {
+          "id": "b13",
+          "text": "To the maximum extent permitted by law, Jojan One's total liability to you for any claim arising from these Terms or your use of the platform shall not exceed the fees paid by you in the 12 months preceding the claim."
+        },
+        {
+          "id": "b14",
+          "text": "We shall not be liable for any indirect, incidental, special or consequential loss, including loss of profits, data or business opportunity."
+        }
+      ]
+    },
+    {
+      "id": "t7",
+      "title": "7. Governing law",
+      "body": [
+        {
+          "id": "b15",
+          "text": "These Terms are governed by the laws of England and Wales. Any disputes shall be subject to the exclusive jurisdiction of the courts of England and Wales."
+        }
+      ]
+    }
+  ],
+  "lastUpdated": "August 2026"
+}

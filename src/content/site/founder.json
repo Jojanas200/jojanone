@@ -1,0 +1,62 @@
+{
+  "hero": {
+    "eyebrow": "Founder",
+    "name": "Anastasia Ayivor",
+    "role": "Founder & CEO, Jojan One",
+    "tagline": "Businesses shouldn't have to wait until something goes wrong to discover what they should have been doing all along.",
+    "bio": "Anastasia Ayivor is the Founder and CEO of Jojan One, an AI-powered LegalTech and RegTech platform built to help businesses understand their obligations, manage risk and demonstrate readiness."
+  },
+  "story": {
+    "heading": "Why I built Jojan One",
+    "paragraphs": [
+      {
+        "id": "p1",
+        "text": "With an academic background in law, including an LLB and an LLM in Commercial Law, and professional experience across regulatory reporting, compliance and business advisory, I have worked closely with organisations navigating practical challenges involving regulation, governance, contracts, risk and business operations."
+      },
+      {
+        "id": "p2",
+        "text": "Through this experience, I identified a recurring challenge: small and growing businesses are increasingly expected to manage sophisticated legal, regulatory and governance responsibilities without necessarily having dedicated legal, compliance or risk teams."
+      },
+      {
+        "id": "p3",
+        "text": "Jojan One was created to help close that gap by bringing compliance, risk, contracts, people, governance, data protection, business intelligence and evidence into one intelligent platform."
+      },
+      {
+        "id": "p4",
+        "text": "My vision is to develop Jojan One into internationally scalable business protection infrastructure that makes sophisticated compliance and risk intelligence more accessible to growing organisations."
+      }
+    ]
+  },
+  "beliefs": {
+    "heading": "What I believe",
+    "items": [
+      {
+        "id": "b1",
+        "heading": "Compliance should be a business asset",
+        "body": "Done well, compliance isn't a burden – it's proof that your business is well-run. We help you turn that proof into a competitive advantage."
+      },
+      {
+        "id": "b2",
+        "heading": "Clarity beats complexity",
+        "body": "Most compliance tools make things more complicated. We obsess over making things simpler – without sacrificing accuracy or depth."
+      },
+      {
+        "id": "b3",
+        "heading": "Accessible to every organisation",
+        "body": "The businesses that need compliance support the most are often the ones with the least access to it. That's the gap Jojan One was built to close."
+      }
+    ]
+  },
+  "connect": {
+    "heading": "Get in touch",
+    "body": "I'm always happy to hear from founders, operators, and anyone thinking seriously about how business protection can work better for their organisation.",
+    "linkedinLabel": "Connect on LinkedIn",
+    "emailLabel": "Send a message"
+  },
+  "cta": {
+    "heading": "See what Jojan One can do for your business",
+    "subheading": "Start your 14-day free trial. No credit card required.",
+    "primaryLabel": "Get started free",
+    "secondaryLabel": "Meet the team"
+  }
+}

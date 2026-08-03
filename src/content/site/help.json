@@ -1,0 +1,131 @@
+{
+  "hero": {
+    "eyebrow": "Help Centre",
+    "heading": "How can we help?",
+    "subheading": "Find answers, guides, and support for everything on the Jojan One platform."
+  },
+  "search": {
+    "placeholder": "Search for answers..."
+  },
+  "categories": [
+    {
+      "id": "cat1",
+      "icon": "rocket",
+      "title": "Getting started",
+      "description": "Set up your account, connect your business profile, and take your first steps on the platform.",
+      "cta": "Get set up",
+      "href": "/contact?topic=Getting+started"
+    },
+    {
+      "id": "cat2",
+      "icon": "gauge",
+      "title": "Business Confidence Score",
+      "description": "Understand how your score is calculated, what affects it, and how to improve it over time.",
+      "cta": "Learn more",
+      "href": "/capabilities/business-confidence-score"
+    },
+    {
+      "id": "cat3",
+      "icon": "bot",
+      "title": "Jova – your AI assistant",
+      "description": "Learn how to use Jova to generate tasks, ask compliance questions, and navigate your obligations.",
+      "cta": "Explore Jova",
+      "href": "/capabilities/jova"
+    },
+    {
+      "id": "cat4",
+      "icon": "file",
+      "title": "Document generation",
+      "description": "Create compliant policies, contracts, and agreements – and understand how to customise them.",
+      "cta": "See how it works",
+      "href": "/capabilities/document-generation"
+    },
+    {
+      "id": "cat5",
+      "icon": "shield",
+      "title": "Compliance modules",
+      "description": "Deep-dives into each of the 13 platform modules – from GDPR to employment law and governance.",
+      "cta": "Browse modules",
+      "href": "/capabilities"
+    },
+    {
+      "id": "cat6",
+      "icon": "users",
+      "title": "Team & permissions",
+      "description": "Add team members, assign roles, manage access levels, and track who has completed what.",
+      "cta": "View plans",
+      "href": "/pricing"
+    },
+    {
+      "id": "cat7",
+      "icon": "credit-card",
+      "title": "Billing & plans",
+      "description": "Manage your subscription, upgrade or downgrade your plan, and understand your invoice.",
+      "cta": "View billing",
+      "href": "/pricing"
+    },
+    {
+      "id": "cat8",
+      "icon": "lock",
+      "title": "Security & privacy",
+      "description": "How Jojan One protects your data, our certifications, and your rights as a data subject.",
+      "cta": "Read more",
+      "href": "/trust/security"
+    }
+  ],
+  "popular": {
+    "heading": "Popular articles",
+    "items": [
+      {
+        "id": "a1",
+        "title": "How to set up your business profile",
+        "category": "Getting started",
+        "readTime": "3 min read",
+        "href": "/get-started"
+      },
+      {
+        "id": "a2",
+        "title": "What is the Business Confidence Score?",
+        "category": "Business Confidence Score",
+        "readTime": "4 min read",
+        "href": "/capabilities/business-confidence-score"
+      },
+      {
+        "id": "a3",
+        "title": "How to generate a GDPR-compliant privacy policy",
+        "category": "Document generation",
+        "readTime": "5 min read",
+        "href": "/capabilities/document-generation"
+      },
+      {
+        "id": "a4",
+        "title": "Asking Jova a compliance question",
+        "category": "Jova",
+        "readTime": "2 min read",
+        "href": "/capabilities/jova"
+      },
+      {
+        "id": "a5",
+        "title": "Adding a team member and setting their permissions",
+        "category": "Team & permissions",
+        "readTime": "3 min read",
+        "href": "/get-started"
+      },
+      {
+        "id": "a6",
+        "title": "Understanding your evidence vault",
+        "category": "Compliance modules",
+        "readTime": "4 min read",
+        "href": "/capabilities/compliance-monitor"
+      }
+    ]
+  },
+  "contact": {
+    "heading": "Still need help?",
+    "subheading": "Our support team is here Monday to Friday, 9am – 6pm GMT.",
+    "emailLabel": "Email support",
+    "emailHref": "mailto:support@jojanone.com",
+    "chatLabel": "Start a chat",
+    "note": "Typical response time: under 4 hours on business days."
+  }
+}

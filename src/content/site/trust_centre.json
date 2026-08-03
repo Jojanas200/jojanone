@@ -1,0 +1,89 @@
+{
+  "hero": {
+    "eyebrow": "Trust Centre",
+    "title": "How we protect your business and your data",
+    "subtitle": "Transparency is at the core of what we do. Here you'll find everything you need to understand how Jojan One operates, how we handle your data, and the standards we hold ourselves to."
+  },
+  "sections": [
+    {
+      "id": "s1",
+      "icon": "shield",
+      "title": "Security",
+      "description": "Where Jojan One runs, how your data is isolated, and the standards we are working towards.",
+      "href": "/trust/security",
+      "badge": ""
+    },
+    {
+      "id": "s2",
+      "icon": "lock",
+      "title": "Privacy Policy",
+      "description": "How we collect, use, store and share your personal data – and your rights under applicable law.",
+      "href": "/trust/privacy",
+      "badge": ""
+    },
+    {
+      "id": "s3",
+      "icon": "file-text",
+      "title": "Terms of Service",
+      "description": "The legal agreement governing your use of the Jojan One platform and services.",
+      "href": "/trust/terms",
+      "badge": ""
+    },
+    {
+      "id": "s4",
+      "icon": "cookie",
+      "title": "Cookie Policy",
+      "description": "What cookies we use, why we use them, and how you can manage your preferences.",
+      "href": "/trust/cookies",
+      "badge": ""
+    },
+    {
+      "id": "s5",
+      "icon": "cpu",
+      "title": "AI Transparency",
+      "description": "How Jova works, what data she uses, how decisions are made, and the limits of AI-generated guidance.",
+      "href": "/trust/ai",
+      "badge": "New"
+    },
+    {
+      "id": "s6",
+      "icon": "database",
+      "title": "Data Processing",
+      "description": "Our Data Processing Agreement, sub-processors list, and how we handle data on your behalf.",
+      "href": "/trust/dpa",
+      "badge": ""
+    }
+  ],
+  "certifications": {
+    "title": "Standards we are working towards",
+    "note": "Jojan One does not hold these certifications today. We list them because they are the bar we are building to, and we will only claim one once it has been awarded.",
+    "items": [
+      {
+        "id": "c1",
+        "label": "ISO 27001",
+        "description": "Information security management - in progress"
+      },
+      {
+        "id": "c2",
+        "label": "SOC 2 Type II",
+        "description": "Security, availability and confidentiality - planned"
+      },
+      {
+        "id": "c3",
+        "label": "UK GDPR",
+        "description": "Data protection compliance - our operating standard today"
+      },
+      {
+        "id": "c4",
+        "label": "Cyber Essentials Plus",
+        "description": "UK government-backed certification - planned"
+      }
+    ]
+  },
+  "contact": {
+    "title": "Questions about trust and compliance?",
+    "body": "Our data protection contact and the engineering team behind the platform are available to answer any questions you have.",
+    "email": "trust@jojanone.com",
+    "cta": "Email our data protection contact"
+  }
+}

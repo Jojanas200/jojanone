@@ -1,0 +1,120 @@
+{
+  "hero": {
+    "eyebrow": "Trust Centre – Security",
+    "title": "Enterprise-grade security for every business",
+    "subtitle": "How Jojan One is built, hosted and operated - and what we are still working towards."
+  },
+  "sections": [
+    {
+      "id": "sec1",
+      "title": "Infrastructure security",
+      "items": [
+        {
+          "id": "s1a",
+          "heading": "Where the platform runs",
+          "body": "The Jojan One application is hosted on Vercel. Your business records, accounts and uploaded files are held in Supabase, which provisions managed PostgreSQL on AWS. Our production project is provisioned in a European region."
+        },
+        {
+          "id": "s1b",
+          "heading": "Encryption at rest",
+          "body": "Customer data is encrypted at rest by our infrastructure providers using AES-256. This covers the production database, its automated backups and uploaded files."
+        },
+        {
+          "id": "s1c",
+          "heading": "Encryption in transit",
+          "body": "All traffic is protected using TLS 1.2 or higher. HTTPS is enforced across every endpoint and insecure connections are rejected."
+        },
+        {
+          "id": "s1d",
+          "heading": "Tenant isolation",
+          "body": "Every table is protected by PostgreSQL Row Level Security. Queries run as the signed-in user rather than as a privileged service account, so one workspace cannot read or write another's records even if the application code above it is wrong. Service credentials never reach the browser."
+        }
+      ]
+    },
+    {
+      "id": "sec2",
+      "title": "Access controls",
+      "items": [
+        {
+          "id": "s2a",
+          "heading": "Role-based access",
+          "body": "Access inside a workspace is role-based. Every request is checked against the signed-in user's role, the modules their package includes and the workspace they are acting in before any data is returned."
+        },
+        {
+          "id": "s2b",
+          "heading": "Multi-factor authentication",
+          "body": "We require multi-factor authentication on the provider accounts that hold production access, including source control, hosting and the database."
+        },
+        {
+          "id": "s2c",
+          "heading": "Audit logging",
+          "body": "Administrative actions taken in the platform are written to an audit log, alongside a record of platform events, so account changes can be traced after the fact."
+        }
+      ]
+    },
+    {
+      "id": "sec3",
+      "title": "Application security",
+      "items": [
+        {
+          "id": "s3a",
+          "heading": "Isolation testing",
+          "body": "Every data feature ships with an automated test that provisions two separate tenants and asserts that neither can read or write the other's records. These run against a real database rather than a mock, and a feature is not released until its test passes."
+        },
+        {
+          "id": "s3b",
+          "heading": "Dependency management",
+          "body": "We monitor published security advisories for the packages Jojan One depends on and update them as fixes are released."
+        },
+        {
+          "id": "s3c",
+          "heading": "Secure development",
+          "body": "Changes are reviewed before release and must pass an automated type check and the platform's verification suite before they can be deployed to production."
+        }
+      ]
+    },
+    {
+      "id": "sec4",
+      "title": "Business continuity",
+      "items": [
+        {
+          "id": "s4a",
+          "heading": "Backups",
+          "body": "Our database provider takes automated daily backups of the production database."
+        },
+        {
+          "id": "s4b",
+          "heading": "Incident response",
+          "body": "If a security incident affects personal data we hold on your behalf we will notify you without undue delay, and within 72 hours of becoming aware where UK GDPR requires it."
+        },
+        {
+          "id": "s4c",
+          "heading": "Availability",
+          "body": "We aim for 99.9% monthly availability of the Jojan One platform."
+        }
+      ]
+    },
+    {
+      "id": "sec5",
+      "title": "What we are working towards",
+      "items": [
+        {
+          "id": "s5a",
+          "heading": "Independent penetration testing",
+          "body": "We have not yet commissioned an independent penetration test. Engaging a CREST-accredited assessor, and publishing a summary of the findings and their remediation, is on our roadmap."
+        },
+        {
+          "id": "s5b",
+          "heading": "Certification",
+          "body": "Jojan One does not currently hold ISO 27001, SOC 2 Type II or Cyber Essentials Plus. These are the standards we are building towards, and we will say so here when each is achieved rather than before."
+        },
+        {
+          "id": "s5c",
+          "heading": "Status page",
+          "body": "We do not yet publish a live status page. Until we do, service incidents are communicated by email to affected customers."
+        }
+      ]
+    }
+  ],
+  "lastUpdated": "August 2026"
+}

@@ -1,0 +1,130 @@
+{
+  "hero": {
+    "eyebrow": "How it works",
+    "heading": "From obligation to evidence in one platform",
+    "subheading": "Jojan One guides your business through five connected stages. Each stage builds on the last, so you always know where you stand and can prove it when it matters."
+  },
+  "steps": [
+    {
+      "id": "s1",
+      "number": "01",
+      "slug": "understand",
+      "label": "Understand",
+      "heading": "Know exactly what applies to your business",
+      "body": "Jojan One maps your business profile sector, size, jurisdiction, and structure against the regulatory landscape. You get a clear, prioritised view of every obligation that applies to you, with nothing irrelevant cluttering the picture.",
+      "detail": "Our platform continuously monitors legislative and regulatory changes across your jurisdictions, automatically updating your obligation set so you never miss a new requirement.",
+      "highlights": [
+        {
+          "id": "h1",
+          "text": "Jurisdiction-aware obligation mapping"
+        },
+        {
+          "id": "h2",
+          "text": "Sector and size-specific filtering"
+        },
+        {
+          "id": "h3",
+          "text": "Automatic updates as regulations change"
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "number": "02",
+      "slug": "monitor",
+      "label": "Monitor",
+      "heading": "Stay ahead of your compliance position",
+      "body": "Real-time monitoring tracks your compliance status across all 13 modules from GDPR and employment law to governance and contracts. Alerts surface issues before they become problems.",
+      "detail": "Your Business Confidence Score gives leadership a single, honest number that reflects your true compliance health, updated continuously as your team takes action.",
+      "highlights": [
+        {
+          "id": "h1",
+          "text": "Live Business Confidence Score"
+        },
+        {
+          "id": "h2",
+          "text": "Cross-module risk visibility"
+        },
+        {
+          "id": "h3",
+          "text": "Proactive alerts and deadline tracking"
+        }
+      ]
+    },
+    {
+      "id": "s3",
+      "number": "03",
+      "slug": "act",
+      "label": "Act",
+      "heading": "Take the right action at the right time",
+      "body": "Jova, your AI compliance assistant, turns complex obligations into clear, actionable tasks. Assign responsibilities, set deadlines, and track progress all within the platform.",
+      "detail": "Guided workflows walk your team through each requirement step by step, reducing the risk of errors and ensuring nothing falls through the cracks.",
+      "highlights": [
+        {
+          "id": "h1",
+          "text": "AI-guided task generation with Jova"
+        },
+        {
+          "id": "h2",
+          "text": "Team assignment and deadline management"
+        },
+        {
+          "id": "h3",
+          "text": "Step-by-step guided workflows"
+        }
+      ]
+    },
+    {
+      "id": "s4",
+      "number": "04",
+      "slug": "evidence",
+      "label": "Evidence",
+      "heading": "Build an unbroken audit trail automatically",
+      "body": "Every action, document, and decision is timestamped and stored in your evidence vault. Policies, contracts, training records, and sign-offs are linked directly to the obligations they satisfy.",
+      "detail": "Document generation tools produce compliant policies and agreements in minutes. Your evidence library grows with your business, always ready for inspection.",
+      "highlights": [
+        {
+          "id": "h1",
+          "text": "Automatic timestamped evidence capture"
+        },
+        {
+          "id": "h2",
+          "text": "AI-generated compliant documents"
+        },
+        {
+          "id": "h3",
+          "text": "Obligation-linked evidence library"
+        }
+      ]
+    },
+    {
+      "id": "s5",
+      "number": "05",
+      "slug": "prove",
+      "label": "Prove",
+      "heading": "Demonstrate readiness to anyone who asks",
+      "body": "Generate board-ready reports, investor packs, and regulator-facing evidence bundles in seconds. Your Business Confidence Score and full audit trail give stakeholders the confidence they need.",
+      "detail": "Whether it's a due diligence request, a regulatory inspection, or a board meeting, Jojan One gives you the evidence to prove your business is ready.",
+      "highlights": [
+        {
+          "id": "h1",
+          "text": "One-click board and investor reports"
+        },
+        {
+          "id": "h2",
+          "text": "Regulator-ready evidence bundles"
+        },
+        {
+          "id": "h3",
+          "text": "Shareable Business Confidence Score"
+        }
+      ]
+    }
+  ],
+  "cta": {
+    "heading": "Ready to see it in action?",
+    "subheading": "Start your 14-day free trial. No credit card required.",
+    "primaryLabel": "Start Your 14-Day Free Trial",
+    "secondaryLabel": "View capabilities"
+  }
+}

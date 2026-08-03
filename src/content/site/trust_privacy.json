@@ -1,0 +1,105 @@
+{
+  "hero": {
+    "eyebrow": "Trust Centre – Privacy",
+    "title": "Privacy Policy",
+    "subtitle": "Last updated: July 2026"
+  },
+  "intro": "Jojan One Technologies Limited ('Jojan One', 'we', 'us', 'our') is committed to protecting your personal data. This Privacy Policy explains how we collect, use, store and share information about you when you use our platform and services.",
+  "sections": [
+    {
+      "id": "p1",
+      "title": "Who we are",
+      "body": [
+        {
+          "id": "b1",
+          "text": "Jojan One Technologies Limited is registered in England and Wales (company number 17348476). Our registered office is at 66 Paul Street, London, EC2A 4NA. We are the data controller for personal data collected through our platform."
+        },
+        {
+          "id": "b2",
+          "text": "Our data protection contact can be reached at trust@jojanone.com. We have not appointed a statutory Data Protection Officer; UK GDPR does not require one for a business of our size and processing profile."
+        }
+      ]
+    },
+    {
+      "id": "p2",
+      "title": "What data we collect",
+      "body": [
+        {
+          "id": "b3",
+          "text": "Account data: name, email address, job title, company name and billing information when you register for an account."
+        },
+        {
+          "id": "b4",
+          "text": "Usage data: information about how you use the platform, including features accessed, actions taken and time spent. This helps us improve the product."
+        },
+        {
+          "id": "b5",
+          "text": "Business data: information you input into the platform about your business, including compliance status, risk assessments, contracts and policies. This data is processed on your behalf as a data processor."
+        },
+        {
+          "id": "b6",
+          "text": "Technical data: IP address, browser type, device information and cookies. See our Cookie Policy for more detail."
+        }
+      ]
+    },
+    {
+      "id": "p3",
+      "title": "How we use your data",
+      "body": [
+        {
+          "id": "b7",
+          "text": "To provide and improve the Jojan One platform and services."
+        },
+        {
+          "id": "b8",
+          "text": "To send you service communications, including account notifications, security alerts and product updates."
+        },
+        {
+          "id": "b9",
+          "text": "To process payments and manage your subscription."
+        },
+        {
+          "id": "b10",
+          "text": "To comply with our legal obligations."
+        },
+        {
+          "id": "b11",
+          "text": "With your consent, to send you marketing communications about Jojan One products and services."
+        }
+      ]
+    },
+    {
+      "id": "p4",
+      "title": "Your rights",
+      "body": [
+        {
+          "id": "b12",
+          "text": "Under UK GDPR, you have the right to access, correct, delete or restrict the processing of your personal data. You also have the right to data portability and to object to processing based on legitimate interests."
+        },
+        {
+          "id": "b13",
+          "text": "To exercise any of these rights, please contact us at trust@jojanone.com. We will respond within 30 days."
+        },
+        {
+          "id": "b14",
+          "text": "You have the right to lodge a complaint with the Information Commissioner's Office (ICO) if you believe we have not handled your data correctly."
+        }
+      ]
+    },
+    {
+      "id": "p5",
+      "title": "Data retention",
+      "body": [
+        {
+          "id": "b15",
+          "text": "We retain your account data for as long as your account is active and for 7 years after account closure, in line with our legal obligations."
+        },
+        {
+          "id": "b16",
+          "text": "Business data you input into the platform is retained for the duration of your subscription and deleted within 90 days of account closure, unless you request earlier deletion."
+        }
+      ]
+    }
+  ],
+  "lastUpdated": "August 2026"
+}

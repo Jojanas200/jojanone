@@ -1,0 +1,120 @@
+{
+  "hero": {
+    "eyebrow": "Trust Centre – Data Processing",
+    "title": "Data Processing Agreement",
+    "subtitle": "Last updated: July 2026"
+  },
+  "intro": "This Data Processing Agreement ('DPA') forms part of the Terms of Service between Jojan One Technologies Ltd and you ('Customer'). It sets out the terms on which Jojan One processes personal data on your behalf.",
+  "sections": [
+    {
+      "id": "d1",
+      "title": "Roles and responsibilities",
+      "body": [
+        {
+          "id": "b1",
+          "text": "You are the data controller for personal data you input into the Jojan One platform. Jojan One acts as a data processor, processing that data only on your instructions and in accordance with this DPA."
+        },
+        {
+          "id": "b2",
+          "text": "Jojan One is the data controller for data collected about your use of the platform (account data, usage data, technical data). This is governed by our Privacy Policy."
+        }
+      ]
+    },
+    {
+      "id": "d2",
+      "title": "How we process your data",
+      "body": [
+        {
+          "id": "b3",
+          "text": "We process personal data only to provide the services described in the Terms of Service and as instructed by you. We will not process your data for any other purpose without your explicit consent."
+        },
+        {
+          "id": "b4",
+          "text": "We implement appropriate technical and organisational measures to protect personal data against unauthorised access, disclosure, alteration or destruction. See our Security page for details."
+        }
+      ]
+    },
+    {
+      "id": "d3",
+      "title": "Sub-processors",
+      "body": [
+        {
+          "id": "b5",
+          "text": "We use a limited number of sub-processors to deliver our services. All sub-processors are bound by data processing agreements that meet the requirements of UK GDPR."
+        },
+        {
+          "id": "b6",
+          "text": "Current sub-processors are: Vercel (application hosting), Supabase (managed database, authentication and file storage), Stripe (payment processing), Anthropic (the AI model behind Jova, processed under terms that exclude use of your data for model training) and Resend (transactional email)."
+        },
+        {
+          "id": "b7",
+          "text": "We will notify you of any changes to our sub-processor list with at least 30 days' notice, giving you the opportunity to object."
+        }
+      ]
+    },
+    {
+      "id": "d4",
+      "title": "Data transfers",
+      "body": [
+        {
+          "id": "b8",
+          "text": "Your business records are stored in a European region. Some processing takes place outside the EEA - notably requests to our AI model provider - and where it does we rely on Standard Contractual Clauses and equivalent safeguards."
+        }
+      ]
+    },
+    {
+      "id": "d5",
+      "title": "Your rights as a controller",
+      "body": [
+        {
+          "id": "b9",
+          "text": "We will assist you in responding to data subject requests under UK GDPR, including requests for access, rectification, erasure and portability."
+        },
+        {
+          "id": "b10",
+          "text": "We will notify you without undue delay if we become aware of a personal data breach affecting your data, and in any event within 72 hours."
+        },
+        {
+          "id": "b11",
+          "text": "On termination of your account, we will delete or return all personal data within 90 days, unless retention is required by law."
+        }
+      ]
+    }
+  ],
+  "subprocessors": {
+    "title": "Sub-processor list",
+    "items": [
+      {
+        "id": "sp1",
+        "name": "Vercel",
+        "purpose": "Application hosting and content delivery",
+        "location": "Global edge, EU primary region"
+      },
+      {
+        "id": "sp2",
+        "name": "Supabase",
+        "purpose": "Managed database, authentication and file storage",
+        "location": "EU (managed PostgreSQL on AWS)"
+      },
+      {
+        "id": "sp3",
+        "name": "Stripe",
+        "purpose": "Payment processing",
+        "location": "UK / EU"
+      },
+      {
+        "id": "sp4",
+        "name": "Anthropic",
+        "purpose": "AI language model behind Jova",
+        "location": "US (Standard Contractual Clauses in place)"
+      },
+      {
+        "id": "sp5",
+        "name": "Resend",
+        "purpose": "Transactional email",
+        "location": "EU / US (Standard Contractual Clauses in place)"
+      }
+    ]
+  },
+  "lastUpdated": "August 2026"
+}

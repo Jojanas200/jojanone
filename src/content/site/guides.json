@@ -1,0 +1,145 @@
+{
+  "hero": {
+    "eyebrow": "Guides & Insights",
+    "heading": "Practical knowledge for business protection.",
+    "subheading": "In-depth guides, frameworks, and expert insights to help you understand compliance, risk, and governance – and act on them with confidence."
+  },
+  "filters": [
+    {
+      "id": "f1",
+      "label": "All",
+      "value": "all"
+    },
+    {
+      "id": "f2",
+      "label": "Compliance",
+      "value": "compliance"
+    },
+    {
+      "id": "f3",
+      "label": "Risk Management",
+      "value": "risk"
+    },
+    {
+      "id": "f4",
+      "label": "Governance",
+      "value": "governance"
+    },
+    {
+      "id": "f5",
+      "label": "Data & Privacy",
+      "value": "data"
+    },
+    {
+      "id": "f6",
+      "label": "HR & People",
+      "value": "hr"
+    }
+  ],
+  "featured": {
+    "eyebrow": "Featured guide",
+    "title": "The SME Compliance Playbook: From Reactive to Proactive",
+    "description": "Most small businesses treat compliance as a fire to put out. This guide shows you how to build a system that prevents fires from starting – covering regulatory monitoring, evidence collection, and board-level reporting.",
+    "category": "Compliance",
+    "readTime": "Quick overview",
+    "cta": "Read the guide"
+  },
+  "guides": [
+    {
+      "id": "g1",
+      "category": "compliance",
+      "categoryLabel": "Compliance",
+      "title": "Understanding UK Regulatory Obligations for SMEs",
+      "description": "A plain-English breakdown of the key regulations affecting UK small businesses – from Companies House filings to sector-specific rules – and how to stay on top of them.",
+      "readTime": "Quick overview",
+      "icon": "shield",
+      "href": "/capabilities/compliance-monitor"
+    },
+    {
+      "id": "g2",
+      "category": "risk",
+      "categoryLabel": "Risk Management",
+      "title": "How to Build a Risk Register That Actually Gets Used",
+      "description": "Most risk registers sit in a drawer. This guide walks you through creating a living risk register that informs decisions, satisfies auditors, and protects your business.",
+      "readTime": "Quick overview",
+      "icon": "gauge",
+      "href": "/capabilities/risk-intelligence"
+    },
+    {
+      "id": "g3",
+      "category": "data",
+      "categoryLabel": "Data & Privacy",
+      "title": "GDPR Compliance for Growing Businesses: A Practical Guide",
+      "description": "Cut through the legal jargon. This guide covers the six lawful bases for processing, your obligations as a data controller, and how to respond to a subject access request.",
+      "readTime": "Quick overview",
+      "icon": "lock",
+      "href": "/trust/privacy"
+    },
+    {
+      "id": "g4",
+      "category": "governance",
+      "categoryLabel": "Governance",
+      "title": "Corporate Governance Essentials for SME Directors",
+      "description": "What does good governance actually look like for a business with 10–200 employees? This guide covers board responsibilities, decision-making frameworks, and audit readiness.",
+      "readTime": "Quick overview",
+      "icon": "building",
+      "href": "/capabilities/executive-intelligence"
+    },
+    {
+      "id": "g5",
+      "category": "hr",
+      "categoryLabel": "HR & People",
+      "title": "Employment Law Fundamentals: What Every UK Employer Must Know",
+      "description": "From contracts and working time to disciplinary procedures and redundancy – a practical overview of your obligations as an employer and how to document them properly.",
+      "readTime": "Quick overview",
+      "icon": "users",
+      "href": "/capabilities/document-generation"
+    },
+    {
+      "id": "g6",
+      "category": "compliance",
+      "categoryLabel": "Compliance",
+      "title": "How to Prepare for a Regulatory Inspection",
+      "description": "Regulators give little notice. This guide helps you build an evidence library, organise your documentation, and brief your team so you are always inspection-ready.",
+      "readTime": "Quick overview",
+      "icon": "file",
+      "href": "/capabilities/compliance-monitor"
+    },
+    {
+      "id": "g7",
+      "category": "risk",
+      "categoryLabel": "Risk Management",
+      "title": "Cyber Risk for Non-Technical Business Owners",
+      "description": "You do not need to be a technologist to manage cyber risk. This guide explains the key threats, the controls that matter most, and how to communicate risk to your board.",
+      "readTime": "Quick overview",
+      "icon": "shield",
+      "href": "/trust/security"
+    },
+    {
+      "id": "g8",
+      "category": "governance",
+      "categoryLabel": "Governance",
+      "title": "Writing Policies That People Actually Follow",
+      "description": "A policy no one reads is a liability, not a protection. Learn how to write clear, proportionate policies, get sign-off, and build a culture of compliance from the top down.",
+      "readTime": "Quick overview",
+      "icon": "file",
+      "href": "/capabilities/document-generation"
+    },
+    {
+      "id": "g9",
+      "category": "data",
+      "categoryLabel": "Data & Privacy",
+      "title": "Data Retention: How Long Should You Keep Business Records?",
+      "description": "Keeping data too long is a GDPR risk. Deleting it too soon could breach other laws. This guide maps out retention periods for common business record types.",
+      "readTime": "Quick overview",
+      "icon": "lock",
+      "href": "/trust/data-processing"
+    }
+  ],
+  "cta": {
+    "heading": "See how Jojan One puts this into practice.",
+    "subheading": "The platform monitors your obligations, generates the documents, and builds the evidence – so you spend less time on compliance and more time on your business.",
+    "primary": "Start free trial",
+    "secondary": "See capabilities"
+  }
+}

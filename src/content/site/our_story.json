@@ -1,0 +1,39 @@
+{
+  "hero": {
+    "eyebrow": "Our story",
+    "title": "Why we built Jojan One",
+    "subtitle": "Growing businesses are expected to manage increasingly complex responsibilities but the tools for doing so are often fragmented. Jojan One was created to bring them together."
+  },
+  "chapters": [
+    {
+      "id": "ch1",
+      "year": "The Problem",
+      "title": "A fragmented landscape",
+      "body": "Growing businesses are expected to manage responsibilities across compliance, contracts, employment, governance, data protection and risk – often without dedicated legal, compliance or risk teams. The information, advisers, documents and systems needed to manage those responsibilities can become fragmented, making it difficult for leadership to see what requires attention and whether the business is genuinely prepared."
+    },
+    {
+      "id": "ch2",
+      "year": "The Idea",
+      "title": "One intelligent platform",
+      "body": "Jojan One began with a simple question: what if a business could understand what matters, take action and maintain the evidence to prove it – from one intelligent platform? That idea became the foundation for Jojan One."
+    },
+    {
+      "id": "ch3",
+      "year": "The Platform",
+      "title": "Intelligence at the centre",
+      "body": "Jojan One brings together business intelligence, compliance, risk, contracts, people, governance, data protection and evidence. At its centre is Jova – an intelligent business protection assistant designed to use organisational context to help businesses understand what needs attention, why it matters and what action to consider."
+    },
+    {
+      "id": "ch4",
+      "year": "The Vision",
+      "title": "Built for growing organisations",
+      "body": "Jojan One is being built as an intelligent business protection layer for growing organisations. Our vision is to make sophisticated business protection, compliance and risk intelligence more understandable, actionable and accessible – regardless of the size of the organisation or, progressively, where it operates."
+    }
+  ],
+  "cta": {
+    "title": "Understand. Monitor. Act. Evidence. Prove.",
+    "subtitle": "Start your 14-day free trial. No credit card required.",
+    "primaryCta": "Get started free",
+    "secondaryCta": "Meet the team"
+  }
+}

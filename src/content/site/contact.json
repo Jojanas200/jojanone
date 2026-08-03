@@ -1,0 +1,50 @@
+{
+  "hero": {
+    "eyebrow": "Get in touch",
+    "title": "We'd love to hear from you",
+    "subtitle": "Whether you have a question about the platform, want to discuss your business needs, or just want to say hello – we're here."
+  },
+  "channels": [
+    {
+      "id": "c1",
+      "label": "Sales",
+      "description": "Talk to us about plans, pricing or a demo",
+      "email": "sales@jojanone.com",
+      "responseTime": "Within 4 hours"
+    },
+    {
+      "id": "c2",
+      "label": "Support",
+      "description": "Get help with your account or the platform",
+      "email": "support@jojanone.com",
+      "responseTime": "Within 24 hours"
+    },
+    {
+      "id": "c3",
+      "label": "Press & media",
+      "description": "Media enquiries and press requests",
+      "email": "press@jojanone.com",
+      "responseTime": "Within 48 hours"
+    }
+  ],
+  "form": {
+    "title": "Send us a message",
+    "namePlaceholder": "Your name",
+    "emailPlaceholder": "Your email",
+    "companyPlaceholder": "Company name",
+    "subjectPlaceholder": "What's this about?",
+    "messagePlaceholder": "Tell us how we can help...",
+    "submitLabel": "Send message",
+    "successTitle": "Message sent",
+    "successBody": "Thanks for reaching out. We'll get back to you shortly."
+  },
+  "office": {
+    "title": "Registered office",
+    "name": "Jojan One Technologies Ltd",
+    "line1": "66 Paul Street",
+    "line2": "London",
+    "line3": "EC2A 4NA",
+    "line4": "United Kingdom",
+    "company": "Registered in England and Wales. Company No. 17348476."
+  }
+}

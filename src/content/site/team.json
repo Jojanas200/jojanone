@@ -1,0 +1,25 @@
+{
+  "hero": {
+    "eyebrow": "The team",
+    "title": "Built by people who understand business protection.",
+    "subtitle": "Jojan One combines legal and regulatory expertise with technology and product engineering to build a more intelligent approach to business protection."
+  },
+  "leadership": [
+    {
+      "id": "l1",
+      "name": "Anastasia Ayivor",
+      "role": "Founder & CEO",
+      "area": "Legal, Regulatory Compliance & Business Strategy",
+      "linkedin": "https://www.linkedin.com/in/anastasia-ayivor-",
+      "photo": "/airo-assets/images/team/anastasia-ayivor"
+    },
+    {
+      "id": "l2",
+      "name": "Kwabena Osei-Tutu",
+      "role": "Chief Technology Officer",
+      "area": "Technology, AI & Product Engineering",
+      "linkedin": "https://www.linkedin.com/in/kwabena-osei-tutu-1b6009a0",
+      "photo": "/airo-assets/images/team/kwabena-osei-tutu"
+    }
+  ]
+}

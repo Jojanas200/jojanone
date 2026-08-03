@@ -1,0 +1,519 @@
+{
+  "hero": {
+    "eyebrow": "Pricing",
+    "title": "Simple, transparent pricing",
+    "subtitle": "Choose the plan that fits your business today and scale with confidence as your organisation grows. Everything your business needs to stay protected, compliant and investor-ready, with no hidden fees or surprises."
+  },
+  "trialIntro": {
+    "title": "Every Subscription Includes a 14-Day Free Trial",
+    "body": "Experience the full Growth Plan free for 14 days before choosing the subscription that best fits your business.",
+    "note": "No credit card required. Cancel anytime."
+  },
+  "trialBadge": "All new customers receive a complimentary 14-Day Growth Plan Trial before selecting a subscription.",
+  "tiers": [
+    {
+      "id": "starter",
+      "name": "Starter",
+      "price": "£49",
+      "period": "per month",
+      "description": "For start-ups, freelancers and small businesses building strong business foundations.",
+      "cta": "Start Free Trial",
+      "ctaHref": "/get-started",
+      "highlight": false,
+      "badge": "",
+      "features": [
+        {
+          "id": "s1",
+          "text": "1 user, 1 organisation"
+        },
+        {
+          "id": "s2",
+          "text": "Business Confidence Score"
+        },
+        {
+          "id": "s3",
+          "text": "Jova AI Assistant (500 requests/month)"
+        },
+        {
+          "id": "s4",
+          "text": "Compliance Monitor"
+        },
+        {
+          "id": "s5",
+          "text": "Risk Register (up to 10 active risks)"
+        },
+        {
+          "id": "s6",
+          "text": "Contracts (up to 10 active contracts)"
+        },
+        {
+          "id": "s7",
+          "text": "HR"
+        },
+        {
+          "id": "s8",
+          "text": "GDPR & Data Protection"
+        },
+        {
+          "id": "s9",
+          "text": "Governance"
+        },
+        {
+          "id": "s10",
+          "text": "Policies"
+        },
+        {
+          "id": "s11",
+          "text": "Evidence"
+        },
+        {
+          "id": "s12",
+          "text": "Business Timeline"
+        },
+        {
+          "id": "s13",
+          "text": "Document Generation"
+        },
+        {
+          "id": "s14",
+          "text": "Companies House integration"
+        },
+        {
+          "id": "s15",
+          "text": "Standard Reports"
+        },
+        {
+          "id": "s16",
+          "text": "Email Support"
+        }
+      ]
+    },
+    {
+      "id": "growth",
+      "name": "Growth",
+      "price": "£149",
+      "period": "per month",
+      "description": "For growing SMEs that want the full Jojan One experience.",
+      "cta": "Start Free Trial",
+      "ctaHref": "/get-started",
+      "highlight": true,
+      "badge": "Most popular",
+      "features": [
+        {
+          "id": "g1",
+          "text": "Everything in Starter"
+        },
+        {
+          "id": "g2",
+          "text": "Up to 5 users"
+        },
+        {
+          "id": "g3",
+          "text": "Unlimited contracts and risks"
+        },
+        {
+          "id": "g4",
+          "text": "Unlimited document storage"
+        },
+        {
+          "id": "g5",
+          "text": "Executive Intelligence"
+        },
+        {
+          "id": "g6",
+          "text": "Business Map"
+        },
+        {
+          "id": "g7",
+          "text": "Investor Ready"
+        },
+        {
+          "id": "g8",
+          "text": "Tender Ready"
+        },
+        {
+          "id": "g9",
+          "text": "Full Academy"
+        },
+        {
+          "id": "g10",
+          "text": "Reports & Evidence Packs"
+        },
+        {
+          "id": "g11",
+          "text": "Advanced Reporting"
+        },
+        {
+          "id": "g12",
+          "text": "Bulk Import"
+        },
+        {
+          "id": "g13",
+          "text": "Priority Email Support"
+        },
+        {
+          "id": "g14",
+          "text": "5,000 AI requests per month"
+        }
+      ]
+    },
+    {
+      "id": "scale",
+      "name": "Scale",
+      "price": "£349",
+      "period": "per month",
+      "description": "For larger organisations and multi-organisation groups.",
+      "cta": "Start Free Trial",
+      "ctaHref": "/get-started",
+      "highlight": false,
+      "badge": "",
+      "features": [
+        {
+          "id": "sc1",
+          "text": "Everything in Growth"
+        },
+        {
+          "id": "sc2",
+          "text": "Unlimited users"
+        },
+        {
+          "id": "sc3",
+          "text": "Multi-Organisation Support"
+        },
+        {
+          "id": "sc4",
+          "text": "API Access"
+        },
+        {
+          "id": "sc5",
+          "text": "SSO / SAML"
+        },
+        {
+          "id": "sc6",
+          "text": "Dedicated Onboarding"
+        },
+        {
+          "id": "sc7",
+          "text": "Custom Document Templates"
+        },
+        {
+          "id": "sc8",
+          "text": "Enterprise Reporting"
+        },
+        {
+          "id": "sc9",
+          "text": "Advanced Permissions"
+        },
+        {
+          "id": "sc10",
+          "text": "Dedicated Customer Success Manager"
+        },
+        {
+          "id": "sc11",
+          "text": "Premium Support"
+        },
+        {
+          "id": "sc12",
+          "text": "Fair Use Unlimited AI"
+        }
+      ]
+    }
+  ],
+  "platformNote": "Every Jojan One plan includes the core Business Protection Platform. As your organisation grows, you'll unlock greater collaboration, intelligence, automation and enterprise capabilities designed to support your next stage of growth.",
+  "comparison": {
+    "title": "Compare plans",
+    "categories": [
+      {
+        "id": "cat1",
+        "name": "Core Business Protection",
+        "rows": [
+          {
+            "id": "r1",
+            "feature": "Business Confidence Score",
+            "starter": "true",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r2",
+            "feature": "Compliance Monitor",
+            "starter": "true",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r3",
+            "feature": "Risk Register",
+            "starter": "Up to 10",
+            "growth": "Unlimited",
+            "scale": "Unlimited"
+          },
+          {
+            "id": "r4",
+            "feature": "Contracts",
+            "starter": "Up to 10",
+            "growth": "Unlimited",
+            "scale": "Unlimited"
+          },
+          {
+            "id": "r5",
+            "feature": "HR",
+            "starter": "true",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r6",
+            "feature": "GDPR & Data Protection",
+            "starter": "true",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r7",
+            "feature": "Governance",
+            "starter": "true",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r8",
+            "feature": "Policies",
+            "starter": "true",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r9",
+            "feature": "Evidence",
+            "starter": "true",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r10",
+            "feature": "Business Timeline",
+            "starter": "true",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r11",
+            "feature": "Document Generation",
+            "starter": "true",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r12",
+            "feature": "Companies House Integration",
+            "starter": "true",
+            "growth": "true",
+            "scale": "true"
+          }
+        ]
+      },
+      {
+        "id": "cat2",
+        "name": "Intelligence & Growth",
+        "rows": [
+          {
+            "id": "r13",
+            "feature": "Executive Intelligence",
+            "starter": "false",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r14",
+            "feature": "Reports & Evidence Packs",
+            "starter": "Standard",
+            "growth": "Full",
+            "scale": "Enterprise"
+          },
+          {
+            "id": "r15",
+            "feature": "Business Map",
+            "starter": "false",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r16",
+            "feature": "Investor Ready",
+            "starter": "false",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r17",
+            "feature": "Tender Ready",
+            "starter": "false",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r18",
+            "feature": "Academy",
+            "starter": "false",
+            "growth": "Full",
+            "scale": "Full"
+          }
+        ]
+      },
+      {
+        "id": "cat3",
+        "name": "AI",
+        "rows": [
+          {
+            "id": "r19",
+            "feature": "Jova AI Assistant",
+            "starter": "true",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r20",
+            "feature": "AI Usage",
+            "starter": "500/month",
+            "growth": "5,000/month",
+            "scale": "Fair Use Unlimited"
+          }
+        ]
+      },
+      {
+        "id": "cat4",
+        "name": "Team & Collaboration",
+        "rows": [
+          {
+            "id": "r21",
+            "feature": "Users",
+            "starter": "1",
+            "growth": "Up to 5",
+            "scale": "Unlimited"
+          },
+          {
+            "id": "r22",
+            "feature": "Bulk Import",
+            "starter": "false",
+            "growth": "true",
+            "scale": "true"
+          },
+          {
+            "id": "r23",
+            "feature": "Advanced Reporting",
+            "starter": "false",
+            "growth": "true",
+            "scale": "true"
+          }
+        ]
+      },
+      {
+        "id": "cat5",
+        "name": "Enterprise",
+        "rows": [
+          {
+            "id": "r24",
+            "feature": "Multi-Organisation Support",
+            "starter": "false",
+            "growth": "false",
+            "scale": "true"
+          },
+          {
+            "id": "r25",
+            "feature": "API Access",
+            "starter": "false",
+            "growth": "false",
+            "scale": "true"
+          },
+          {
+            "id": "r26",
+            "feature": "SSO / SAML",
+            "starter": "false",
+            "growth": "false",
+            "scale": "true"
+          },
+          {
+            "id": "r27",
+            "feature": "Dedicated Onboarding",
+            "starter": "false",
+            "growth": "false",
+            "scale": "true"
+          },
+          {
+            "id": "r28",
+            "feature": "Custom Document Templates",
+            "starter": "false",
+            "growth": "false",
+            "scale": "true"
+          },
+          {
+            "id": "r29",
+            "feature": "Advanced Permissions",
+            "starter": "false",
+            "growth": "false",
+            "scale": "true"
+          }
+        ]
+      }
+    ]
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "items": [
+      {
+        "id": "faq1",
+        "question": "What do I get during my free trial?",
+        "answer": "Your 14-day free trial includes full access to the Growth Plan, allowing you to experience Jojan One's advanced compliance, governance, AI, reporting and business intelligence features."
+      },
+      {
+        "id": "faq2",
+        "question": "Do I need a credit card?",
+        "answer": "No. You can start your free trial without providing any payment details."
+      },
+      {
+        "id": "faq3",
+        "question": "What happens after my trial ends?",
+        "answer": "At the end of your 14-day trial, you can choose the subscription plan that best fits your business: Starter – Business Protection Essentials, Growth – Complete Business Protection, or Scale – Enterprise Business Protection. If you choose not to subscribe immediately, your account will become inactive until you select a plan. Your data will remain securely stored in accordance with our data retention policy."
+      },
+      {
+        "id": "faq4",
+        "question": "Can I upgrade at any time?",
+        "answer": "Yes. You can upgrade your subscription whenever your business requires additional users, advanced intelligence, automation or enterprise capabilities."
+      },
+      {
+        "id": "faq5",
+        "question": "Can I change plans at any time?",
+        "answer": "Yes. You can upgrade or downgrade your plan at any time. Changes take effect at the start of your next billing period."
+      },
+      {
+        "id": "faq6",
+        "question": "What counts as a user?",
+        "answer": "A user is anyone with a login to your Jojan One account, including team members, directors and advisors you invite."
+      },
+      {
+        "id": "faq7",
+        "question": "Do you offer annual billing?",
+        "answer": "Yes. Annual billing is available at a 20% discount. Contact us to switch to annual billing."
+      },
+      {
+        "id": "faq8",
+        "question": "What happens to my data if I cancel?",
+        "answer": "Your data remains accessible for 30 days after cancellation. You can export everything before your account closes."
+      },
+      {
+        "id": "faq9",
+        "question": "Is Jojan One suitable for my industry?",
+        "answer": "Jojan One is designed for SMEs across all sectors. Jova tailors compliance monitoring and document generation to your specific industry and jurisdiction."
+      }
+    ]
+  },
+  "cta": {
+    "title": "Experience Jojan One Before You Commit",
+    "subtitle": "Start with a complimentary 14-day Growth Plan trial and discover how Jojan One helps protect your business, simplify compliance and support smarter business decisions.",
+    "primaryCta": "Start Your Free Trial",
+    "primaryHref": "/get-started",
+    "secondaryCta": "Book a Demo",
+    "secondaryHref": "/contact"
+  }
+}

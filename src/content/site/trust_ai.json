@@ -1,0 +1,87 @@
+{
+  "hero": {
+    "eyebrow": "Trust Centre – AI",
+    "title": "AI Transparency",
+    "subtitle": "How Jova works, what she knows, and what she doesn't"
+  },
+  "intro": "Jova is Jojan One's AI business protection assistant. This page explains how Jova works, what data she uses, how she generates guidance, and the important limits of AI-generated output.",
+  "sections": [
+    {
+      "id": "ai1",
+      "title": "How Jova works",
+      "body": [
+        {
+          "id": "b1",
+          "text": "Jova is built on large language model (LLM) technology, combined with Jojan One's proprietary compliance frameworks, regulatory knowledge base and your business's specific data."
+        },
+        {
+          "id": "b2",
+          "text": "When you ask Jova a question or request guidance, she draws on three sources: her underlying language model, Jojan One's curated regulatory and compliance knowledge base, and the business data you have entered into the platform."
+        },
+        {
+          "id": "b3",
+          "text": "Jova's responses are generated dynamically. They are not pre-written templates – they are constructed in response to your specific question and business context."
+        }
+      ]
+    },
+    {
+      "id": "ai2",
+      "title": "What Jova can and cannot do",
+      "body": [
+        {
+          "id": "b4",
+          "text": "Jova can: identify compliance gaps, generate draft policies and documents, explain regulatory requirements in plain language, suggest actions to address risks, and help you build an evidence trail."
+        },
+        {
+          "id": "b5",
+          "text": "Jova cannot: provide legally binding advice, guarantee that her output is accurate or complete, replace a qualified solicitor or compliance professional, or account for jurisdiction-specific requirements she has not been trained on."
+        },
+        {
+          "id": "b6",
+          "text": "All AI-generated content should be reviewed by a qualified professional before being relied upon for significant business decisions."
+        }
+      ]
+    },
+    {
+      "id": "ai3",
+      "title": "Data used by Jova",
+      "body": [
+        {
+          "id": "b7",
+          "text": "Jova uses the business data you enter into the platform to personalise her guidance. This includes your business profile, compliance status, risk assessments and any documents you have uploaded."
+        },
+        {
+          "id": "b8",
+          "text": "Your data is not used to train the underlying language model. Your business data remains private to your account and is not shared with other customers."
+        },
+        {
+          "id": "b9",
+          "text": "Jojan One's compliance frameworks are reviewed and updated by our team to reflect changes in legislation and regulatory guidance."
+        },
+        {
+          "id": "ai3d",
+          "text": "Jova does not browse the internet. She answers from your own records and Jojan One's compliance frameworks only, and every answer she gives cites the records it came from."
+        }
+      ]
+    },
+    {
+      "id": "ai4",
+      "title": "Accuracy and limitations",
+      "body": [
+        {
+          "id": "b10",
+          "text": "AI language models can produce incorrect, incomplete or outdated information. Jova is no exception. We work hard to minimise errors through our knowledge base curation and testing processes, but we cannot guarantee that every response is accurate."
+        },
+        {
+          "id": "b11",
+          "text": "Jova's guidance reflects the regulatory environment at the time her knowledge base was last updated. Regulations change, so always verify that guidance is current before acting on it."
+        },
+        {
+          "id": "b12",
+          "text": "If you believe Jova has provided incorrect guidance, please report it to support@jojanone.com. We take accuracy seriously and investigate all reports."
+        }
+      ]
+    }
+  ],
+  "lastUpdated": "August 2026"
+}

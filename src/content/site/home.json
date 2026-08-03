@@ -1,0 +1,335 @@
+{
+  "hero": {
+    "eyebrow": "The Business Protection Operating System for SMEs",
+    "headline": "Protect your business. Prove it.",
+    "body": "Protect your business with AI-powered compliance, governance, risk management, HR, contracts and business intelligence – all in one intelligent platform.",
+    "ctaPrimary": "Start Your 14-Day Free Trial",
+    "ctaSupporting": "Experience the full Growth Plan free for 14 days, then choose the subscription that best fits your business.",
+    "ctaSecondary": "See How It Works"
+  },
+  "businessConfidence": {
+    "headline": "One number. Your business protection picture.",
+    "body": "Jojan One continuously monitors your business across every critical area and gives you a single, clear picture of where you stand.",
+    "score": 82,
+    "scoreLabel": "Strong",
+    "modules": [
+      {
+        "id": "m1",
+        "name": "Compliance",
+        "score": 88
+      },
+      {
+        "id": "m2",
+        "name": "Risk",
+        "score": 74
+      },
+      {
+        "id": "m3",
+        "name": "People",
+        "score": 91
+      },
+      {
+        "id": "m4",
+        "name": "Contracts",
+        "score": 79
+      },
+      {
+        "id": "m5",
+        "name": "Governance",
+        "score": 85
+      },
+      {
+        "id": "m6",
+        "name": "Data Protection",
+        "score": 77
+      },
+      {
+        "id": "m7",
+        "name": "Evidence & Readiness",
+        "score": 83
+      }
+    ]
+  },
+  "jova": {
+    "headline": "Meet Jova.",
+    "subheadline": "Your intelligent business protection assistant.",
+    "alerts": [
+      {
+        "id": "a1",
+        "title": "Employment document requires review",
+        "severity": "high",
+        "tag": "People & HR"
+      },
+      {
+        "id": "a2",
+        "title": "Supplier agreement expires in 21 days",
+        "severity": "medium",
+        "tag": "Contracts",
+        "countdown": "21 days"
+      },
+      {
+        "id": "a3",
+        "title": "Data protection obligation requires verification",
+        "severity": "medium",
+        "tag": "GDPR"
+      }
+    ],
+    "userQuery": "What should I deal with first?",
+    "jovaResponse": {
+      "what": "Your employment contract template has not been updated to reflect recent legislative changes. Three active employee contracts reference the outdated version.",
+      "why": "Non-compliant employment documents create legal exposure and may invalidate key contractual terms. This is your highest-priority open item.",
+      "action": "Review and update the employment contract template using the Jojan One document generator, then re-issue to affected employees.",
+      "source": "People & HR · Employment Documents · Last reviewed 14 months ago"
+    }
+  },
+  "howItWorks": {
+    "headline": "How Jojan One works.",
+    "body": "Jojan One learns about your business, develops Business Memory, identifies relevant risks and obligations, helps you take action and maintains evidence of everything completed.",
+    "steps": [
+      {
+        "id": "s1",
+        "number": "01",
+        "name": "Understand",
+        "description": "Jojan One learns your business structure, sector and obligations."
+      },
+      {
+        "id": "s2",
+        "number": "02",
+        "name": "Monitor",
+        "description": "Continuous monitoring across compliance, risk, contracts and people."
+      },
+      {
+        "id": "s3",
+        "number": "03",
+        "name": "Act",
+        "description": "Jova guides you through prioritised actions with clear next steps."
+      },
+      {
+        "id": "s4",
+        "number": "04",
+        "name": "Evidence",
+        "description": "Every action is logged and documented automatically."
+      },
+      {
+        "id": "s5",
+        "number": "05",
+        "name": "Prove",
+        "description": "Generate reports and evidence packs to demonstrate readiness."
+      }
+    ]
+  },
+  "capabilities": {
+    "headline": "Everything your business needs. One platform.",
+    "items": [
+      {
+        "id": "c1",
+        "name": "Compliance Monitor",
+        "description": "Track obligations and stay ahead of regulatory requirements.",
+        "size": "normal"
+      },
+      {
+        "id": "c2",
+        "name": "Risk Management",
+        "description": "Identify, assess and manage business risks in one place.",
+        "size": "normal"
+      },
+      {
+        "id": "c3",
+        "name": "Contracts",
+        "description": "Manage, track and review all business agreements.",
+        "size": "normal"
+      },
+      {
+        "id": "c4",
+        "name": "Policies & Documents",
+        "description": "Create, store and maintain business-critical documents.",
+        "size": "normal"
+      },
+      {
+        "id": "c5",
+        "name": "People & HR",
+        "description": "Employment compliance, contracts and people management.",
+        "size": "normal"
+      },
+      {
+        "id": "c6",
+        "name": "GDPR & Data Protection",
+        "description": "Full data protection compliance and obligation management.",
+        "size": "normal"
+      },
+      {
+        "id": "c7",
+        "name": "Governance",
+        "description": "Board governance, decisions and accountability records.",
+        "size": "normal"
+      },
+      {
+        "id": "c8",
+        "name": "Executive Intelligence",
+        "description": "Real-time executive dashboard with actionable business insight.",
+        "size": "large"
+      },
+      {
+        "id": "c9",
+        "name": "Business Timeline",
+        "description": "A chronological record of every business protection event.",
+        "size": "normal"
+      },
+      {
+        "id": "c10",
+        "name": "Reports & Evidence",
+        "description": "Generate audit-ready reports and evidence packs on demand.",
+        "size": "normal"
+      },
+      {
+        "id": "c11",
+        "name": "Business Map",
+        "description": "Visualise your business structure, obligations and relationships.",
+        "size": "normal"
+      },
+      {
+        "id": "c12",
+        "name": "Academy",
+        "description": "Guided learning to build business protection knowledge.",
+        "size": "normal"
+      },
+      {
+        "id": "c13",
+        "name": "Jova",
+        "description": "Your intelligent assistant – always watching, always ready.",
+        "size": "large"
+      }
+    ]
+  },
+  "documentGeneration": {
+    "headline": "From obligation to document.",
+    "body": "Jojan One creates professional, jurisdiction-aware business documents tailored to your business.",
+    "workflow": [
+      {
+        "id": "w1",
+        "step": "Ask Jova"
+      },
+      {
+        "id": "w2",
+        "step": "Complete information"
+      },
+      {
+        "id": "w3",
+        "step": "Generate"
+      },
+      {
+        "id": "w4",
+        "step": "Review"
+      },
+      {
+        "id": "w5",
+        "step": "Save"
+      },
+      {
+        "id": "w6",
+        "step": "Export PDF/DOCX"
+      }
+    ],
+    "documentTypes": [
+      {
+        "id": "d1",
+        "name": "Employee Handbooks"
+      },
+      {
+        "id": "d2",
+        "name": "Privacy Policies"
+      },
+      {
+        "id": "d3",
+        "name": "Data Protection Policies"
+      },
+      {
+        "id": "d4",
+        "name": "HR Policies"
+      },
+      {
+        "id": "d5",
+        "name": "Governance Documents"
+      },
+      {
+        "id": "d6",
+        "name": "Risk Assessments"
+      },
+      {
+        "id": "d7",
+        "name": "Business Policies"
+      },
+      {
+        "id": "d8",
+        "name": "Supported Contracts"
+      }
+    ]
+  },
+  "executiveIntelligence": {
+    "headline": "See what matters before it becomes a problem.",
+    "body": "The Executive Intelligence dashboard gives leadership a real-time view of business protection status risks, compliance, actions and evidence in one place."
+  },
+  "builtFor": {
+    "headline": "Built for businesses that need clarity, not complexity.",
+    "jurisdictionNote": "Built with jurisdiction-aware business protection at its core. UK regulatory intelligence available at launch, with additional jurisdictions introduced progressively.",
+    "segments": [
+      {
+        "id": "seg1",
+        "name": "Startups",
+        "description": "Build the right foundations from day one. Jojan One helps early-stage businesses establish compliance, governance and protection before problems arise."
+      },
+      {
+        "id": "seg2",
+        "name": "Growing SMEs",
+        "description": "As your business grows, so does complexity. Jojan One scales with you – keeping obligations, risks and people management under control."
+      },
+      {
+        "id": "seg3",
+        "name": "Compliance-heavy businesses",
+        "description": "For businesses operating in regulated sectors, Jojan One provides the structure, monitoring and evidence needed to stay ahead."
+      },
+      {
+        "id": "seg4",
+        "name": "Investor and tender-ready businesses",
+        "description": "Demonstrate business readiness with confidence. Jojan One maintains the evidence and documentation that investors and procurement teams require."
+      }
+    ]
+  },
+  "trust": {
+    "headline": "Business protection starts with trust.",
+    "body": "Jojan One is built on a foundation of security, transparency and responsible AI.",
+    "pillars": [
+      {
+        "id": "p1",
+        "name": "Trust Centre",
+        "href": "/trust"
+      },
+      {
+        "id": "p2",
+        "name": "Security",
+        "href": "/trust/security"
+      },
+      {
+        "id": "p3",
+        "name": "Privacy",
+        "href": "/trust/privacy"
+      },
+      {
+        "id": "p4",
+        "name": "AI Transparency",
+        "href": "/trust/ai-transparency"
+      },
+      {
+        "id": "p5",
+        "name": "Data Processing",
+        "href": "/trust/data-processing"
+      }
+    ]
+  },
+  "finalCta": {
+    "headline": "Know where your business stands.",
+    "body": "Understand what matters. Take action. Keep the evidence. Prove you're ready.",
+    "ctaPrimary": "Start Your 14-Day Free Trial",
+    "ctaSecondary": "See How It Works"
+  }
+}

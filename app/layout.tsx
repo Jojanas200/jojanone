@@ -30,7 +30,7 @@ export default function RootLayout({
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
         />
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
       </head>

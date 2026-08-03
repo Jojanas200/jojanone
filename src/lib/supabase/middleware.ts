@@ -1,10 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { isMarketingPath } from "@/shared/site/routes";
 
 // Paths the middleware never redirects to /login. `/api` is included because
 // Route Handlers enforce their own auth and must return 401 JSON (not an HTML
 // redirect) to unauthenticated fetches. `/invite` renders its own sign-in
-// prompt. The public marketing landing lives at exactly "/" (handled below).
+// prompt. The public marketing site is allowed by isMarketingPath().
 const NO_REDIRECT_PREFIXES = ["/login", "/auth", "/api", "/invite"];
 
 /** Refresh the Supabase session cookie and guard routes. */
@@ -38,7 +39,8 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const noRedirect =
-    path === "/" || NO_REDIRECT_PREFIXES.some((p) => path.startsWith(p));
+    isMarketingPath(path) ||
+    NO_REDIRECT_PREFIXES.some((p) => path.startsWith(p));
 
   if (!user && !noRedirect) {
     const url = request.nextUrl.clone();
