@@ -21,6 +21,8 @@ import {
 import { listActivities } from "../src/server/services/activity";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createObligationSchema } from "../src/shared/schemas/compliance";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -79,11 +81,15 @@ async function main() {
       { orgName: "VEv B", workspaceName: "VEv B" },
     );
 
-    const ob = await createObligation({ sub: userA }, wsA, {
-      title: "Confirmation statement",
-      category: "companies_house",
-      status: "action_required",
-    });
+    const ob = await createObligation(
+      { sub: userA },
+      wsA,
+      createObligationSchema.parse({
+        title: "Confirmation statement",
+        category: "companies_house",
+        status: "action_required",
+      }),
+    );
 
     // Standalone evidence first: recorded WITHOUT completing the obligation.
     const partial = await confirmObligationEvidence({ sub: userA }, ob.id, {

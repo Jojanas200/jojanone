@@ -22,6 +22,10 @@ import {
 } from "../src/server/services/tender";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createDueDiligenceItemSchema } from "../src/shared/schemas/investor";
+
+import { createTenderOpportunitySchema } from "../src/shared/schemas/tender";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -92,10 +96,14 @@ async function main() {
       "DD item created for A",
       dd?.title === "Cap table" && dd.status === "missing",
     );
-    await createDueDiligenceItem({ sub: userB }, wsB, {
-      title: "B financials",
-      category: "financial",
-    });
+    await createDueDiligenceItem(
+      { sub: userB },
+      wsB,
+      createDueDiligenceItemSchema.parse({
+        title: "B financials",
+        category: "financial",
+      }),
+    );
     const ddA = await listDueDiligenceItems({ sub: userA });
     check("A sees only its DD item", ddA.length === 1 && ddA[0].id === dd.id);
     const ddReady = await updateDueDiligenceItem({ sub: userA }, dd.id, {
@@ -104,10 +112,14 @@ async function main() {
     check("A can mark DD item ready", ddReady?.status === "ready");
     let ddBlocked = false;
     try {
-      await createDueDiligenceItem({ sub: userA }, wsB, {
-        title: "hack",
-        category: "legal",
-      });
+      await createDueDiligenceItem(
+        { sub: userA },
+        wsB,
+        createDueDiligenceItemSchema.parse({
+          title: "hack",
+          category: "legal",
+        }),
+      );
     } catch {
       ddBlocked = true;
     }
@@ -132,9 +144,13 @@ async function main() {
       op?.title === "Grounds maintenance framework" &&
         op.contractValue === 12_000_000,
     );
-    await createTenderOpportunity({ sub: userB }, wsB, {
-      title: "B cleaning contract",
-    });
+    await createTenderOpportunity(
+      { sub: userB },
+      wsB,
+      createTenderOpportunitySchema.parse({
+        title: "B cleaning contract",
+      }),
+    );
     const opA = await listTenderOpportunities({ sub: userA });
     check(
       "A sees only its opportunity",
@@ -146,7 +162,11 @@ async function main() {
     check("A can set bid status", opBid?.status === "bid");
     let opBlocked = false;
     try {
-      await createTenderOpportunity({ sub: userA }, wsB, { title: "hack" });
+      await createTenderOpportunity(
+        { sub: userA },
+        wsB,
+        createTenderOpportunitySchema.parse({ title: "hack" }),
+      );
     } catch {
       opBlocked = true;
     }

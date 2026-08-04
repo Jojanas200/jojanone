@@ -17,6 +17,12 @@ import { createProcessingActivity } from "../src/server/services/gdpr";
 import { getJovaBriefing } from "../src/server/services/jova";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createObligationSchema } from "../src/shared/schemas/compliance";
+
+import { createProcessingActivitySchema } from "../src/shared/schemas/gdpr";
+
+import { createRiskSchema } from "../src/shared/schemas/risk";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -85,23 +91,35 @@ async function main() {
     );
 
     // Seed A with data that trips three distinct rules.
-    await createRisk({ sub: userA }, wsA, {
-      riskTitle: "Data breach exposure",
-      riskCategory: "cyber",
-      likelihood: 5,
-      impact: 5,
-      residualLikelihood: 5,
-      residualImpact: 5,
-    });
-    const ob = await createObligation({ sub: userA }, wsA, {
-      title: "Confirmation statement",
-      category: "companies_house",
-      status: "overdue",
-    });
-    await createProcessingActivity({ sub: userA }, wsA, {
-      activityName: "Health records",
-      specialCategoryData: true,
-    });
+    await createRisk(
+      { sub: userA },
+      wsA,
+      createRiskSchema.parse({
+        riskTitle: "Data breach exposure",
+        riskCategory: "cyber",
+        likelihood: 5,
+        impact: 5,
+        residualLikelihood: 5,
+        residualImpact: 5,
+      }),
+    );
+    const ob = await createObligation(
+      { sub: userA },
+      wsA,
+      createObligationSchema.parse({
+        title: "Confirmation statement",
+        category: "companies_house",
+        status: "overdue",
+      }),
+    );
+    await createProcessingActivity(
+      { sub: userA },
+      wsA,
+      createProcessingActivitySchema.parse({
+        activityName: "Health records",
+        specialCategoryData: true,
+      }),
+    );
 
     const b1 = await getJovaBriefing({ sub: userA });
     check(

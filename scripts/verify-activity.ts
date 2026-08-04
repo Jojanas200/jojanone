@@ -17,6 +17,10 @@ import { listActivities } from "../src/server/services/activity";
 import { COURSES } from "../src/data/academy-catalog";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createAssignmentSchema } from "../src/shared/schemas/academy";
+
+import { createTenderOpportunitySchema } from "../src/shared/schemas/tender";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -76,19 +80,31 @@ async function main() {
     );
 
     // A: a create, a delete and an academy assignment → three activity rows.
-    const op = await createTenderOpportunity({ sub: userA }, wsA, {
-      title: "Framework bid",
-    });
+    const op = await createTenderOpportunity(
+      { sub: userA },
+      wsA,
+      createTenderOpportunitySchema.parse({
+        title: "Framework bid",
+      }),
+    );
     await deleteTenderOpportunity({ sub: userA }, op.id);
-    await createAssignment({ sub: userA }, wsA, {
-      courseId: COURSES[0].id,
-      learnerId: "owner",
-    });
+    await createAssignment(
+      { sub: userA },
+      wsA,
+      createAssignmentSchema.parse({
+        courseId: COURSES[0].id,
+        learnerId: "owner",
+      }),
+    );
 
     // B: unrelated activity that must never leak into A's feed.
-    await createTenderOpportunity({ sub: userB }, wsB, {
-      title: "B private bid",
-    });
+    await createTenderOpportunity(
+      { sub: userB },
+      wsB,
+      createTenderOpportunitySchema.parse({
+        title: "B private bid",
+      }),
+    );
 
     const feedA = await listActivities({ sub: userA }, 50);
     check(

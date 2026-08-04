@@ -18,6 +18,8 @@ import { createRisk } from "../src/server/services/risk";
 import { createEmployee } from "../src/server/services/hr";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createEmployeeSchema } from "../src/shared/schemas/hr";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -128,10 +130,14 @@ async function main() {
     await criticalRisk(userA, wsA, "Data breach exposure");
     await criticalRisk(userA, wsA, "Key person dependency");
     await criticalRisk(userA, wsA, "Cashflow shock");
-    await createEmployee({ sub: userA }, wsA, {
-      fullName: "New Starter",
-      rightToWorkStatus: "outstanding",
-    });
+    await createEmployee(
+      { sub: userA },
+      wsA,
+      createEmployeeSchema.parse({
+        fullName: "New Starter",
+        rightToWorkStatus: "outstanding",
+      }),
+    );
 
     const s = await getSnapshot({ sub: userA });
     const complianceArea = s.areas.find((a) => a.key === "compliance");

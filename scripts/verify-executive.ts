@@ -20,6 +20,10 @@ import { createDueDiligenceItem } from "../src/server/services/investor";
 import { createTenderOpportunity } from "../src/server/services/tender";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createDueDiligenceItemSchema } from "../src/shared/schemas/investor";
+
+import { createTenderOpportunitySchema } from "../src/shared/schemas/tender";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -108,21 +112,33 @@ async function main() {
     );
 
     // --- growth signals (honest facts) -------------------------------------
-    await createDueDiligenceItem(A, wsA, {
-      title: "Cap table",
-      category: "corporate",
-      status: "ready",
-    });
-    await createDueDiligenceItem(A, wsA, {
-      title: "Management accounts",
-      category: "financial",
-      status: "missing",
-    });
-    await createTenderOpportunity(A, wsA, {
-      title: "Council services framework",
-      contractValue: 500000,
-      submissionDeadline: inDays(10),
-    });
+    await createDueDiligenceItem(
+      A,
+      wsA,
+      createDueDiligenceItemSchema.parse({
+        title: "Cap table",
+        category: "corporate",
+        status: "ready",
+      }),
+    );
+    await createDueDiligenceItem(
+      A,
+      wsA,
+      createDueDiligenceItemSchema.parse({
+        title: "Management accounts",
+        category: "financial",
+        status: "missing",
+      }),
+    );
+    await createTenderOpportunity(
+      A,
+      wsA,
+      createTenderOpportunitySchema.parse({
+        title: "Council services framework",
+        contractValue: 500000,
+        submissionDeadline: inDays(10),
+      }),
+    );
 
     const g = await getGrowthSignals(A);
     check("due-diligence ready count", g.ddReady === 1);

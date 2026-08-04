@@ -21,6 +21,8 @@ import {
 import { provisionWorkspace } from "../src/server/services/provisioning";
 import { contractIssues } from "../app/(app)/contracts/issues";
 
+import { createContractSchema } from "../src/shared/schemas/contract";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -99,14 +101,22 @@ async function main() {
     console.log(
       "3) Create a contract in each workspace (Contracts service, withUser)",
     );
-    const cA = await createContract({ sub: userA }, wsA, {
-      contractType: "customer",
-      title: "A – Acme MSA",
-    });
-    const cB = await createContract({ sub: userB }, wsB, {
-      contractType: "supplier",
-      title: "B – Globex SLA",
-    });
+    const cA = await createContract(
+      { sub: userA },
+      wsA,
+      createContractSchema.parse({
+        contractType: "customer",
+        title: "A – Acme MSA",
+      }),
+    );
+    const cB = await createContract(
+      { sub: userB },
+      wsB,
+      createContractSchema.parse({
+        contractType: "supplier",
+        title: "B – Globex SLA",
+      }),
+    );
     check(
       "contract A created",
       cA?.title === "A – Acme MSA" && cA.workspaceId === wsA,
@@ -193,10 +203,14 @@ async function main() {
     console.log("6) Cross-tenant WRITE is blocked by RLS");
     let blocked = false;
     try {
-      await createContract({ sub: userA }, wsB, {
-        contractType: "other",
-        title: "hack",
-      });
+      await createContract(
+        { sub: userA },
+        wsB,
+        createContractSchema.parse({
+          contractType: "other",
+          title: "hack",
+        }),
+      );
     } catch {
       blocked = true;
     }

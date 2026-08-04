@@ -26,6 +26,8 @@ import {
   setTenderChecklistItem,
 } from "../src/server/services/tender";
 
+import { createTenderResponseSchema } from "../src/shared/schemas/tender-readiness";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -107,12 +109,16 @@ async function main() {
     );
 
     // --- Responses ---
-    const resp = await createTenderResponse({ sub: userA }, wsA, {
-      sectionTitle: "Method statement",
-      wordLimit: 500,
-      responseText: "Our approach is...",
-      status: "draft",
-    });
+    const resp = await createTenderResponse(
+      { sub: userA },
+      wsA,
+      createTenderResponseSchema.parse({
+        sectionTitle: "Method statement",
+        wordLimit: 500,
+        responseText: "Our approach is...",
+        status: "draft",
+      }),
+    );
     check("response created", resp.sectionTitle === "Method statement");
     check(
       "A lists its one response",
@@ -199,13 +205,17 @@ async function main() {
       "requirement links to its opportunity",
       linkedReq.opportunityId === opp.id,
     );
-    const linkedResp = await createTenderResponse({ sub: userA }, wsA, {
-      opportunityId: opp.id,
-      sectionTitle: "Quality assurance",
-      wordLimit: 300,
-      responseText: "Our QA approach is...",
-      status: "draft",
-    });
+    const linkedResp = await createTenderResponse(
+      { sub: userA },
+      wsA,
+      createTenderResponseSchema.parse({
+        opportunityId: opp.id,
+        sectionTitle: "Quality assurance",
+        wordLimit: 300,
+        responseText: "Our QA approach is...",
+        status: "draft",
+      }),
+    );
     check(
       "response links to its opportunity",
       linkedResp.opportunityId === opp.id,

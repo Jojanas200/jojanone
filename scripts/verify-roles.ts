@@ -26,6 +26,8 @@ import {
 import { requireModuleAccess } from "../src/server/auth/guard";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createContractSchema } from "../src/shared/schemas/contract";
+
 // The page guard redirects (throws NEXT_REDIRECT) when access is denied.
 const guardBlocks = async (userId: string, key: string) => {
   try {
@@ -77,10 +79,14 @@ const deleteUser = (id: string) =>
 
 async function canCreate(userId: string, ws: string): Promise<boolean> {
   try {
-    await createContract({ sub: userId }, ws, {
-      contractType: "customer",
-      title: `probe-${userId.slice(0, 6)}`,
-    });
+    await createContract(
+      { sub: userId },
+      ws,
+      createContractSchema.parse({
+        contractType: "customer",
+        title: `probe-${userId.slice(0, 6)}`,
+      }),
+    );
     return true;
   } catch {
     return false;

@@ -16,6 +16,10 @@ import {
   setObligationStatus,
 } from "../src/server/services/compliance";
 
+import { createObligationSchema } from "../src/shared/schemas/compliance";
+
+import { createRiskSchema } from "../src/shared/schemas/risk";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -80,19 +84,27 @@ async function main() {
     check("fresh workspace has an empty feed", empty.length === 0);
 
     // Seed two activities; each domain write records one.
-    await createRisk({ sub: userA }, wsA, {
-      riskTitle: "Supplier concentration",
-      riskCategory: "operational",
-      likelihood: 3,
-      impact: 3,
-      residualLikelihood: 2,
-      residualImpact: 2,
-    });
-    const ob = await createObligation({ sub: userA }, wsA, {
-      title: "VAT return Q1",
-      category: "vat",
-      status: "action_required",
-    });
+    await createRisk(
+      { sub: userA },
+      wsA,
+      createRiskSchema.parse({
+        riskTitle: "Supplier concentration",
+        riskCategory: "operational",
+        likelihood: 3,
+        impact: 3,
+        residualLikelihood: 2,
+        residualImpact: 2,
+      }),
+    );
+    const ob = await createObligation(
+      { sub: userA },
+      wsA,
+      createObligationSchema.parse({
+        title: "VAT return Q1",
+        category: "vat",
+        status: "action_required",
+      }),
+    );
 
     const feed1 = await getActivityFeed({ sub: userA });
     check("both writes are recorded in the feed", feed1.length === 2);

@@ -28,6 +28,8 @@ import {
 } from "../src/server/ai/provider";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createRiskSchema } from "../src/shared/schemas/risk";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -153,22 +155,30 @@ async function main() {
     );
 
     // Each workspace gets a distinctively-named critical risk.
-    await createRisk({ sub: userA }, wsA, {
-      riskTitle: "AardvarkSecretRiskA",
-      riskCategory: "cyber",
-      likelihood: 5,
-      impact: 5,
-      residualLikelihood: 5,
-      residualImpact: 5,
-    });
-    await createRisk({ sub: userB }, wsB, {
-      riskTitle: "BadgerSecretRiskB",
-      riskCategory: "cyber",
-      likelihood: 5,
-      impact: 5,
-      residualLikelihood: 5,
-      residualImpact: 5,
-    });
+    await createRisk(
+      { sub: userA },
+      wsA,
+      createRiskSchema.parse({
+        riskTitle: "AardvarkSecretRiskA",
+        riskCategory: "cyber",
+        likelihood: 5,
+        impact: 5,
+        residualLikelihood: 5,
+        residualImpact: 5,
+      }),
+    );
+    await createRisk(
+      { sub: userB },
+      wsB,
+      createRiskSchema.parse({
+        riskTitle: "BadgerSecretRiskB",
+        riskCategory: "cyber",
+        likelihood: 5,
+        impact: 5,
+        residualLikelihood: 5,
+        residualImpact: 5,
+      }),
+    );
 
     const mock = new MockProvider();
 

@@ -22,6 +22,8 @@ import {
 import { COURSES } from "../src/data/academy-catalog";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createAssignmentSchema } from "../src/shared/schemas/academy";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const COURSE_ID = COURSES[0].id;
@@ -81,21 +83,29 @@ async function main() {
       { orgName: "VAc B", workspaceName: "VAc B" },
     );
 
-    const asg = await createAssignment({ sub: userA }, wsA, {
-      courseId: COURSE_ID,
-      learnerId: "owner",
-      legallyRequired: true,
-    });
+    const asg = await createAssignment(
+      { sub: userA },
+      wsA,
+      createAssignmentSchema.parse({
+        courseId: COURSE_ID,
+        learnerId: "owner",
+        legallyRequired: true,
+      }),
+    );
     check(
       "assignment created + enriched with course title",
       !!asg.courseTitle && asg.courseTitle !== COURSE_ID,
     );
     check("legally-required flag persisted", asg.legallyRequired === true);
 
-    await createAssignment({ sub: userB }, wsB, {
-      courseId: COURSE_ID,
-      learnerId: "owner",
-    });
+    await createAssignment(
+      { sub: userB },
+      wsB,
+      createAssignmentSchema.parse({
+        courseId: COURSE_ID,
+        learnerId: "owner",
+      }),
+    );
 
     const listA = await listAssignments({ sub: userA });
     check(

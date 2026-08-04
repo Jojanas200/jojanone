@@ -16,6 +16,8 @@ import { getExecutiveTotals } from "../src/server/services/executive";
 import { getTimeline } from "../src/server/services/timeline";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createTenderOpportunitySchema } from "../src/shared/schemas/tender";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -75,25 +77,37 @@ async function main() {
     );
 
     // A: one live opportunity with a deadline, one closed (won) - pipeline counts only the live one.
-    const live = await createTenderOpportunity({ sub: userA }, wsA, {
-      title: "A framework bid",
-      contractValue: 5_000_000,
-      submissionDeadline: "2026-12-01",
-      status: "bid",
-    });
-    const won = await createTenderOpportunity({ sub: userA }, wsA, {
-      title: "A closed deal",
-      contractValue: 9_000_000,
-    });
+    const live = await createTenderOpportunity(
+      { sub: userA },
+      wsA,
+      createTenderOpportunitySchema.parse({
+        title: "A framework bid",
+        contractValue: 5_000_000,
+        submissionDeadline: "2026-12-01",
+        status: "bid",
+      }),
+    );
+    const won = await createTenderOpportunity(
+      { sub: userA },
+      wsA,
+      createTenderOpportunitySchema.parse({
+        title: "A closed deal",
+        contractValue: 9_000_000,
+      }),
+    );
     await updateTenderOpportunity({ sub: userA }, won.id, { status: "won" });
 
     // B: unrelated opportunity that must never leak into A's views.
-    await createTenderOpportunity({ sub: userB }, wsB, {
-      title: "B secret bid",
-      contractValue: 42_000_000,
-      submissionDeadline: "2026-11-15",
-      status: "bid",
-    });
+    await createTenderOpportunity(
+      { sub: userB },
+      wsB,
+      createTenderOpportunitySchema.parse({
+        title: "B secret bid",
+        contractValue: 42_000_000,
+        submissionDeadline: "2026-11-15",
+        status: "bid",
+      }),
+    );
 
     // --- Executive totals ----------------------------------------------------
     const totals = await getExecutiveTotals({ sub: userA });

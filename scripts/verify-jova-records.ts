@@ -20,6 +20,10 @@ import { createProcessingActivity } from "../src/server/services/gdpr";
 import { createEntity } from "../src/server/services/business-entities";
 import { retrieveContext } from "../src/server/ai/retrieval";
 
+import { createContractSchema } from "../src/shared/schemas/contract";
+
+import { createEmployeeSchema } from "../src/shared/schemas/hr";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -81,17 +85,21 @@ async function main() {
     // The tester's exact scenario: a contract with dates, notice period,
     // obligations and key terms; a risk with review date, owner, controls,
     // likelihood and impact.
-    await createContract({ sub: userA }, wsA, {
-      contractType: "customer",
-      title: "Northwind Services Agreement",
-      counterparty: "Northwind Traders",
-      startDate: "2026-01-01",
-      endDate: "2026-12-31",
-      noticePeriodDays: 60,
-      keyTerms: "Exclusivity in the North East region; annual price review.",
-      obligations: "Quarterly service report due within 10 working days.",
-      owner: "Sam Field",
-    });
+    await createContract(
+      { sub: userA },
+      wsA,
+      createContractSchema.parse({
+        contractType: "customer",
+        title: "Northwind Services Agreement",
+        counterparty: "Northwind Traders",
+        startDate: "2026-01-01",
+        endDate: "2026-12-31",
+        noticePeriodDays: 60,
+        keyTerms: "Exclusivity in the North East region; annual price review.",
+        obligations: "Quarterly service report due within 10 working days.",
+        owner: "Sam Field",
+      }),
+    );
     await createRisk({ sub: userA }, wsA, {
       riskTitle: "Single point of failure in dispatch software",
       riskCategory: "operational",
@@ -105,14 +113,18 @@ async function main() {
       controls: "Nightly backups and a documented manual dispatch fallback.",
       response: "reduce",
     });
-    await createEmployee({ sub: userA }, wsA, {
-      fullName: "Jordan Blake",
-      jobTitle: "Dispatch lead",
-      employmentType: "employee",
-      rightToWorkStatus: "verified",
-      trainingStatus: "up_to_date",
-      riskLevel: "low",
-    });
+    await createEmployee(
+      { sub: userA },
+      wsA,
+      createEmployeeSchema.parse({
+        fullName: "Jordan Blake",
+        jobTitle: "Dispatch lead",
+        employmentType: "employee",
+        rightToWorkStatus: "verified",
+        trainingStatus: "complete",
+        riskLevel: "low",
+      }),
+    );
     await createObligation({ sub: userA }, wsA, {
       title: "Confirmation statement (CS01)",
       category: "companies_house",
@@ -181,10 +193,14 @@ async function main() {
 
     // --- Query ranking: relevant record survives the per-module cap ----------
     for (let i = 0; i < 10; i++) {
-      await createContract({ sub: userA }, wsA, {
-        contractType: "supplier",
-        title: `Filler contract ${i + 1}`,
-      });
+      await createContract(
+        { sub: userA },
+        wsA,
+        createContractSchema.parse({
+          contractType: "supplier",
+          title: `Filler contract ${i + 1}`,
+        }),
+      );
     }
     const ranked = await retrieveContext(
       { sub: userA },

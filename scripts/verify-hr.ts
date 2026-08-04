@@ -16,6 +16,8 @@ import {
 } from "../src/server/services/hr";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createEmployeeSchema } from "../src/shared/schemas/hr";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -74,14 +76,18 @@ async function main() {
       { orgName: "VH B", workspaceName: "VH B" },
     );
 
-    const emp = await createEmployee({ sub: userA }, wsA, {
-      fullName: "Jordan Blake",
-      jobTitle: "Support worker",
-      employmentType: "employee",
-      rightToWorkStatus: "outstanding",
-      trainingStatus: "outstanding",
-      riskLevel: "medium",
-    });
+    const emp = await createEmployee(
+      { sub: userA },
+      wsA,
+      createEmployeeSchema.parse({
+        fullName: "Jordan Blake",
+        jobTitle: "Support worker",
+        employmentType: "employee",
+        rightToWorkStatus: "outstanding",
+        trainingStatus: "outstanding",
+        riskLevel: "medium",
+      }),
+    );
     check(
       "employee created for A",
       emp?.fullName === "Jordan Blake" && emp.employmentStatus === "active",
@@ -92,13 +98,17 @@ async function main() {
         emp.trainingStatus === "outstanding",
     );
 
-    await createEmployee({ sub: userB }, wsB, {
-      fullName: "Sam Rivers",
-      employmentType: "contractor",
-      rightToWorkStatus: "verified",
-      trainingStatus: "complete",
-      riskLevel: "low",
-    });
+    await createEmployee(
+      { sub: userB },
+      wsB,
+      createEmployeeSchema.parse({
+        fullName: "Sam Rivers",
+        employmentType: "contractor",
+        rightToWorkStatus: "verified",
+        trainingStatus: "complete",
+        riskLevel: "low",
+      }),
+    );
 
     const aSees = await listEmployees({ sub: userA });
     const bSees = await listEmployees({ sub: userB });
@@ -124,10 +134,14 @@ async function main() {
 
     let blocked = false;
     try {
-      await createEmployee({ sub: userA }, wsB, {
-        fullName: "hack",
-        employmentType: "employee",
-      });
+      await createEmployee(
+        { sub: userA },
+        wsB,
+        createEmployeeSchema.parse({
+          fullName: "hack",
+          employmentType: "employee",
+        }),
+      );
     } catch {
       blocked = true;
     }

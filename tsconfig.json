@@ -18,7 +18,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "//": "Scoped to the Next.js app + shared backend. The dormant TanStack files (src/routes, src/router.tsx, src/start.ts, src/server.ts) are excluded from Next's typecheck during the migration.",
+  "//": "Scoped to the Next.js app + shared backend + the verification scripts. The dormant TanStack files (src/routes, src/router.tsx, src/start.ts, src/server.ts) are excluded from Next's typecheck during the migration. scripts/ is included because the verifiers are the safety net for every data feature - leaving them unchecked once let a shadowed import and an invalid enum value through.",
   "include": [
     "next-env.d.ts",
     "app/**/*.ts",
@@ -27,6 +27,7 @@
     "src/shared/**/*.ts",
     "src/lib/**/*.ts",
     "src/config/**/*.ts",
+    "scripts/**/*.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": ["node_modules"]

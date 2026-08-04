@@ -17,6 +17,8 @@ import {
 } from "../src/server/services/reports";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createTenderOpportunitySchema } from "../src/shared/schemas/tender";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -75,14 +77,22 @@ async function main() {
       { orgName: "VRp B", workspaceName: "VRp B" },
     );
 
-    await createTenderOpportunity({ sub: userA }, wsA, {
-      title: "A framework, bid",
-      authority: "Council A",
-      contractValue: 5_000_000,
-    });
-    await createTenderOpportunity({ sub: userB }, wsB, {
-      title: "B secret bid",
-    });
+    await createTenderOpportunity(
+      { sub: userA },
+      wsA,
+      createTenderOpportunitySchema.parse({
+        title: "A framework, bid",
+        authority: "Council A",
+        contractValue: 5_000_000,
+      }),
+    );
+    await createTenderOpportunity(
+      { sub: userB },
+      wsB,
+      createTenderOpportunitySchema.parse({
+        title: "B secret bid",
+      }),
+    );
 
     // --- CSV export ----------------------------------------------------------
     const csvA = await exportCsv({ sub: userA }, "tenders");

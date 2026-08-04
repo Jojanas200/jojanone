@@ -16,6 +16,8 @@ import {
 } from "../src/server/services/gdpr";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createProcessingActivitySchema } from "../src/shared/schemas/gdpr";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -118,9 +120,13 @@ async function main() {
 
     let blocked = false;
     try {
-      await createProcessingActivity({ sub: userA }, wsB, {
-        activityName: "hack",
-      });
+      await createProcessingActivity(
+        { sub: userA },
+        wsB,
+        createProcessingActivitySchema.parse({
+          activityName: "hack",
+        }),
+      );
     } catch {
       blocked = true;
     }

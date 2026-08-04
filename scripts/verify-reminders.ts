@@ -24,6 +24,12 @@ import {
 } from "../src/server/services/notifications";
 import { provisionWorkspace } from "../src/server/services/provisioning";
 
+import { createContractSchema } from "../src/shared/schemas/contract";
+
+import { createObligationSchema } from "../src/shared/schemas/compliance";
+
+import { createTenderOpportunitySchema } from "../src/shared/schemas/tender";
+
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
@@ -90,25 +96,41 @@ async function main() {
     );
 
     // A: three in-window items + one out-of-window (45 days > 30-day horizon).
-    await createObligation({ sub: userA }, wsA, {
-      title: "Confirmation statement",
-      category: "companies_house",
-      dueDate: addDays(TODAY, 5),
-    });
-    await createContract({ sub: userA }, wsA, {
-      contractType: "customer",
-      title: "Key account MSA",
-      renewalDate: addDays(TODAY, 10),
-    });
-    await createTenderOpportunity({ sub: userA }, wsA, {
-      title: "Framework opportunity",
-      submissionDeadline: addDays(TODAY, 7),
-    });
-    await createObligation({ sub: userA }, wsA, {
-      title: "Far future filing",
-      category: "tax",
-      dueDate: addDays(TODAY, 45),
-    });
+    await createObligation(
+      { sub: userA },
+      wsA,
+      createObligationSchema.parse({
+        title: "Confirmation statement",
+        category: "companies_house",
+        dueDate: addDays(TODAY, 5),
+      }),
+    );
+    await createContract(
+      { sub: userA },
+      wsA,
+      createContractSchema.parse({
+        contractType: "customer",
+        title: "Key account MSA",
+        renewalDate: addDays(TODAY, 10),
+      }),
+    );
+    await createTenderOpportunity(
+      { sub: userA },
+      wsA,
+      createTenderOpportunitySchema.parse({
+        title: "Framework opportunity",
+        submissionDeadline: addDays(TODAY, 7),
+      }),
+    );
+    await createObligation(
+      { sub: userA },
+      wsA,
+      createObligationSchema.parse({
+        title: "Far future filing",
+        category: "tax",
+        dueDate: addDays(TODAY, 45),
+      }),
+    );
 
     const created = await generateReminders(wsA, { today: TODAY });
     check("three in-window items generate reminders", created === 3);
@@ -149,11 +171,15 @@ async function main() {
     check("unread is now zero", (await unreadCount({ sub: userA })) === 0);
 
     // Cross-tenant: B's reminders never appear in A's feed.
-    await createObligation({ sub: userB }, wsB, {
-      title: "B private filing",
-      category: "vat",
-      dueDate: addDays(TODAY, 3),
-    });
+    await createObligation(
+      { sub: userB },
+      wsB,
+      createObligationSchema.parse({
+        title: "B private filing",
+        category: "vat",
+        dueDate: addDays(TODAY, 3),
+      }),
+    );
     const createdB = await generateReminders(wsB, { today: TODAY });
     check("B generates its own reminder", createdB === 1);
     const feedA = await listNotifications({ sub: userA });

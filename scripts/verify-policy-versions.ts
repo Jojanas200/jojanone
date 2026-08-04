@@ -16,6 +16,7 @@ import {
   setPolicyStatus,
 } from "../src/server/services/policies";
 import { providerFor } from "../src/server/ai/provider";
+import { draftPolicySchema } from "../src/shared/schemas/policies";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -82,10 +83,11 @@ async function main() {
     const policy = await draftPolicy(
       { sub: userA },
       wsA,
-      {
+      draftPolicySchema.parse({
         policyName: "Data Protection Policy",
         policyCategory: "Data protection",
-      },
+        answers: {},
+      }),
       det,
     );
     check(
