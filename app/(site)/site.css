@@ -1891,6 +1891,154 @@
   color: #071a33;
 }
 
+/* ---- How it works: stages ------------------------------------------------
+   Each of the five stages owns a colour, set as --stage on the chip and on
+   the card, and everything inside follows it. */
+
+.s-stage-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 44px;
+}
+
+.s-stage-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--stage) 35%, transparent);
+  background: color-mix(in srgb, var(--stage) 8%, transparent);
+  font-size: 14px;
+  color: var(--stage);
+  text-decoration: none;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.s-stage-chip:hover {
+  background: color-mix(in srgb, var(--stage) 16%, transparent);
+  border-color: color-mix(in srgb, var(--stage) 55%, transparent);
+}
+
+.s-stage-chip b {
+  font-weight: 400;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.s-stages {
+  display: grid;
+  gap: 28px;
+  margin-top: 72px;
+}
+
+.s-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: 108px 1fr;
+  gap: 24px;
+  padding: 40px;
+  border: 1px solid var(--s-line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.015);
+  scroll-margin-top: 96px;
+  overflow: hidden;
+}
+
+/* The stage's colour as a short edge on the card, the way the design marks
+   which stage you are reading. */
+.s-stage::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 96px;
+  background: linear-gradient(var(--stage), transparent);
+}
+
+.s-stage-mark {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+
+.s-stage-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--stage) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--stage) 22%, transparent);
+  color: var(--stage);
+}
+
+.s-stage-num {
+  font-family: var(--s-serif);
+  font-size: 44px;
+  line-height: 1;
+  color: color-mix(in srgb, var(--stage) 45%, transparent);
+}
+
+.s-stage-label {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--stage);
+}
+
+.s-stage h2 {
+  font-family: var(--s-serif);
+  font-size: clamp(24px, 2.6vw, 31px);
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 0 0 20px;
+}
+
+.s-stage-body {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.65;
+  color: #cbd5e1;
+}
+
+.s-stage-detail {
+  margin: 18px 0 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--s-muted);
+}
+
+.s-stage-list {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.s-stage-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15px;
+  color: #fff;
+}
+
+.s-stage-list svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--stage);
+}
+
 /* ---- Capability library grid --------------------------------------------- */
 
 .s-cap-grid {
@@ -2163,6 +2311,10 @@
   .s-cap-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .s-stage {
+    padding: 32px;
+    gap: 20px;
+  }
   .s-follow {
     flex-direction: column;
     gap: 20px;
@@ -2187,6 +2339,16 @@
   }
   .s-bento-wide {
     grid-column: span 1;
+  }
+  .s-stage {
+    grid-template-columns: 1fr;
+    padding: 26px;
+  }
+  .s-stage-mark {
+    grid-auto-flow: column;
+    justify-content: start;
+    align-items: center;
+    gap: 18px;
   }
   .s-window-top {
     grid-template-columns: 1fr;
