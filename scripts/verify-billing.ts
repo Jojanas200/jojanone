@@ -13,6 +13,8 @@ import { adminDb } from "../src/server/db";
 import {
   billingEvents,
   organisations,
+  // Aliased: a local `plans` holds the sellable catalogue further down.
+  plans as plansTable,
   subscriptions,
   workspaces,
 } from "../src/server/db/schema";
@@ -109,20 +111,31 @@ async function main() {
         notSellable.every((k) => !sellable.includes(k)),
     );
 
+    // The trial package is an operator decision, so these assert against the
+    // catalogue rather than against a package key someone can change.
+    const trialRows = await adminDb
+      .select({ key: plansTable.key, seatLimit: plansTable.seatLimit })
+      .from(plansTable)
+      .where(eq(plansTable.isTrialDefault, true))
+      .limit(1);
+    const trialPkg = trialRows[0];
+    const trialSeats = trialPkg?.seatLimit ?? 1;
+
     const ov0 = await getBillingOverview({ sub: userA }, wsA);
     check(
-      "fresh workspace is trialing Starter with 1 seat",
-      ov0?.planKey === "starter" &&
+      "a fresh workspace trials the designated package with its own seats",
+      !!trialPkg &&
+        ov0?.planKey === trialPkg.key &&
         ov0?.status === "trialing" &&
-        ov0?.seatsAllowed === 1,
+        ov0?.seatsAllowed === trialSeats,
     );
     check(
-      "owner occupies the single seat",
-      ov0?.seatsUsed === 1 && ov0?.seatsAvailable === 0,
+      "the owner occupies exactly one of those seats",
+      ov0?.seatsUsed === 1 && ov0?.seatsAvailable === trialSeats - 1,
     );
     check(
-      "Starter has no seat available",
-      (await hasSeatAvailable({ sub: userA }, wsA)) === false,
+      "seat availability follows the trial package's seat limit",
+      (await hasSeatAvailable({ sub: userA }, wsA)) === trialSeats > 1,
     );
 
     // --- Session creation guards (no live Stripe call) -----------------------
@@ -257,8 +270,8 @@ async function main() {
     check("A cannot read B's billing overview (RLS)", foreign === null);
     const ovB = await getBillingOverview({ sub: userB }, wsB);
     check(
-      "B still sees its own untouched Starter plan",
-      ovB?.planKey === "starter" && ovB?.status === "trialing",
+      "B still sees its own untouched trial",
+      ovB?.planKey === trialPkg?.key && ovB?.status === "trialing",
     );
   } finally {
     if (savedKey === undefined) delete process.env.STRIPE_SECRET_KEY;

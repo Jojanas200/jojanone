@@ -9,6 +9,10 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 
+/** Package keys are slugs; anything else in the URL is ignored. */
+const asPlanKey = (v: string | null) =>
+  v && /^[a-z0-9][a-z0-9-]{0,48}$/.test(v) ? v : null;
+
 export function LoginForm() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -16,17 +20,37 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  // The package chosen on the pricing page, arriving as ?plan=. It preselects
+  // the billing step in onboarding; it never grants entitlement.
+  const [plan, setPlan] = useState<string | null>(null);
 
   // Surface an error passed back from the /auth/callback route, then clean it
-  // out of the URL so it doesn't linger on refresh.
+  // out of the URL so it doesn't linger on refresh. The plan is read here too,
+  // and deliberately left in the URL so it survives a refresh.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    setPlan(asPlanKey(params.get("plan")));
     const err = params.get("error");
     if (err) {
       toast.error(err);
-      window.history.replaceState({}, "", window.location.pathname);
+      params.delete("error");
+      const query = params.toString();
+      window.history.replaceState(
+        {},
+        "",
+        query
+          ? `${window.location.pathname}?${query}`
+          : window.location.pathname,
+      );
     }
   }, []);
+
+  // Signing in with a package in hand goes to onboarding so the billing step
+  // can be preselected; the app redirects on to the dashboard if that
+  // workspace has already finished onboarding.
+  const destination = plan
+    ? `/onboarding?plan=${encodeURIComponent(plan)}`
+    : "/dashboard";
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,20 +63,25 @@ export function LoginForm() {
           password,
         });
         if (error) throw error;
-        router.push("/dashboard");
+        router.push(destination);
         router.refresh();
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-            data: { full_name: fullName.trim() },
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(destination)}`,
+            // Stamped on the account so the choice survives the confirmation
+            // email, which a query string would not.
+            data: {
+              full_name: fullName.trim(),
+              ...(plan ? { intended_plan: plan } : {}),
+            },
           },
         });
         if (error) throw error;
         if (data.session) {
-          router.push("/dashboard");
+          router.push(destination);
           router.refresh();
         } else {
           toast.success("Account created", {

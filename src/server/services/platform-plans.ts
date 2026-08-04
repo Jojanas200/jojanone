@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, isNull, ne } from "drizzle-orm";
 import { adminDb } from "../db/admin";
 import { plans } from "../db/schema";
 import { logPlatformAction, type PlatformActor } from "./platform-admin";
@@ -21,6 +21,7 @@ export interface PlanRow {
   trialDays: number;
   isSellable: boolean;
   isHighlighted: boolean;
+  isTrialDefault: boolean;
   published: boolean;
   stripeProductId: string | null;
   stripePriceId: string | null;
@@ -39,6 +40,7 @@ const COLUMNS = {
   trialDays: plans.trialDays,
   isSellable: plans.isSellable,
   isHighlighted: plans.isHighlighted,
+  isTrialDefault: plans.isTrialDefault,
   published: plans.published,
   stripeProductId: plans.stripeProductId,
   stripePriceId: plans.stripePriceId,
@@ -89,6 +91,8 @@ export interface PlanPatch {
   trialDays?: number;
   isSellable?: boolean;
   isHighlighted?: boolean;
+  /** Make this the package new signups trial. Clears the flag elsewhere. */
+  isTrialDefault?: boolean;
   published?: boolean;
   sortOrder?: number;
 }
@@ -256,13 +260,28 @@ export async function updatePlan(
   if (patch.isSellable !== undefined) set.isSellable = patch.isSellable;
   if (patch.isHighlighted !== undefined)
     set.isHighlighted = patch.isHighlighted;
+  if (patch.isTrialDefault !== undefined)
+    set.isTrialDefault = patch.isTrialDefault;
   if (patch.sortOrder !== undefined) set.sortOrder = patch.sortOrder;
   if (sync) {
     set.stripeProductId = sync.stripeProductId;
     set.stripePriceId = sync.stripePriceId;
   }
 
-  await adminDb.update(plans).set(set).where(eq(plans.key, key));
+  // Only one package can be the trial, enforced by a partial unique index.
+  // Clearing the others has to happen in the same transaction as setting this
+  // one, or the index rejects the write.
+  if (patch.isTrialDefault === true) {
+    await adminDb.transaction(async (tx) => {
+      await tx
+        .update(plans)
+        .set({ isTrialDefault: false, updatedAt: new Date() })
+        .where(and(eq(plans.isTrialDefault, true), ne(plans.key, key)));
+      await tx.update(plans).set(set).where(eq(plans.key, key));
+    });
+  } else {
+    await adminDb.update(plans).set(set).where(eq(plans.key, key));
+  }
   await logPlatformAction(actor, "plan.update", {
     detail: { key, ...patch, stripeSynced: sync?.synced ?? "unchanged" },
   });

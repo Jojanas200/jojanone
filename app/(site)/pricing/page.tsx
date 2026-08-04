@@ -18,17 +18,21 @@ export const metadata = {
 export const revalidate = 60;
 
 /**
- * The trial copy was written when the trial was fixed at 14 days; operators now
- * set it per package. Rather than let the prose contradict the catalogue, the
- * number is substituted from whatever the published packages actually offer.
+ * The trial copy was written when the trial was fixed at 14 days on the Growth
+ * plan; both are now operator decisions. Rather than let the prose contradict
+ * the catalogue, the length and the package name are substituted from whatever
+ * Admin > Packages actually designates.
  */
-const withTrialDays = (text: string, days: number) =>
-  days === 14
-    ? text
-    : text.replace(
-        /\b14([- ])([Dd])ay/g,
-        (_m, gap: string, d: string) => `${days}${gap}${d}ay`,
-      );
+const withTrial = (text: string, days: number, planName: string) =>
+  text
+    .replace(
+      /\b14([- ])([Dd])ay/g,
+      (_m, gap: string, d: string) => `${days}${gap}${d}ay`,
+    )
+    .replace(
+      /\bGrowth (Plan|plan)\b/g,
+      (_m, word: string) => `${planName} ${word}`,
+    );
 
 const money = (minor: number | null, currency: string) =>
   minor === null
@@ -52,8 +56,16 @@ export default async function PricingPage() {
   const { hero, trialIntro, trialBadge, platformNote, faq, cta } =
     pricingContent;
   const plans = await listPublishedPlans();
-  const trialDays = Math.max(0, ...plans.map((plan) => plan.trialDays), 0);
-  const trial = (text: string) => withTrialDays(text, trialDays || 14);
+
+  // The package new signups actually trial, and for how long. Falls back to
+  // the longest published trial while no package is designated.
+  const designated = plans.find((plan) => plan.isTrialDefault) ?? null;
+  const trialDays =
+    designated?.trialDays ||
+    Math.max(0, ...plans.map((plan) => plan.trialDays), 0) ||
+    14;
+  const trialName = designated?.name ?? "Growth";
+  const trial = (text: string) => withTrial(text, trialDays, trialName);
 
   return (
     <>
@@ -189,7 +201,9 @@ export default async function PricingPage() {
 
                     <Link
                       href={
-                        plan.priceMinor === null ? "/contact" : GET_STARTED_HREF
+                        plan.priceMinor === null
+                          ? "/contact"
+                          : `${GET_STARTED_HREF}?plan=${encodeURIComponent(plan.key)}`
                       }
                       className={`s-btn ${plan.isHighlighted ? "s-btn-primary" : "s-btn-ghost"}`}
                     >

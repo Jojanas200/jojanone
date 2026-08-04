@@ -19,18 +19,22 @@ export async function getSessionUser(): Promise<{
   sub: string;
   email: string | null;
   fullName: string | null;
+  /** The package chosen on the pricing page, stamped at sign-up. Survives the
+   *  email confirmation round trip, which a query string does not. */
+  intendedPlan: string | null;
 } | null> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return null;
-  const rawName = (user.user_metadata as Record<string, unknown> | undefined)
-    ?.full_name;
+  const meta = user.user_metadata as Record<string, unknown> | undefined;
+  const str = (v: unknown) =>
+    typeof v === "string" && v.trim() ? v.trim() : null;
   return {
     sub: user.id,
     email: user.email ?? null,
-    fullName:
-      typeof rawName === "string" && rawName.trim() ? rawName.trim() : null,
+    fullName: str(meta?.full_name),
+    intendedPlan: str(meta?.intended_plan),
   };
 }

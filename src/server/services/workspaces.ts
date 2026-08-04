@@ -1,12 +1,17 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { withUser, type UserClaims } from "../db";
 import { adminDb } from "../db/admin";
 import { memberships, plans, subscriptions, workspaces } from "../db/schema";
 
 /**
  * The optional modules the workspace's package unlocks, or null when it is on
- * no package at all. null means unrestricted: trials, imported and legacy
- * workspaces keep full access rather than being silently locked out.
+ * no package at all. null means unrestricted: imported and legacy workspaces
+ * keep full access rather than being silently locked out.
+ *
+ * A lapsed trial returns [] rather than the package's own features. That
+ * withdraws the optional modules while leaving every core module in place, so
+ * the customer keeps their records and their Business Confidence Score and is
+ * asked to subscribe rather than locked out of their own data.
  *
  * Reads the catalogue with the service role - the plans table is a global
  * catalogue, not tenant data, and the workspace id is resolved from the
@@ -16,12 +21,138 @@ export async function planFeaturesFor(
   workspaceId: string,
 ): Promise<string[] | null> {
   const rows = await adminDb
-    .select({ features: plans.features })
+    .select({
+      features: plans.features,
+      status: subscriptions.status,
+      trialEndsAt: subscriptions.trialEndsAt,
+    })
     .from(subscriptions)
     .innerJoin(plans, eq(plans.key, subscriptions.planKey))
     .where(eq(subscriptions.workspaceId, workspaceId))
     .limit(1);
-  return rows[0]?.features ?? null;
+
+  const row = rows[0];
+  if (!row) return null;
+  return trialHasLapsed(row.status, row.trialEndsAt) ? [] : row.features;
+}
+
+/**
+ * True when a subscription is still only a trial and its end has passed. Any
+ * other status - active, past_due, cancelled - is the billing system's to
+ * judge, not ours.
+ */
+export function trialHasLapsed(
+  status: string,
+  trialEndsAt: Date | null,
+  now: Date = new Date(),
+): boolean {
+  return status === "trialing" && trialEndsAt !== null && trialEndsAt <= now;
+}
+
+/**
+ * Record the package the customer intends to buy. Only a published, sellable
+ * package is accepted, and it changes entitlement for nobody - it decides
+ * which package the billing screen and checkout preselect.
+ *
+ * Returns whether the intent was stored, so a caller can tell "ignored" from
+ * "saved" rather than assuming.
+ */
+export async function setIntendedPlan(
+  workspaceId: string,
+  planKey: string | null,
+): Promise<boolean> {
+  if (!planKey) {
+    await adminDb
+      .update(subscriptions)
+      .set({ intendedPlanKey: null, updatedAt: new Date() })
+      .where(eq(subscriptions.workspaceId, workspaceId));
+    return true;
+  }
+
+  const rows = await adminDb
+    .select({ key: plans.key })
+    .from(plans)
+    .where(
+      and(
+        eq(plans.key, planKey),
+        eq(plans.published, true),
+        eq(plans.isSellable, true),
+        isNull(plans.archivedAt),
+      ),
+    )
+    .limit(1);
+  if (!rows[0]) return false;
+
+  await adminDb
+    .update(subscriptions)
+    .set({ intendedPlanKey: rows[0].key, updatedAt: new Date() })
+    .where(eq(subscriptions.workspaceId, workspaceId));
+  return true;
+}
+
+/** The package new signups trial, as designated by the operator. */
+export async function trialPlan(): Promise<{
+  key: string;
+  name: string;
+  trialDays: number;
+} | null> {
+  const rows = await adminDb
+    .select({
+      key: plans.key,
+      name: plans.name,
+      trialDays: plans.trialDays,
+    })
+    .from(plans)
+    .where(and(eq(plans.isTrialDefault, true), isNull(plans.archivedAt)))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/** What a workspace's trial looks like today, for the billing screen. */
+export interface TrialState {
+  isTrial: boolean;
+  endsAt: Date | null;
+  daysLeft: number | null;
+  lapsed: boolean;
+  intendedPlanKey: string | null;
+}
+
+export async function trialStateFor(workspaceId: string): Promise<TrialState> {
+  const rows = await adminDb
+    .select({
+      status: subscriptions.status,
+      trialEndsAt: subscriptions.trialEndsAt,
+      intendedPlanKey: subscriptions.intendedPlanKey,
+    })
+    .from(subscriptions)
+    .where(eq(subscriptions.workspaceId, workspaceId))
+    .limit(1);
+
+  const row = rows[0];
+  if (!row) {
+    return {
+      isTrial: false,
+      endsAt: null,
+      daysLeft: null,
+      lapsed: false,
+      intendedPlanKey: null,
+    };
+  }
+
+  const isTrial = row.status === "trialing";
+  const endsAt = row.trialEndsAt;
+  const lapsed = trialHasLapsed(row.status, endsAt);
+  return {
+    isTrial,
+    endsAt,
+    // Rounded up, so the last partial day still reads as "1 day left".
+    daysLeft:
+      isTrial && endsAt
+        ? Math.max(0, Math.ceil((endsAt.getTime() - Date.now()) / 86_400_000))
+        : null,
+    lapsed,
+    intendedPlanKey: row.intendedPlanKey,
+  };
 }
 
 /** Workspaces the current user belongs to (RLS-scoped), with their role. */

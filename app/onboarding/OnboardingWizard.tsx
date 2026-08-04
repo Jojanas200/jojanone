@@ -14,10 +14,17 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FieldControl } from "./FieldControl";
 
+/** The one field whose options are a live catalogue rather than static copy. */
+const PLAN_FIELD = "billing.plan";
+
 export function OnboardingWizard({
   initialAnswers,
+  planOptions = [],
 }: {
   initialAnswers: OnboardingAnswers;
+  /** Published packages, resolved on the server. Empty means none are on
+   *  sale, in which case the picker is hidden rather than lying. */
+  planOptions?: { value: string; label: string }[];
 }) {
   const router = useRouter();
   const [answers, setAnswers] = useState<OnboardingAnswers>(initialAnswers);
@@ -31,7 +38,14 @@ export function OnboardingWizard({
   const isLast = step === SECTIONS.length - 1;
 
   const missing = useMemo(() => missingInitialFields(answers), [answers]);
-  const visibleInSection = section.fields.filter((f) => isVisible(f, answers));
+
+  // The package picker offers what the operator has published, not the two
+  // keys the schema was written with. With nothing published it is dropped
+  // entirely: an empty select would ask for a choice that cannot be made.
+  const visibleInSection = section.fields
+    .filter((f) => isVisible(f, answers))
+    .filter((f) => f.id !== PLAN_FIELD || planOptions.length > 0)
+    .map((f) => (f.id === PLAN_FIELD ? { ...f, options: planOptions } : f));
 
   function setAnswer(id: string, value: JsonValue | undefined) {
     setAnswers((a) => {

@@ -21,6 +21,7 @@ export type DesignerPlan = {
   trialDays: number;
   isSellable: boolean;
   isHighlighted: boolean;
+  isTrialDefault: boolean;
   published: boolean;
   stripePriceId: string | null;
   sortOrder: number;
@@ -82,6 +83,7 @@ function PlanCard({
     trialDays: String(plan.trialDays),
     isSellable: plan.isSellable,
     isHighlighted: plan.isHighlighted,
+    isTrialDefault: plan.isTrialDefault,
     sortOrder: String(plan.sortOrder),
     features: new Set(plan.features),
   });
@@ -119,6 +121,7 @@ function PlanCard({
         features: [...f.features],
         isSellable: f.isSellable,
         isHighlighted: f.isHighlighted,
+        isTrialDefault: f.isTrialDefault,
         sortOrder: Number(f.sortOrder || 0),
       },
       "Package saved",
@@ -342,6 +345,21 @@ function PlanCard({
               />
               <span className="text-muted-foreground">
                 Highlight as most popular
+              </span>
+            </label>
+            {/* Exactly one package can hold this; saving it here clears it
+                everywhere else. The trial's length is this package's own
+                trial days. */}
+            <label className="flex items-center gap-2 text-sm">
+              <Switch
+                checked={f.isTrialDefault}
+                disabled={!canWrite}
+                onCheckedChange={(v) =>
+                  setF({ ...f, isTrialDefault: v === true })
+                }
+              />
+              <span className="text-muted-foreground">
+                Give new signups this package on trial
               </span>
             </label>
             {canWrite && (

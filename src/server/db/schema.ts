@@ -779,6 +779,8 @@ export const plans = pgTable("plans", {
   isHighlighted: boolean("is_highlighted").notNull().default(false),
   /** Published packages appear on the public pricing page. */
   published: boolean("published").notNull().default(false),
+  /** The package new signups trial. At most one, enforced by a partial index. */
+  isTrialDefault: boolean("is_trial_default").notNull().default(false),
   stripeProductId: text("stripe_product_id"),
   stripePriceId: text("stripe_price_id"),
   sortOrder: integer("sort_order").notNull().default(0),
@@ -797,6 +799,12 @@ export const subscriptions = pgTable("subscriptions", {
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   currentPeriodEnd: ts("current_period_end"),
+  /** When a trial lapses. Null means no time-boxed trial. Stripe owns
+   *  current_period_end; this is ours and applies before any payment. */
+  trialEndsAt: ts("trial_ends_at"),
+  /** The package the customer chose before paying: preselects checkout,
+   *  grants nothing. */
+  intendedPlanKey: text("intended_plan_key"),
   cancelAt: ts("cancel_at"),
   createdAt: ts("created_at").notNull().defaultNow(),
   updatedAt: ts("updated_at").notNull().defaultNow(),

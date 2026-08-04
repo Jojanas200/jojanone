@@ -35,6 +35,7 @@ const planFields = {
   trialDays: z.number().int().min(0).max(365),
   isSellable: z.boolean(),
   isHighlighted: z.boolean(),
+  isTrialDefault: z.boolean(),
   sortOrder: z.number().int().min(0).max(9_999),
 };
 
@@ -50,6 +51,7 @@ export const planUpdateSchema = z
     trialDays: planFields.trialDays.optional(),
     isSellable: planFields.isSellable.optional(),
     isHighlighted: planFields.isHighlighted.optional(),
+    isTrialDefault: planFields.isTrialDefault.optional(),
     sortOrder: planFields.sortOrder.optional(),
   })
   .refine((v) => Object.keys(v).length > 0, {

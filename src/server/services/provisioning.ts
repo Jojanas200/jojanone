@@ -10,11 +10,21 @@ import { withUser, type UserClaims } from "../db";
  */
 export async function provisionWorkspace(
   claims: UserClaims,
-  opts: { orgName: string; workspaceName: string },
+  opts: {
+    orgName: string;
+    workspaceName: string;
+    /**
+     * The package the customer picked on the pricing page. Recorded as an
+     * intent that preselects checkout - it never decides entitlement, or a
+     * client could name itself the most expensive package for free. The
+     * function discards anything that is not published and sellable.
+     */
+    intendedPlan?: string | null;
+  },
 ): Promise<string> {
   return withUser(claims, async (tx) => {
     const rows = (await tx.execute(
-      sql`select public.provision_workspace(${opts.orgName}, ${opts.workspaceName}) as id`,
+      sql`select public.provision_workspace(${opts.orgName}, ${opts.workspaceName}, ${opts.intendedPlan ?? null}) as id`,
     )) as unknown as Array<{ id: string }>;
     return rows[0].id;
   });

@@ -5,7 +5,10 @@ import {
   getBusinessProfile,
   updateBusinessProfile,
 } from "@/server/services/settings";
-import { getActiveWorkspaceId } from "@/server/services/workspaces";
+import {
+  getActiveWorkspaceId,
+  setIntendedPlan,
+} from "@/server/services/workspaces";
 import { provisionWorkspace } from "@/server/services/provisioning";
 import { getOnboarding, saveOnboarding } from "@/server/services/onboarding";
 import { isPlatformAdmin } from "@/server/services/platform-admin";
@@ -15,6 +18,12 @@ import type { OnboardingAnswers } from "@/shared/onboarding/types";
 
 const asName = (v: unknown) =>
   typeof v === "string" && v.trim() ? v.trim() : undefined;
+
+/** Package keys are slugs; anything else never reaches the database. */
+const asPlanKey = (v: unknown) =>
+  typeof v === "string" && /^[a-z0-9][a-z0-9-]{0,48}$/.test(v.trim())
+    ? v.trim()
+    : null;
 
 export async function GET() {
   const user = await getSessionUser();
@@ -61,6 +70,10 @@ export async function PATCH(req: Request) {
     ws = await provisionWorkspace(claims, {
       orgName: name,
       workspaceName: name,
+      // The package chosen on the pricing page arrives as the billing answer.
+      // It preselects checkout; provisioning grants the operator's trial
+      // package regardless, and discards anything unpublished.
+      intendedPlan: asPlanKey(body["billing.plan"]),
     });
     await trackEvent({
       name: "workspace.created",
@@ -71,6 +84,18 @@ export async function PATCH(req: Request) {
   }
 
   const state = await saveOnboarding(claims, ws, body);
+
+  // The package picked in the billing step is recorded as the workspace's
+  // intent, so changing it during onboarding changes what checkout offers.
+  // It never grants entitlement - the trial package does that. Best-effort:
+  // an unpublished key is ignored rather than failing the save.
+  if ("billing.plan" in body) {
+    try {
+      await setIntendedPlan(ws, asPlanKey(body["billing.plan"]));
+    } catch {
+      // intent is a convenience, never a reason to lose the answers
+    }
+  }
 
   // Fan the owner's name out of the answers blob: auth metadata (the per-user
   // identity used on certificates) and the business profile's primary contact
